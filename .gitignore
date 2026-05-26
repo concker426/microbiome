@@ -1,0 +1,44 @@
+# Data directories
+data/
+saved_models/
+checkpoints/
+models/
+
+# Logs
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.save
+*.save.*
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large external assets
+*.zip
+*.tar.gz
+
+# Environment
+.env
+.venv/
+venv/
+
+# Backup files
+*.bak
+*~
+
+# Evaluation results (regeneratable)
+evaluation_results/
+evaluation_results_real/
+eval_results_*/
+
+# Results
+results/
