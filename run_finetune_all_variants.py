@@ -21,6 +21,7 @@ Comparison table:   eval_results_{encoder_tag}_comparison.json
 """
 import argparse, json, os, subprocess, sys, time
 from pathlib import Path
+import torch
 
 BASE = "/hd/liujx/microbiome_llm_project"
 DATA_BASE = os.path.join(BASE, "data")
@@ -107,10 +108,18 @@ import run_microbiome_nl_7b as nl
     for key, val in cfg["data"].items():
         launcher += f'nl.{key} = os.path.join("{BASE}", "{val}")\n'
 
+    # Detect actual encoder config to avoid shape mismatch
+    _enc = torch.load(encoder_path, map_location="cpu")
+    _vocab_sz = _enc["embedding.token_embed.weight"].shape[0]
+    _max_len = _enc["embedding.pos_embed.weight"].shape[0]
+    del _enc
+
     launcher += f"""
 nl.OUTPUT_DIR = "{output_dir}"
 nl.EVAL_DIR = "{eval_dir}"
 nl.PRETRAINED_ENCODER = "{encoder_path}"
+nl.VOCAB_SIZE = {_vocab_sz}
+nl.MAX_SEQ_LEN = {_max_len}
 nl.EPOCHS = 3
 nl.LR = 1e-4
 os.makedirs(nl.OUTPUT_DIR, exist_ok=True)

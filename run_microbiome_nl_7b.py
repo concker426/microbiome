@@ -270,17 +270,19 @@ class NLMultimodalDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
         # Pre-encode all samples for speed
+        def _tokenize(msgs, **kw):
+            r = tokenizer.apply_chat_template(msgs, tokenize=True, **kw)
+            # Handle BatchEncoding from newer transformers versions
+            if hasattr(r, 'input_ids'):
+                return r.input_ids
+            return r
+
         self.encoded = []
         for item in data:
             messages = item["messages"]
-            full_ids = tokenizer.apply_chat_template(
-                messages, tokenize=True, max_length=max_length, truncation=True,
-            )
-
-            prompt_ids = tokenizer.apply_chat_template(
-                [messages[0]], tokenize=True, max_length=max_length,
-                truncation=True, add_generation_prompt=True,
-            )
+            full_ids = _tokenize(messages, max_length=max_length, truncation=True)
+            prompt_ids = _tokenize([messages[0]], max_length=max_length,
+                                   truncation=True, add_generation_prompt=True)
             user_len = len(prompt_ids)
 
             labels = [-100] * len(full_ids)

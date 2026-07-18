@@ -67,42 +67,57 @@ def load_jsonl(path):
 
 
 def compute_healthy_baselines(train_data, train_vectors):
-    """Compute mean relative abundance per genus across Healthy samples."""
+    """Compute percentile-based reference intervals from Healthy samples.
+
+    Uses P2.5 and P97.5 as reference bounds (Oh & Park 2025, Casén et al. 2015).
+    Percentiles are non-parametric and handle skewed microbiome distributions.
+    """
     healthy_indices = [i for i, d in enumerate(train_data) if d["label"] == "Healthy"]
-    print(f"  Computing baseline from {len(healthy_indices)} Healthy samples")
+    print(f"  Computing percentile baseline from {len(healthy_indices)} Healthy samples")
     healthy_vecs = train_vectors[healthy_indices]  # (N_healthy, 1222)
-    baseline = healthy_vecs.mean(axis=0)  # (1222,)
-    return baseline
+    mean = healthy_vecs.mean(axis=0)
+    lower = np.percentile(healthy_vecs, 2.5, axis=0)   # P2.5
+    upper = np.percentile(healthy_vecs, 97.5, axis=0)   # P97.5
+    lower = np.maximum(lower, 0)
+    return {"mean": mean, "lower": lower, "upper": upper}
 
 
 def find_top_deviations(sample_vec, baseline, genus_names, top_n=8):
     """
-    Find genera with largest deviation from healthy baseline.
-    Returns list of (genus_name, relative_abundance, baseline_abundance, delta, status)
-    where status is 'elevated' or 'reduced'.
+    Find genera deviating from healthy reference interval (outside P2.5–P97.5).
+    Uses percentile-based reference intervals (Oh & Park 2025).
+    Returns list of (genus_name, relative_abundance, baseline_mean, delta, status, weighted_delta)
     """
-    # Filter: only consider genera present (>0) in either sample or baseline
-    # to avoid spurious comparisons on very rare genera
+    mean = baseline["mean"]
+    lower = baseline["lower"]
+    upper = baseline["upper"]
+
     deviations = []
     for i in range(len(genus_names)):
         sample_val = float(sample_vec[i]) if i < len(sample_vec) else 0.0
-        baseline_val = float(baseline[i]) if i < len(baseline) else 0.0
-        if sample_val < 0.001 and baseline_val < 0.001:
-            continue
-        delta = sample_val - baseline_val
-        # Use fold change for small values, absolute for large
-        if baseline_val > 0.1:
-            fold_change = delta / baseline_val
-            weighted_delta = abs(delta) * 0.5 + abs(fold_change) * 0.5 * baseline_val * 10
-        elif baseline_val > 0.01:
-            fold_change = delta / max(baseline_val, 0.001)
-            weighted_delta = abs(delta) + abs(fold_change) * 0.01
-        else:
-            weighted_delta = abs(delta) * 2  # emphasis on newly appearing genera
+        mean_val = float(mean[i]) if i < len(mean) else 0.0
+        lower_val = float(lower[i]) if i < len(lower) else 0.0
+        upper_val = float(upper[i]) if i < len(upper) else 0.0
 
-        status = "elevated" if delta > 0 else "reduced"
+        # Skip very rare genera (both sample and baseline near zero)
+        if sample_val < 0.01 and mean_val < 0.01:
+            continue
+
+        # Only flag if OUTSIDE the healthy CI
+        if lower_val <= sample_val <= upper_val:
+            continue  # within normal range
+
+        if sample_val < lower_val:
+            delta = lower_val - sample_val  # how far below lower bound
+            status = "reduced"
+            weighted_delta = delta / max(lower_val, 0.001)  # relative to lower bound
+        else:  # sample_val > upper_val
+            delta = sample_val - upper_val
+            status = "elevated"
+            weighted_delta = delta / max(upper_val, 0.001)
+
         deviations.append((genus_names[i], round(sample_val, 2),
-                           round(baseline_val, 2), round(delta, 2),
+                           round(mean_val, 2), round(delta, 2),
                            status, weighted_delta))
 
     deviations.sort(key=lambda x: -x[5])  # sort by weighted delta
@@ -130,14 +145,16 @@ def make_analysis_text(label, top_deviations):
     lines.append("分析理由：")
 
     if label == "Healthy":
-        lines.append("该样本的肠道菌群组成在正常范围内，核心菌群结构稳健。")
+        lines.append("该样本的肠道菌群组成在健康人群参考范围内，核心菌群结构稳健。")
         if reduced:
             genera_str = "、".join(n for n, _, _ in reduced[:3])
-            lines.append(f"  尽管{genera_str}等菌属相对丰度略低于平均水平，但仍处于正常波动范围。")
+            lines.append(f"  其中{genera_str}等菌属接近参考范围下限，但仍在正常波动范围之内。")
         if elevated:
             genera_str = "、".join(n for n, _, _ in elevated[:3])
-            lines.append(f"  {genera_str}等菌属均维持在健康水平，未出现显著的条件致病菌富集。")
-        lines.append("菌群多样性正常，有益菌（Faecalibacterium、Blautia、Roseburia等）比例均衡。")
+            lines.append(f"  {genera_str}等菌属丰度处于健康人群典型范围内。")
+        if not reduced and not elevated:
+            lines.append("  主要菌属的丰度均在健康人群参考区间内，未发现显著偏离。")
+        lines.append("菌群多样性和功能配置正常，有益菌比例均衡。")
         lines.append("结论：正常肠道菌群，未见明显异常。")
     else:
         lines.append("该样本表现出与肠道炎症相关的菌群失调特征。")
@@ -164,7 +181,7 @@ def make_analysis_text(label, top_deviations):
                     else:
                         line_parts.append(f"高于均值）")
                 else:
-                    line_parts.append(f"    - {name}：相对丰度 {sa:.1f}%（健康样本中罕见）——该菌属异常出现")
+                    line_parts = [f"    - {name}：相对丰度 {sa:.1f}%（健康样本中罕见）——该菌属异常出现"]
                 lines.append("".join(line_parts))
         lines.append("综合判断：菌群结构显著偏离健康状态，符合肠道炎症的微生物组特征。")
         if reduced and elevated:
@@ -316,7 +333,7 @@ def main():
 
     # Print top baseline genera
     top_baseline = sorted(
-        [(genus_names[i], baseline[i]) for i in range(len(genus_names))],
+        [(genus_names[i], baseline["mean"][i]) for i in range(len(genus_names))],
         key=lambda x: -x[1],
     )[:10]
     print(f"  Top genera in healthy baseline:")

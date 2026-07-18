@@ -47,9 +47,11 @@ IBD_INCREASED = {
     "Peptostreptococcus", "Pseudomonas",
 }
 
-NUM_AUGMENT_PER_DISEASE = 4   # create 4 variants per Disease sample
-NUM_HEALTHY_TO_DISEASE = 500  # convert 500 Healthy → synthetic Disease
-DISEASE_TARGET = 441 * (NUM_AUGMENT_PER_DISEASE + 1) + NUM_HEALTHY_TO_DISEASE
+# ONLY Dropout perturbation — scientifically defensible
+# (simulates varying sequencing depth, no prior knowledge injected)
+NUM_AUGMENT_PER_DISEASE = 2   # create 2 dropout variants per Disease sample
+NUM_AUGMENT_PER_HEALTHY = 2   # create 2 dropout variants per Healthy sample (balance)
+NUM_HEALTHY_TO_DISEASE = 0    # DISABLED: injects label knowledge
 
 
 def load_jsonl(path):
@@ -257,8 +259,8 @@ def main():
     print(f"  Healthy samples: {len(healthy_indices)}")
 
     # ── Step 1: Perturb Disease samples ──
-    print("\n[2/5] Augmenting Disease samples via perturbation...")
-    methods = ["noise", "dropout", "shuffle_tail", "mix"]
+    print("\n[2/5] Augmenting Disease samples (Dropout only)...")
+    methods = ["dropout"]  # Only scientifically valid method
     augmented_disease_entries = []
 
     for idx in disease_indices:
@@ -266,27 +268,56 @@ def main():
         seq = train_sequences[idx]
         mask = train_masks[idx]
 
-        for m in methods:
-            new_seq, new_mask = perturb_genus_sequence(seq, mask, method=m)
+        for aug_i in range(NUM_AUGMENT_PER_DISEASE):
+            new_seq, new_mask = perturb_genus_sequence(seq, mask, method="dropout")
             count_nonzero = int(new_mask.sum())
             if count_nonzero < 3:
                 continue  # skip degenerate sequences
             new_vec = compute_vectors_from_sequence(new_seq, new_mask, genus_names)
 
-            # Build entry with same metadata
             entry = {
                 "original_idx": idx,
                 "label": "Disease",
                 "dataset_type": orig["dataset_type"],
-                "sample_id": f"{orig['sample_id']}_aug_{m}",
+                "sample_id": f"{orig['sample_id']}_aug_dropout_{aug_i}",
                 "genus_sequence": new_seq.tolist(),
                 "genus_mask": new_mask.tolist(),
                 "genus_vector": new_vec.tolist(),
-                "aug_method": m,
+                "aug_method": "dropout",
             }
             augmented_disease_entries.append(entry)
 
     print(f"  Created {len(augmented_disease_entries)} augmented Disease variants")
+
+    # ── Step 1b: Perturb Healthy samples (for class balance) ──
+    print("\n[2b/5] Augmenting Healthy samples (Dropout only)...")
+    augmented_healthy_entries = []
+
+    for idx in healthy_indices:
+        orig = train_data[idx]
+        seq = train_sequences[idx]
+        mask = train_masks[idx]
+
+        for aug_i in range(NUM_AUGMENT_PER_HEALTHY):
+            new_seq, new_mask = perturb_genus_sequence(seq, mask, method="dropout")
+            count_nonzero = int(new_mask.sum())
+            if count_nonzero < 3:
+                continue
+            new_vec = compute_vectors_from_sequence(new_seq, new_mask, genus_names)
+
+            entry = {
+                "original_idx": idx,
+                "label": "Healthy",
+                "dataset_type": orig["dataset_type"],
+                "sample_id": f"{orig['sample_id']}_aug_dropout_{aug_i}",
+                "genus_sequence": new_seq.tolist(),
+                "genus_mask": new_mask.tolist(),
+                "genus_vector": new_vec.tolist(),
+                "aug_method": "dropout",
+            }
+            augmented_healthy_entries.append(entry)
+
+    print(f"  Created {len(augmented_healthy_entries)} augmented Healthy variants")
 
     # ── Step 2: Healthy→Disease conversion ──
     print("\n[3/5] Converting Healthy samples to synthetic Disease...")
@@ -338,9 +369,9 @@ def main():
 
     synthetic_nl = []
 
-    all_synthetic = augmented_disease_entries + converted_disease_entries
+    all_synthetic = augmented_disease_entries + converted_disease_entries + augmented_healthy_entries
     for idx, entry in enumerate(all_synthetic):
-        label = "Disease"
+        label = entry["label"]  # use actual label (Disease or Healthy)
         vec = np.array(entry["genus_vector"], dtype=np.float32)
 
         top_devs = find_top_deviations(vec, baseline, genus_names, top_n=8)
@@ -348,7 +379,7 @@ def main():
         marker = make_marker_text(label, top_devs)
         comparison = make_comparison_text(label, top_devs)
 
-        diag_statement = "诊断结果：Disease。"
+        diag_statement = f"诊断结果：{label}。"
 
         # Build 3 task variants
         diag_user = (
@@ -393,7 +424,7 @@ def main():
                 ],
                 "dataset_type": entry["dataset_type"],
                 "sample_id": entry["sample_id"],
-                "label": "Disease",
+                "label": label,  # use actual label from entry
                 "is_synthetic": True,
                 "aug_method": entry["aug_method"],
             })
