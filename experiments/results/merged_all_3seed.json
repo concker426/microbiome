@@ -1,0 +1,44 @@
+[
+  {
+    "seed": 42,
+    "enc_nl": {
+      "accuracy": 0.8473684210526315,
+      "correct": 161,
+      "total": 190
+    },
+    "nl_only": {
+      "accuracy": 0.835,
+      "correct": 167,
+      "total": 200
+    },
+    "gap": 0.012368421052631584
+  },
+  {
+    "seed": 123,
+    "enc_nl": {
+      "accuracy": 0.835,
+      "correct": 167,
+      "total": 200
+    },
+    "nl_only": {
+      "accuracy": 0.82,
+      "correct": 164,
+      "total": 200
+    },
+    "gap": 0.015000000000000013
+  },
+  {
+    "seed": 456,
+    "enc_nl": {
+      "accuracy": 0.82,
+      "correct": 164,
+      "total": 200
+    },
+    "nl_only": {
+      "accuracy": 0.84,
+      "correct": 168,
+      "total": 200
+    },
+    "gap": -0.020000000000000018
+  }
+]

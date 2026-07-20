@@ -1,0 +1,21 @@
+Genus,Direction,Mechanism,Evidence_Level,PMID
+Faecalibacterium,Decreased,SCFA butyrate production ↓ → gut barrier disruption ↓ Treg,Strong (multiple meta-analyses),39314611
+Roseburia,Decreased,Butyrate producer ↓ → SCFA reduction → inflammation,Strong (multiple meta-analyses),39314611
+Eubacterium,Decreased,SCFA producer ↓ → barrier function impairment,Moderate,39314611
+Coprococcus,Decreased,Butyrate producer ↓,Moderate,39314611
+Blautia,Decreased,SCFA production ↓,Moderate,39314611
+Ruminococcus,Decreased,R. bromii butyrate ↓,Moderate,39314611
+Clostridium,Decreased,Beneficial Clostridia ↓ → Treg induction impaired,Moderate,39314611
+Lachnospira,Decreased,SCFA production ↓,Moderate,39314611
+Escherichia,Increased,AIEC adhesion → pro-inflammatory → permeability ↑,Strong (multiple meta-analyses),39314611
+Proteus,Increased,Proteobacteria bloom → LPS ↑ → inflammation,Moderate,39314611
+Enterobacter,Increased,Pro-inflammatory → intestinal permeability ↑,Moderate,39314611
+Clostridioides,Increased,C. difficile → toxin production → mucosal damage,Moderate,39314611
+Bacteroides,Variable,Some species protective (B. fragilis PSA) others pro-inflammatory,Complex,39314611
+Prevotella,Variable,Context-dependent; can be increased or decreased,Complex,39314611
+Bifidobacterium,Decreased,Probiotic genus ↓ → SCFA ↓ immune modulation impaired,Moderate,39314611
+Akkermansia,Decreased,Mucin degradation ↓ → barrier function ↓,Moderate,39314611
+Lactobacillus,Decreased,Probiotic ↓ → anti-inflammatory ↓,Moderate,39314611
+Streptococcus,Increased,Pro-inflammatory → associated with disease activity,Weak,39314611
+Veillonella,Increased,Associated with disease activity,Weak,39314611
+Fusobacterium,Increased,Pro-inflammatory → tissue invasion,Moderate,39314611
