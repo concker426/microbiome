@@ -1,12 +1,12 @@
-# Monitor Report — 2026-07-20 07:20:01
+# Monitor Report — 2026-07-20 07:30:01
 
 ## Processes
-- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=06:57
+- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=16:57
 - **B (two-stage)**: **NOT RUNNING** :red_circle:
 
 ## GPU
 ```
-0, NVIDIA L40, 21541 MiB, 46068 MiB, 98 %
+0, NVIDIA L40, 21541 MiB, 46068 MiB, 97 %
 1, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
 2, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
 ```
@@ -14,7 +14,7 @@
 ## Output Health
 
 ### A (merged_all)
-- Size: 1275 bytes
+- Size: 1309 bytes
 - **ERROR DETECTED** :red_circle:
 ```
 Traceback (most recent call last):
@@ -22,11 +22,11 @@ OSError: libnvJitLink.so.13: cannot open shared object file: No such file or dir
 ```
 - Latest lines:
 ```
-           ~~~~~~~~~~~~~^^^^^^
   File "/home/star/miniconda3/lib/python3.13/ctypes/__init__.py", line 390, in __init__
     self._handle = _dlopen(self._name, mode)
                    ~~~~~~~^^^^^^^^^^^^^^^^^^
 OSError: libnvJitLink.so.13: cannot open shared object file: No such file or directory
+  Epoch 1/4 loss=0.1449 time=517s
 ```
 
 ### B (two-stage)
@@ -50,4 +50,4 @@ torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 1 
 ```
 ```
 
-*Auto: 07:20:01*
+*Auto: 07:30:01*
