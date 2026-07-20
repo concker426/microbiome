@@ -1,12 +1,12 @@
-# Monitor Report — 2026-07-20 08:30:01
+# Monitor Report — 2026-07-20 08:40:01
 
 ## Processes
-- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=01:16:57
+- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=01:26:57
 - **B (two-stage)**: **NOT RUNNING** :red_circle:
 
 ## GPU
 ```
-0, NVIDIA L40, 21561 MiB, 46068 MiB, 96 %
+0, NVIDIA L40, 21561 MiB, 46068 MiB, 97 %
 1, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
 2, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
 ```
@@ -14,7 +14,7 @@
 ## Output Health
 
 ### A (merged_all)
-- Size: 1724 bytes
+- Size: 1758 bytes
 - **ERROR DETECTED** :red_circle:
 ```
 Traceback (most recent call last):
@@ -22,11 +22,11 @@ OSError: libnvJitLink.so.13: cannot open shared object file: No such file or dir
 ```
 - Latest lines:
 ```
-Seed=123
 Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|██████████| 339/339 [00:00<00:00, 10847.83it/s]
   Epoch 1/4 loss=0.1457 time=511s
   Epoch 2/4 loss=0.0119 time=519s
   Epoch 3/4 loss=0.0127 time=522s
+  Epoch 4/4 loss=0.0116 time=512s
 ```
 
 ### B (two-stage)
@@ -50,4 +50,4 @@ torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 2 
 ```
 ```
 
-*Auto: 08:30:02*
+*Auto: 08:40:02*
