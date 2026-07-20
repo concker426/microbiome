@@ -1,20 +1,20 @@
-# Monitor Report — 2026-07-20 08:40:01
+# Monitor Report — 2026-07-20 08:50:01
 
 ## Processes
-- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=01:26:57
-- **B (two-stage)**: **NOT RUNNING** :red_circle:
+- **A (merged_all)**: PID=1571156 | CPU=0.0% | MEM=2 MB | Runtime=01:36:57
+- **B (two-stage)**: PID=1573686 | CPU=0.0% | MEM=2 MB | Runtime=04:49
 
 ## GPU
 ```
-0, NVIDIA L40, 21561 MiB, 46068 MiB, 97 %
+0, NVIDIA L40, 21559 MiB, 46068 MiB, 97 %
 1, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
-2, NVIDIA L40, 3 MiB, 46068 MiB, 0 %
+2, NVIDIA L40, 19311 MiB, 46068 MiB, 97 %
 ```
 
 ## Output Health
 
 ### A (merged_all)
-- Size: 1758 bytes
+- Size: 1969 bytes
 - **ERROR DETECTED** :red_circle:
 ```
 Traceback (most recent call last):
@@ -22,32 +22,31 @@ OSError: libnvJitLink.so.13: cannot open shared object file: No such file or dir
 ```
 - Latest lines:
 ```
-Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|██████████| 339/339 [00:00<00:00, 10847.83it/s]
-  Epoch 1/4 loss=0.1457 time=511s
-  Epoch 2/4 loss=0.0119 time=519s
-  Epoch 3/4 loss=0.0127 time=522s
   Epoch 4/4 loss=0.0116 time=512s
+  Enc+NL=0.8350 NL-only=0.8200 Gap=0.0150 Time=2534s
+
+Seed=456
+Loading weights:   0%|          | 0/339 [00:00<?, ?it/s]Loading weights: 100%|██████████| 339/339 [00:00<00:00, 10751.70it/s]
 ```
 
 ### B (two-stage)
-- Size: 4712 bytes
+- Size: 2893 bytes
 - **ERROR DETECTED** :red_circle:
 ```
-OSError: libnvJitLink.so.13: cannot open shared object file: No such file or directory
 Traceback (most recent call last):
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 2 has a total capacity of 44.39 GiB of which 49.31 MiB is free. Including non-PyTorch memory, this process has 44.34 GiB memory in use. Of the allocated memory 43.42 GiB is allocated by PyTorch, and 419.37 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+OSError: libnvJitLink.so.13: cannot open shared object file: No such file or directory
 ```
 - Latest lines:
 ```
-        p, memory_format=torch.preserve_format
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 2 has a total capacity of 44.39 GiB of which 49.31 MiB is free. Including non-PyTorch memory, this process has 44.34 GiB memory in use. Of the allocated memory 43.42 GiB is allocated by PyTorch, and 419.37 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+                   ~~~~~~~^^^^^^^^^^^^^^^^^^
+OSError: libnvJitLink.so.13: cannot open shared object file: No such file or directory
+  Stage 1: Adapter only (Qwen frozen)
+    S1 Ep1/3 loss=3.0411
+    S1 Ep2/3 loss=1.3289
 ```
 
 ## Results Extracted
 ```
 ```
 
-*Auto: 08:40:02*
+*Auto: 08:50:01*
