@@ -1,4 +1,4 @@
-# ProCyon v2 — Experiment Log (2026-07-21 12:03)
+# ProCyon v2 — Experiment Log (2026-07-21 13:03)
 
 ## Status: IDLE
 
@@ -10,38 +10,38 @@
 - **procyon_v2_phase3.json** (2026-07-18 11:19:03): ACC=
 - **procyon_v2_summary.json** (2026-07-15 14:23:00): ACC=
 
-## Latest Output (bczidlgs1.output)
+## Latest Output (bxsqj648f.output)
 ```
-  [46/50] 2538.1000126 (Healthy)...
-    A (raw):  The presence of certain bacterial genera in a gut microbiome can provide insights into potential health conditions, including Inflammatory Bowel Disea...
-    B (SHAP): Based on the provided SHAP feature importance values, the machine learning model has indicated that certain bacterial genera are present in levels tha...
-
-  [47/50] 2538.1000028 (Disease)...
-    A (raw):  The presence of certain bacterial genera in a gut microbiome can provide insights into potential associations with conditions like Inflammatory Bowel ...
-    B (SHAP): Given the predictions and the SHAP feature importance scores, it appears that the patient's gut microbiome is not in a healthy state, with a probabili...
-
-  [48/50] 2538.1000724 (Healthy)...
-    A (raw):  Analyzing the gut microbiome composition for signs of Inflammatory Bowel Disease (IBD) involves looking at specific microbial signatures that are ofte...
-    B (SHAP): Based on the provided SHAP feature importance values and their direction (up or down), we can infer that certain genera are either positively or negat...
-
-  [49/50] 2538.1000433 (Disease)...
-    A (raw):  The gut microbiome plays a crucial role in maintaining intestinal health and can be significantly altered in individuals with inflammatory bowel disea...
-    B (SHAP): Based on the SHAP feature importance values provided, several genera have been identified as key players in the prediction of a disease state. Let's e...
-
-  [50/50] 2538.1000515 (Healthy)...
-    A (raw):  The gut microbiome plays a critical role in maintaining intestinal health and can contribute to the development of various gastrointestinal disorders,...
-    B (SHAP): Based on the provided information, the machine learning classifier has predicted that the patient's gut microbiome is not healthy, with a probability ...
-
-Saved: /hd/liujx/microbiome_llm_project/ProCyon_v2/analysis/phase4_llm_pilot.json (50 samples)
+  A: The given gut microbiome composition includes several genera that have been implicated in Inflammatory Bowel Disease (IB...
+  B: The classifier predicted the patient to be healthy with 100% confidence, likely due to the presence of certain genera th...
+  C: The classifier predicted the patient to be healthy based on the relative abundances of various genera in their gut micro...
 
 ============================================================
-Preliminary Evaluation
+EVALUATION METRICS
 ============================================================
-  (Detailed evaluation requires human review)
-  Saved responses for manual inspection
-Saved: /hd/liujx/microbiome_llm_project/ProCyon_v2/analysis/phase4_human_review.txt
 
-PHASE 4 PILOT DONE
+  Raw genus list:
+    Hallucinated genera:  0.3/response
+    Input genera mentioned: 5.1/response
+    Specificity ratio:    0.534 (higher = more specific)
+    Prediction consistent: 30/50 (60%)
+
+  SHAP only:
+    Hallucinated genera:  0.0/response
+    Input genera mentioned: 9.9/response
+    Specificity ratio:    0.714 (higher = more specific)
+    Prediction consistent: 49/50 (98%)
+
+  SHAP + Literature:
+    Hallucinated genera:  0.0/response
+    Input genera mentioned: 9.8/response
+    Specificity ratio:    0.665 (higher = more specific)
+    Prediction consistent: 40/50 (80%)
+
+Saved: /hd/liujx/microbiome_llm_project/ProCyon_v2/analysis/phase45_validation.json
+Saved: /hd/liujx/microbiome_llm_project/ProCyon_v2/analysis/phase45_human_review.txt
+
+PHASE 4.5 DONE
 ```
 
-*Auto-generated at 2026-07-21 12:03:02*
+*Auto-generated at 2026-07-21 13:03:02*
