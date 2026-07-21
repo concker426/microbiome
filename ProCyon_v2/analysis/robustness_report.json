@@ -1,0 +1,246 @@
+{
+  "cv_shap_jaccard": {
+    "10": {
+      "mean": 0.0654970760233918,
+      "std": 0.04190987805185711,
+      "pairs": [
+        0.1111111111111111,
+        0.0,
+        0.1111111111111111,
+        0.05263157894736842,
+        0.05263157894736842,
+        0.1111111111111111,
+        0.1111111111111111,
+        0.05263157894736842,
+        0.0,
+        0.05263157894736842
+      ]
+    },
+    "20": {
+      "mean": 0.13159552540357494,
+      "std": 0.04316444135991962,
+      "pairs": [
+        0.14285714285714285,
+        0.14285714285714285,
+        0.1111111111111111,
+        0.17647058823529413,
+        0.08108108108108109,
+        0.14285714285714285,
+        0.21212121212121213,
+        0.14285714285714285,
+        0.1111111111111111,
+        0.05263157894736842
+      ]
+    },
+    "50": {
+      "mean": 0.20655391728779401,
+      "std": 0.04512576103589976,
+      "pairs": [
+        0.1111111111111111,
+        0.14942528735632185,
+        0.20481927710843373,
+        0.20481927710843373,
+        0.21951219512195122,
+        0.2345679012345679,
+        0.20481927710843373,
+        0.26582278481012656,
+        0.26582278481012656,
+        0.20481927710843373
+      ]
+    }
+  },
+  "consistent_genera_across_folds": {
+    "top20": [
+      "Alcanivorax"
+    ],
+    "top50": [
+      "Wohlfahrtiimonas",
+      "Alcanivorax",
+      "Cloacibacillus"
+    ]
+  },
+  "permutation_control": {
+    "real_mean_abs_shap": 0.007999439890710383,
+    "perm_mean_abs_shap": 0.03603471994511031,
+    "ratio": 0.2219925644738043,
+    "real_top20": [
+      "Wohlfahrtiimonas",
+      "Coccomyxa",
+      "Butyricimonas",
+      "Amorphomonas",
+      "Sphingobacterium",
+      "Propionigenium",
+      "Alcanivorax",
+      "Slackia",
+      "Rubellimicrobium",
+      "Desulfomicrobium",
+      "Garciella",
+      "Thalassobius",
+      "Sediminicola",
+      "Herminiimonas",
+      "Litorilinea",
+      "Agarivorans",
+      "Fluviicola",
+      "planctomycete",
+      "Cloacibacillus",
+      "Alicyclobacillus"
+    ],
+    "perm_top20": [
+      "Oceanicaulis",
+      "KSA1",
+      "Salana",
+      "Phaeospirillum",
+      "Granulicella",
+      "Echinicola",
+      "Cenarchaeum",
+      "Eikenella",
+      "Oceanicella",
+      "Ucs1325",
+      "OR-59",
+      "Magnetospirillum",
+      "Indibacter",
+      "Peptoniphilus",
+      "Treubia",
+      "Anaerobiospirillum",
+      "Olivibacter",
+      "Escherichia",
+      "Thiomicrospira",
+      "Symploca"
+    ]
+  },
+  "abundance_importance_correlation": 0.04807649678933668,
+  "novel_candidates": [
+    {
+      "genus_name": "Sphingobacterium",
+      "abs_importance": 0.08421,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 35.0
+    },
+    {
+      "genus_name": "Herminiimonas",
+      "abs_importance": 0.072949,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 33.0
+    },
+    {
+      "genus_name": "Propionigenium",
+      "abs_importance": 0.064368,
+      "prevalence": 0.0,
+      "mean_abundance_rank": 86
+    },
+    {
+      "genus_name": "Garciella",
+      "abs_importance": 0.056656,
+      "prevalence": 0.0,
+      "mean_abundance_rank": 86
+    },
+    {
+      "genus_name": "Coccomyxa",
+      "abs_importance": 0.050747,
+      "prevalence": 0.0,
+      "mean_abundance_rank": 86
+    },
+    {
+      "genus_name": "Butyricimonas",
+      "abs_importance": 0.044878,
+      "prevalence": 0.009104704097116844,
+      "mean_abundance_rank": 44.0
+    },
+    {
+      "genus_name": "Thalassobius",
+      "abs_importance": 0.043104,
+      "prevalence": 0.01669195751138088,
+      "mean_abundance_rank": 36.0
+    },
+    {
+      "genus_name": "Agarivorans",
+      "abs_importance": 0.042561,
+      "prevalence": 0.004552352048558422,
+      "mean_abundance_rank": 52.0
+    },
+    {
+      "genus_name": "Alicyclobacillus",
+      "abs_importance": 0.040073,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 55.0
+    },
+    {
+      "genus_name": "Sediminicola",
+      "abs_importance": 0.038767,
+      "prevalence": 0.0030349013657056147,
+      "mean_abundance_rank": 31.5
+    },
+    {
+      "genus_name": "Slackia",
+      "abs_importance": 0.037037,
+      "prevalence": 0.021244309559939303,
+      "mean_abundance_rank": 24.857142857142858
+    },
+    {
+      "genus_name": "Litorilinea",
+      "abs_importance": 0.036691,
+      "prevalence": 0.08952959028831563,
+      "mean_abundance_rank": 38.28813559322034
+    },
+    {
+      "genus_name": "Rubellimicrobium",
+      "abs_importance": 0.035853,
+      "prevalence": 0.03338391502276176,
+      "mean_abundance_rank": 37.22727272727273
+    },
+    {
+      "genus_name": "Fluviicola",
+      "abs_importance": 0.03402,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 54.0
+    },
+    {
+      "genus_name": "planctomycete",
+      "abs_importance": 0.02702,
+      "prevalence": 0.03945371775417299,
+      "mean_abundance_rank": 36.42307692307692
+    },
+    {
+      "genus_name": "Amorphomonas",
+      "abs_importance": 0.026949,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 61.0
+    },
+    {
+      "genus_name": "Desulfocapsa",
+      "abs_importance": 0.025978,
+      "prevalence": 0.012139605462822459,
+      "mean_abundance_rank": 46.75
+    },
+    {
+      "genus_name": "Salinimicrobium",
+      "abs_importance": 0.024859,
+      "prevalence": 0.007587253414264037,
+      "mean_abundance_rank": 44.0
+    },
+    {
+      "genus_name": "Niabella",
+      "abs_importance": 0.024543,
+      "prevalence": 0.0015174506828528073,
+      "mean_abundance_rank": 30.0
+    },
+    {
+      "genus_name": "Oceanicella",
+      "abs_importance": 0.023442,
+      "prevalence": 0.015174506828528073,
+      "mean_abundance_rank": 41.1
+    }
+  ],
+  "cluster_validation": {
+    "c0": {
+      "richness": 44.63322884012539,
+      "dist_to_healthy": 0.2825399914692188,
+      "entropy": 0.02159652330630249
+    },
+    "c1": {
+      "richness": 3.5238095238095237,
+      "dist_to_healthy": 0.5850136798052561,
+      "entropy": 0.048930725500902064
+    }
+  }
+}

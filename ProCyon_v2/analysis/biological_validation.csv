@@ -1,0 +1,21 @@
+genus,in_dataset,shap_rank,mean_importance,abs_importance,n_samples,prevalence_pct,model_direction,literature_direction,direction_match,literature_evidence,literature_mechanism,pmid
+Faecalibacterium,False,,,,0,0.0,,Decreased,,Strong (multiple meta-analyses),SCFA butyrate production ↓ → gut barrier disruption ↓ Treg,39314611
+Roseburia,True,228,-0.002425,0.002425,5,0.6,Decreased,Decreased,True,Strong (multiple meta-analyses),Butyrate producer ↓ → SCFA reduction → inflammation,39314611
+Eubacterium,False,,,,0,0.0,,Decreased,,Moderate,SCFA producer ↓ → barrier function impairment,39314611
+Coprococcus,False,,,,0,0.0,,Decreased,,Moderate,Butyrate producer ↓,39314611
+Blautia,True,238,-0.002086,0.002086,399,48.3,Decreased,Decreased,True,Moderate,SCFA production ↓,39314611
+Ruminococcus,False,,,,0,0.0,,Decreased,,Moderate,R. bromii butyrate ↓,39314611
+Clostridium,False,,,,0,0.0,,Decreased,,Moderate,Beneficial Clostridia ↓ → Treg induction impaired,39314611
+Lachnospira,True,50,-0.016606,0.016606,8,1.0,Decreased,Decreased,True,Moderate,SCFA production ↓,39314611
+Escherichia,True,298,0.000743,0.000743,521,63.1,Increased,Increased,True,Strong (multiple meta-analyses),AIEC adhesion → pro-inflammatory → permeability ↑,39314611
+Proteus,False,,,,0,0.0,,Increased,,Moderate,Proteobacteria bloom → LPS ↑ → inflammation,39314611
+Enterobacter,True,295,0.000797,0.000797,49,5.9,Increased,Increased,True,Moderate,Pro-inflammatory → intestinal permeability ↑,39314611
+Clostridioides,False,,,,0,0.0,,Increased,,Moderate,C. difficile → toxin production → mucosal damage,39314611
+Bacteroides,False,,,,0,0.0,,Variable,,Complex,Some species protective (B. fragilis PSA) others pro-inflammatory,39314611
+Prevotella,False,,,,0,0.0,,Variable,,Complex,Context-dependent; can be increased or decreased,39314611
+Bifidobacterium,True,163,0.005426,0.005426,12,1.5,Increased,Decreased,False,Moderate,Probiotic genus ↓ → SCFA ↓ immune modulation impaired,39314611
+Akkermansia,False,,,,0,0.0,,Decreased,,Moderate,Mucin degradation ↓ → barrier function ↓,39314611
+Lactobacillus,False,,,,0,0.0,,Decreased,,Moderate,Probiotic ↓ → anti-inflammatory ↓,39314611
+Streptococcus,False,,,,0,0.0,,Increased,,Weak,Pro-inflammatory → associated with disease activity,39314611
+Veillonella,False,,,,0,0.0,,Increased,,Weak,Associated with disease activity,39314611
+Fusobacterium,False,,,,0,0.0,,Increased,,Moderate,Pro-inflammatory → tissue invasion,39314611
