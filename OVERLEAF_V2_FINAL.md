@@ -295,58 +295,72 @@ Even with 5 labeled examples, the LLM achieves only 63% accuracy—far below the
 
 ### 5.1 Why SimpleEmb Beats MGM
 
-The MGM encoder is a 6-layer Transformer pretrained on next-genus prediction across 263,000 samples. Yet it achieves only 50.9% ACC—essentially random—on IBD classification. Why?
+The MGM encoder—a 6-layer Transformer with 34M parameters pretrained on next-genus prediction across 263,000 samples—achieves only 50.9% ACC on IBD classification. Three factors explain this failure:
 
-**Mismatched pretraining objective**: Next-genus prediction teaches the model to capture co-occurrence patterns between genera. But IBD diagnosis requires learning which genus combinations indicate disease, not which genera tend to appear together. The pretraining objective is orthogonal to the downstream task.
+1. **Mismatched pretraining objective**: Next-genus prediction captures genus co-occurrence patterns. IBD diagnosis requires identifying genus combinations that indicate disease—an orthogonal task. The pretraining signal does not transfer.
 
-**Transformer overparameterization**: The 6-layer self-attention stack (34M params) learns sequential dependencies that don't exist. Genus sequences sorted by abundance have no meaningful sequential structure—adjacent tokens share only their abundance rank, not biological relationship.
+2. **Transformer overparameterization for tabular data**: Genus sequences sorted by abundance have no meaningful sequential structure. Adjacent tokens share only abundance rank, not biological relationship. The 6-layer self-attention stack learns spurious sequential dependencies where none exist.
 
-**Data scale mismatch**: MGM was pretrained on diverse microbiome sources (human gut, soil, marine, etc.). The genus co-occurrence patterns in environmental samples differ fundamentally from human gut IBD patterns.
+3. **Data distribution mismatch**: MGM was pretrained on diverse environments (human gut, soil, marine). Genus co-occurrence patterns in environmental samples differ fundamentally from human gut IBD patterns.
 
-In contrast, SimpleEmb learns 366 independent genus embeddings directly optimized for the classification task. Each genus gets a dedicated 768-dim vector that the MLP can combine to detect disease patterns.
+In contrast, SimpleEmb (1.1M params, random init, no pretraining) learns 366 independent genus embeddings directly optimized for classification. Each genus receives a dedicated 768-dim vector; the MLP combines them linearly. This is the correct inductive bias for tabular microbiome data: each genus is an independent feature contributing diagnostic information through its presence and abundance, not through its sequential position.
 
-### 5.2 When LLMs Help (and When They Don't)
+### 5.2 Why 512 Dimensions Are Sufficient
 
-Our results clarify a critical distinction:
+Performance saturates at E=512 (93.41% ACC, 760K params). Extending to E=768 provides zero improvement. With only 366 unique genera in the dataset, a 512-dim embedding provides 1.4 dimensions per genus—sufficient capacity. Beyond this, additional dimensions encode noise rather than signal.
 
-- **LLM as classifier → FAILS**: Qwen2-7B achieves only 70.7% ACC with 11.9% std (unstable), and cannot outperform the MLP alone (92.5%). The LLM's broad biomedical pretraining does not substitute for specialized training on microbiome data.
+This also explains why raw 1226-dim features perform well (XGBoost: 92.22%): the input space is already rich enough. The embedding's value is not in adding information but in organizing it into a structure that enables SHAP interpretation, kNN retrieval, and LLM grounding.
 
-- **LLM as interpreter → SUCCEEDS**: When grounded by SHAP attributions, the LLM produces zero-hallucination explanations with 98% consistency and rich biological specificity (0.71 specificity ratio). The LLM's value is in contextualizing which genera matter and why—connecting Roseburia depletion to butyrate reduction, Faecalibacterium to SCFA production, and Escherichia enrichment to inflammation.
+### 5.3 When LLMs Help (and When They Don't)
 
-This asymmetry motivates ProCyon v2's dual-branch design: the model discovers patterns, SHAP provides evidence, and the LLM explains the evidence.
+| Role | Result | Verdict |
+|------|--------|---------|
+| LLM as classifier | 70.7% ± 11.9% (unstable) | Fails |
+| LLM as interpreter (no SHAP) | 0.3 hallucinations/response, 53% consistency | Unreliable |
+| **LLM as interpreter (SHAP-grounded)** | **0 hallucinations, 98% consistency** | **Succeeds** |
+| LLM + Literature context | 0.02 hallucinations, 94% consistency | Slightly worse |
 
-### 5.3 The Role of SHAP as a Bridge
+The LLM's broad biomedical pretraining does not substitute for specialized microbiome training—it cannot classify IBD from genus lists. But its ability to contextualize microbial patterns in biomedical knowledge makes it invaluable for explanation: connecting Roseburia depletion to butyrate reduction, Faecalibacterium to SCFA production, and Escherichia enrichment to inflammation.
 
-SHAP serves dual purposes in our pipeline:
+This asymmetry motivates ProCyon v2's architecture: **classification and interpretation are separate concerns requiring different optimization**.
 
-1. **Model interpretation**: Understanding which genera drive predictions for individual patients, enabling per-sample biomarker analysis.
+### 5.4 Why SHAP Is Reliable Despite Low Jaccard
 
-2. **LLM grounding**: Providing the LLM with a ranked list of important genera and their directions, preventing hallucination. Before SHAP grounding, the LLM hallucinates 0.3 genera per response; after, zero.
+Top-50 Jaccard similarity across folds is only 0.07, which might suggest SHAP is unstable. However, Spearman rank correlation across folds is ρ=0.72 (p<0.001), showing that the **rank ordering** of genus importance is consistent. The low Jaccard reflects that many genera carry overlapping diagnostic information—different folds may select different but functionally equivalent genera (e.g., different SCFA producers).
 
-This creates a verifiable pipeline: every genus the LLM mentions in its explanation can be traced back to the model's actual decision process.
+This is consistent with IBD biology: the disease is a community-level dysbiosis, not driven by single genera. The model captures distributed patterns across many genera, and SHAP correctly identifies that the signal is collective rather than concentrated.
 
-### 5.4 Limitations
+Supporting evidence:
+- **Deletion test**: Removing top-50 SHAP genera drops AUC by 0.039, vs 0.007 for random deletion (5.6× larger effect)
+- **Permutation control**: Real model SHAP distribution differs substantially from shuffled-label control
+- **Literature validation**: 5/6 available literature genera match expected direction (83.3%)
 
-1. **Dataset diversity**: Results are on AGP+FTP and merged Qiita cohorts. External validation on TCMA, HMP, and independent clinical cohorts is needed.
+### 5.5 Limitations
 
-2. **SHAP stability**: Top-50 Jaccard across folds is 0.07, indicating individual genus rankings vary. However, community-level patterns (directional trends across SCFA producers, pro-inflammatory genera) are consistent.
+1. **Dataset diversity**: Results are on AGP+FTP and merged Qiita cohorts. External validation on TCMA, HMP, and independent clinical IBD cohorts is needed.
 
-3. **LLM explanation quality**: Explanations have not been clinically validated by gastroenterologists. Automatic metrics (hallucination, consistency) are proxies for quality.
+2. **SHAP is not causal**: Leave-one-out importance measures predictive contribution, not biological causation. A genus may be important for prediction without being causally involved in IBD pathogenesis.
 
-4. **Single disease**: Only IBD is evaluated. Extension to other microbiome-associated conditions (colorectal cancer, Type 2 diabetes, obesity) is planned but not yet executed.
+3. **LLM explanation quality**: Explanations have been evaluated with automatic metrics but not by clinical experts. Gastroenterologist evaluation is needed.
+
+4. **Single disease focus**: Only IBD is evaluated. Extension to CRC, T2D, and obesity would strengthen claims of general microbiome representation learning.
+
+5. **Limited literature coverage**: Only 6/20 literature-curated IBD genera appear in our dataset. The model discovers novel discriminative features that cannot be validated against existing literature—these represent hypotheses for future investigation.
 
 ---
 
 ## 6. Conclusion
 
-ProCyon v2 demonstrates that for microbiome-based disease classification, **simpler is better**. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57% accuracy, exceeding:
+ProCyon v2 demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57% accuracy on IBD diagnosis, exceeding:
 - A 34M-parameter pretrained MGM Transformer by 41.7pp (92.57% vs 50.9%)
 - XGBoost on raw features by 0.35pp (92.57% vs 92.22%)
-- Qwen2-7B few-shot by 29.6pp (92.57% vs 63.0%)
+- Qwen2-7B few-shot classification by 29.6pp (92.57% vs 63.0%)
 
-At the same time, LLMs retain essential value as interpretation engines: SHAP-grounded LLM explanations achieve zero hallucination and 98% consistency, transforming model decisions into verifiable biomedical narratives.
+The embedding dimension saturates at E=512 (93.41% ACC, 760K params), cross-cohort validation confirms that training on more diverse data improves generalization (merged→clean: 88.62%), and calibration analysis shows well-calibrated probabilities (ECE=0.05, Brier=0.056).
 
-The key insight is the **separation of concerns**: classification (what the model predicts) and interpretation (why it predicts) require different architectures optimized for different objectives. ProCyon v2 formalizes this separation and provides a reproducible, evidence-grounded framework for microbiome biomarker discovery and interpretation.
+SHAP feature attribution bridges classification and interpretation: Spearman rank correlation of ρ=0.72 across folds confirms consistent genus importance ranking, and deletion tests verify that SHAP-identified genera are 5.6× more impactful than random genera. When grounded by SHAP, LLM explanations achieve zero hallucination and 98% prediction consistency—transforming model decisions into verifiable biomedical narratives.
+
+The core insight is the **separation of concerns**: the model discovers patterns from data, SHAP provides evidence for those patterns, and the LLM explains the evidence in natural language. Each component is optimized for its specific role, and the pipeline is verifiable at every stage.
 
 ---
 
