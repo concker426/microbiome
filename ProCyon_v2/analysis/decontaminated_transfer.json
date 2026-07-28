@@ -1,0 +1,16 @@
+{
+  "clean_train": 659,
+  "merged_test_original": 838,
+  "removed_overlap": 105,
+  "decontaminated_test": 733,
+  "acc": 0.6030013642564802,
+  "auc": 0.7726731287503164,
+  "sensitivity": 0.20708446866485014,
+  "specificity": 1.0,
+  "cm": {
+    "tn": 366,
+    "fp": 0,
+    "fn": 291,
+    "tp": 76
+  }
+}

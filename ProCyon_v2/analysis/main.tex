@@ -192,7 +192,7 @@ All methods evaluated on identical split. Bold indicates best. ProCyon v2 report
 \end{tabular}
 \end{table}
 
-\textbf{Key findings}: (1) MGM pretrained encoder completely fails (50.9\% ACC, below majority baseline), demonstrating that next-genus pretraining does not transfer to IBD classification. (2) XGBoost on raw features is a strong baseline (92.22\%), establishing a high bar. (3) ProCyon v2 achieves best overall performance (92.57\%) with balanced precision (0.945) and recall (0.916). (4) With only 1.14M parameters—$30\times$ fewer than MGM—ProCyon v2 achieves 41.7pp higher accuracy, demonstrating dramatic parameter efficiency.
+\textbf{Key findings}: (1) MGM pretrained encoder completely fails (50.9\% ACC, below majority baseline), demonstrating that next-genus pretraining does not transfer to IBD classification. (2) XGBoost on raw features is a strong baseline (92.22\%), establishing a high bar. (3) ProCyon v2 achieves competitive classification performance (92.57\%) with balanced precision (0.945) and recall (0.916). (4) With only 1.14M parameters—$30\times$ fewer than MGM—ProCyon v2 achieves 41.7pp higher accuracy, demonstrating dramatic parameter efficiency.
 
 \subsection{Ablation Analysis}
 
@@ -238,29 +238,35 @@ MLP hidden dim $=$ $\min(E, 256)$.}
 
 Performance saturates at $E{=}512$ (ACC 93.41\%, AUC 0.9815). Extending to $E{=}768$ provides no benefit but increases parameters by 50\%. For $E{\leq}256$, the embedding dimension becomes a bottleneck ($-2.4$pp ACC). With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus—sufficient capacity for diagnostic representation learning.
 
-\subsection{Cross-Cohort Validation}
+\subsection{Within-Dataset and Cross-Dataset Transfer Evaluation}
+
+We evaluate generalization under two settings. The merged\_all train and test sets contain samples from the same five data sources and therefore represent a within-dataset random split rather than leave-one-study-out validation. For cross-dataset transfer, we decontaminate the target test set by removing samples whose IDs appear in the source training set (105 clean\_2538 training samples appeared in the original merged\_all test set).
 
 \begin{table}[ht]
 \centering
-\caption{\textbf{Cross-cohort validation.} ProCyon v2 (SimpleEmb+MLP, end-to-end)
-trained on one cohort and evaluated on another. merged\_all provides $5\times$ more training data.}
-\label{tab:cross}
+\caption{\textbf{Within-dataset and cross-dataset transfer evaluation.}
+Cross-dataset transfer test sets are decontaminated of training sample overlap.}
+\label{tab:transfer}
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Train $\rightarrow$ Test} & \textbf{$n_\text{train}$} & \textbf{ACC} & \textbf{AUC} & \textbf{Rec.} & \textbf{Spec.} \\
+\textbf{Train $\rightarrow$ Test} & \textbf{$n_\text{train}$} & \textbf{$n_\text{test}$} & \textbf{ACC} & \textbf{AUC} & \textbf{Rec./Spec.} \\
 \midrule
-\multicolumn{6}{l}{\textit{Within-cohort (reference)}} \\
-\;\; clean $\rightarrow$ clean & 659 & 0.9341 & 0.9815 & 0.9140 & 0.9595 \\
-\;\; merged $\rightarrow$ merged & 3,350 & 0.8007 & 0.8545 & 0.7040 & 0.9022 \\
+\multicolumn{6}{l}{\textit{Within-dataset (random split)}} \\
+\;\; clean $\rightarrow$ clean & 659 & 167 & 0.9341 & 0.9815 & 0.914 / 0.960 \\
+\;\; merged $\rightarrow$ merged & 3,350 & 838 & 0.8007 & 0.8545 & 0.704 / 0.902 \\
 \midrule
-\multicolumn{6}{l}{\textit{Cross-cohort}} \\
-\;\; clean $\rightarrow$ merged & 659 & 0.6181 & 0.8060 & 0.2541 & 1.0000 \\
-\;\; \textbf{merged $\rightarrow$ clean} & \textbf{3,350} & \textbf{0.8862} & \textbf{0.9427} & \textbf{0.8817} & \textbf{0.8919} \\
+\multicolumn{6}{l}{\textit{Cross-dataset transfer (decontaminated)}} \\
+\;\; clean $\rightarrow$ merged$^*$ & 659 & 733 & 0.6030 & 0.7727 & 0.207 / 1.000 \\
+\;\; \textbf{merged $\rightarrow$ clean$^\dagger$} & \textbf{3,350} & \textbf{167} & \textbf{0.8862} & \textbf{0.9427} & \textbf{0.882 / 0.892} \\
 \bottomrule
 \end{tabular}
+
+\vspace{4pt}
+\textit{$^*$105 samples overlapping with clean\_2538 training set removed from merged\_all test.\\
+$^\dagger$0 clean\_2538 test samples found in merged\_all training set; transfer direction is valid.}
 \end{table}
 
-\textbf{Finding}: merged$\rightarrow$clean retains 94.9\% of within-cohort performance (0.8862/0.9341), while clean$\rightarrow$merged retains only 77.2\%. Training on $5\times$ more diverse data substantially improves generalization. The clean$\rightarrow$merged failure mode (specificity collapse: 100\%, sensitivity: 25.4\%) indicates that small-dataset models become overly conservative when facing out-of-distribution samples.
+\textbf{Finding}: merged$\rightarrow$clean (decontaminated) achieves 88.62\% ACC, retaining 94.9\% of within-dataset performance. In the reverse direction, clean$\rightarrow$merged suffers from the small training set and exhibits specificity collapse—the model becomes overly conservative, predicting ``Healthy'' for nearly all out-of-distribution samples.
 
 \subsection{Why Does SimpleEmbedding Work?}
 \label{sec:why}
