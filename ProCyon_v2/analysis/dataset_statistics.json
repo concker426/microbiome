@@ -1,0 +1,68 @@
+{
+  "n_train": 659,
+  "n_test": 167,
+  "n_total": 826,
+  "n_disease": 433,
+  "n_healthy": 393,
+  "n_unique_genera": 366,
+  "mean_genera_per_sample": 47.75181598062954,
+  "std_genera_per_sample": 16.15759711851063,
+  "rare_genera_pct_5": 251,
+  "ubiquitous_genera_pct_50": 42,
+  "top10_prevalent": [
+    [
+      "4-29",
+      826,
+      1.0
+    ],
+    [
+      "Caldanaerocella",
+      814,
+      0.9854721549636803
+    ],
+    [
+      "Ucs1325",
+      771,
+      0.9334140435835351
+    ],
+    [
+      "Candidatus Regiella",
+      766,
+      0.927360774818402
+    ],
+    [
+      "Ethanoligenens",
+      753,
+      0.9116222760290557
+    ],
+    [
+      "Sporomusa",
+      746,
+      0.9031476997578692
+    ],
+    [
+      "Janibacter",
+      742,
+      0.8983050847457628
+    ],
+    [
+      "Kitasatospora",
+      732,
+      0.8861985472154964
+    ],
+    [
+      "Streptosporangium",
+      728,
+      0.8813559322033898
+    ],
+    [
+      "Halomicronema",
+      722,
+      0.87409200968523
+    ]
+  ],
+  "richness_healthy": 53.74045801526717,
+  "richness_disease": 42.31639722863741,
+  "cumulative_50pct_genera": 30,
+  "cumulative_90pct_genera": 87
+}
