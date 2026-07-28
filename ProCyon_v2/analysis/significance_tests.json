@@ -1,0 +1,67 @@
+{
+  "cross_cohort_audit": {
+    "clean_sources": [
+      "qiita_2538"
+    ],
+    "merged_sources": [
+      "qiita_1939",
+      "qiita_2538",
+      "external_ibd",
+      "agp_ftp",
+      "qiita_10283"
+    ],
+    "overlap_count": 568,
+    "conclusion": "merged_all shares ALL 5 sources between train and test \u2014 NOT leave-one-study-out",
+    "recommended_terminology": "Cross-Dataset Transfer Evaluation"
+  },
+  "mcnemar_tests": {
+    "ProCyon_v2 vs XGBoost": {
+      "b": 5,
+      "c": 4,
+      "n_discordant": 9,
+      "p_value": 1.0,
+      "significant": false
+    },
+    "ProCyon_v2 vs MGM+MLP": {
+      "b": 81,
+      "c": 7,
+      "n_discordant": 88,
+      "p_value": 0.0,
+      "significant": true
+    }
+  },
+  "auc_bootstrap_tests": {
+    "ProCyon_v2 vs XGBoost": {
+      "mean_diff": 0.0121,
+      "ci_95": [
+        -0.0076,
+        0.0343
+      ],
+      "p_value": 0.244,
+      "significant": false
+    },
+    "ProCyon_v2 vs MGM+MLP": {
+      "mean_diff": 0.5054,
+      "ci_95": [
+        0.4122,
+        0.5965
+      ],
+      "p_value": 0.0,
+      "significant": true
+    }
+  },
+  "per_category_acc": {
+    "ProCyon_v2": {
+      "Healthy": 0.9324,
+      "Disease": 0.9247
+    },
+    "XGBoost": {
+      "Healthy": 0.9189,
+      "Disease": 0.9247
+    },
+    "MGM+MLP": {
+      "Healthy": 0.9595,
+      "Disease": 0.1075
+    }
+  }
+}
