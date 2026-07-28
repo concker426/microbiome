@@ -1,0 +1,39 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Structural baselines: inductive bias comparison.}
+FT-Transformer and DeepSets test whether Transformer architecture
+or permutation-invariant set structure better suits microbiome data.}
+\label{tab:structural}
+\begin{tabular}{lcccccl}
+\toprule
+\textbf{Method} & \textbf{ACC} & \textbf{AUC} & \textbf{F1} & \textbf{Rec.} & \textbf{Params} & \textbf{Inductive Bias} \\
+\midrule
+  MGM (pretrained Transformer) & 0.5090 & 0.4625 & 0.6058 & 0.6774 & 34.0M & Sequential (position-dependent) \\
+  FT-Transformer (no pretrain) & 0.9102 & 0.9552 & 0.9180 & 0.9032 & 769K & Sequential (feature tokenizer) \\
+  DeepSets (set function) & 0.9162 & 0.9731 & 0.9231 & 0.9032 & 512K & Permutation-invariant set \\
+  ProCyon v2 (SimpleEmb+MLP) & 0.9162 & 0.9640 & 0.9231 & 0.9032 & 347K & Permutation-invariant set + learned embedding \\
+\bottomrule
+\end{tabular}
+\end{table}
+\begin{table}[t]
+\centering
+\caption{\textbf{Embedding biology: intra-group cosine similarity.}
+Functional groups of genera defined from literature. Higher intra-group
+similarity indicates the embedding captures known biological relationships.}
+\label{tab:biology}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Functional Group} & \textbf{N genera} & \textbf{Intra-group Cosine} \\
+\midrule
+  SCFA Producers & 8 & 0.0076 \\
+  Pro inflammatory & 7 & -0.0026 \\
+  Probiotic & 3 & -0.0114 \\
+  Mucin Degraders & 3 & 0.0123 \\
+  LPS Producers & 6 & -0.0034 \\
+\midrule
+  Mean intra-group & — & 0.0005 \\
+  Mean inter-group & — & 0.0046 \\
+  \textbf{Intra/Inter ratio} & — & \textbf{0.10$\times$} \\
+\bottomrule
+\end{tabular}
+\end{table}

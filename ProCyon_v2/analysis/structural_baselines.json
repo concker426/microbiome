@@ -1,0 +1,66 @@
+{
+  "experiment": "structural_baselines",
+  "baselines": {
+    "MGM (pretrained Transformer)": {
+      "accuracy": 0.509,
+      "auc": 0.4625,
+      "f1": 0.6058,
+      "recall": 0.6774,
+      "n_params": 34000000
+    },
+    "FT-Transformer (no pretrain)": {
+      "accuracy": 0.9101796407185628,
+      "auc": 0.9552455681487939,
+      "precision": 0.9333333333333333,
+      "recall": 0.9032258064516129,
+      "f1": 0.9180327868852459,
+      "specificity": 0.918918918918919,
+      "n_params": 768898
+    },
+    "DeepSets (set function)": {
+      "accuracy": 0.9161676646706587,
+      "auc": 0.9731182795698925,
+      "precision": 0.9438202247191011,
+      "recall": 0.9032258064516129,
+      "f1": 0.9230769230769231,
+      "specificity": 0.9324324324324325,
+      "n_params": 512386
+    },
+    "ProCyon v2 (SimpleEmb+MLP)": {
+      "accuracy": 0.9161676646706587,
+      "auc": 0.9639639639639641,
+      "precision": 0.9438202247191011,
+      "recall": 0.9032258064516129,
+      "f1": 0.9230769230769231,
+      "specificity": 0.9324324324324325,
+      "n_params": 347266
+    }
+  },
+  "embedding_biology": {
+    "groups": {
+      "SCFA_Producers": {
+        "n_genera": 8,
+        "intra_sim": 0.007555764634162188
+      },
+      "Pro_inflammatory": {
+        "n_genera": 7,
+        "intra_sim": -0.002551855519413948
+      },
+      "Probiotic": {
+        "n_genera": 3,
+        "intra_sim": -0.011421426199376583
+      },
+      "Mucin_Degraders": {
+        "n_genera": 3,
+        "intra_sim": 0.012251029722392559
+      },
+      "LPS_Producers": {
+        "n_genera": 6,
+        "intra_sim": -0.003435158170759678
+      }
+    },
+    "mean_intra_cosine": 0.00047967089340090753,
+    "mean_inter_cosine": 0.004612728022038937,
+    "intra_inter_ratio": 0.1039885488823773
+  }
+}
