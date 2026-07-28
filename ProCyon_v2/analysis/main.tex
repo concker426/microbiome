@@ -22,7 +22,7 @@
 \maketitle
 
 \begin{abstract}
-We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder—nn.Embedding with masked mean pooling, no pretraining, no Transformer—achieves 92.57\% IBD diagnosis accuracy (AUC=0.975), outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%); (2) XGBoost on raw genus abundance is a strong baseline (92.22\%), but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (93.41\%), requiring only 760K parameters; (4) cross-cohort validation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) SHAP Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (70.7\% $\pm$ 11.9\% instability) but excels as an interpreter when grounded by SHAP—achieving zero hallucination rate and 98\% prediction consistency. ProCyon v2 establishes that the model discovers patterns, SHAP provides evidence, and the LLM explains the evidence.
+We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder—nn.Embedding with masked mean pooling, no pretraining, no Transformer—achieves 92.57\% IBD diagnosis accuracy (AUC=0.975), outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%); (2) XGBoost on raw genus abundance is a strong baseline (92.22\%), but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (93.41\%), requiring only 760K parameters; (4) cross-cohort validation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (70.7\% $\pm$ 11.9\% instability) but excels as an interpreter when grounded by LOO attributions—achieving zero hallucination rate and 98\% prediction consistency. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
 \end{abstract}
 
 % ═══════════════════════════════════════
@@ -40,7 +40,7 @@ However, three critical questions remain under-explored:
   \item \textbf{Evidence grounding}: Can model explanations be verified against literature and made robust across data splits?
 \end{enumerate}
 
-This paper systematically investigates these questions through controlled experiments. Our findings challenge several assumptions in current microbiome foundation model design and lead to ProCyon v2: a simple embedding-based classifier with SHAP-attributed feature importance, where the LLM serves solely as an interpreter—not a predictor.
+This paper systematically investigates these questions through controlled experiments. Our findings challenge several assumptions in current microbiome foundation model design and lead to ProCyon v2: a simple embedding-based classifier with LOO-attributed feature importance, where the LLM serves solely as an interpreter—not a predictor.
 
 \textbf{Contributions:}
 \begin{itemize}
@@ -49,8 +49,8 @@ This paper systematically investigates these questions through controlled experi
   \item \textbf{Component ablation}: Isolate contributions of embedding, random projection, non-linearity, and end-to-end training
   \item \textbf{Embedding dimension analysis}: Performance saturates at $E{=}512$ (93.41\% ACC, 760K params)
   \item \textbf{Cross-cohort validation}: Training on $5\times$ larger diverse data improves cross-cohort generalization by 26.8pp
-  \item \textbf{SHAP reliability}: Spearman $\rho{=}0.72$ rank consistency, deletion test validation, literature direction agreement (5/6)
-  \item \textbf{LLM explanation benchmark}: SHAP grounding eliminates hallucination (0.0 vs 0.3/response), achieves 98\% consistency
+  \item \textbf{LOO Attribution Reliability}: Spearman $\rho{=}0.72$ rank consistency, deletion test validation, literature direction agreement (5/6)
+  \item \textbf{LLM explanation benchmark}: LOO grounding eliminates hallucination (0.0 vs 0.3/response), achieves 98\% consistency
 \end{itemize}
 
 % ═══════════════════════════════════════
@@ -110,7 +110,7 @@ Patient representation $\mathbf{h} \in \mathbb{R}^{768}$ \\
 $\downarrow$ \\
 $\swarrow \qquad \qquad \qquad \searrow$ \\
 \textbf{Classification Head} \hspace{2cm} \textbf{Explanation Head} \\
-MLP($768{\rightarrow}256{\rightarrow}\text{BN}{\rightarrow}\text{ReLU}{\rightarrow}\text{Drop}{\rightarrow}2$) \quad SHAP LOO Importance \\
+MLP($768{\rightarrow}256{\rightarrow}\text{BN}{\rightarrow}\text{ReLU}{\rightarrow}\text{Drop}{\rightarrow}2$) \quad LOO Attribution (per-genus) \\
 $\downarrow$ \hspace{3.5cm} $\downarrow$ \\
 $P(\text{IBD} \mid \text{microbiome})$ \hspace{2.3cm} Important genera + direction \\
 \hspace{4.3cm} $\downarrow$ \\
@@ -296,7 +296,7 @@ FT-Transformer—a generic Transformer with no pretraining—achieves 91.0\% ACC
 DeepSets and ProCyon v2—both permutation-invariant by design—achieve 91.6\% ACC, exceeding FT-Transformer's 91.0\% (+0.6pp). In microbiome abundance profiles, genera are sorted by abundance rank, not by biological relationship. Adjacent positions carry no meaningful sequential dependency. A model that treats the input as an unordered \emph{set} of genera, rather than an ordered \emph{sequence}, more faithfully reflects the data structure. The 0.6pp gap, while modest, is systematic—it persists across multiple training runs and reflects the mismatch between sequential inductive bias and tabular data.
 
 \textbf{Finding 3: SimpleEmb combines the advantages of set-based modeling with an explicit embedding space.}
-The comparable performance of DeepSets and ProCyon v2 suggests they share the same permutation-invariant inductive bias. However, SimpleEmb additionally provides an explicit genus embedding space (unlike DeepSets' implicit element encoder) that enables: (a) SHAP feature attribution for per-sample genus importance, (b) kNN retrieval and clustering for patient stratification (kNN ACC: 97.0\%), (c) cosine similarity analysis for embedding quality assessment, and (d) LLM-grounded explanation through SHAP-to-text conversion. This design choice trades no classification performance for substantially richer interpretability.
+The comparable performance of DeepSets and ProCyon v2 suggests they share the same permutation-invariant inductive bias. However, SimpleEmb additionally provides an explicit genus embedding space (unlike DeepSets' implicit element encoder) that enables: (a) LOO feature attribution for per-sample genus importance, (b) kNN retrieval and clustering for patient stratification (kNN ACC: 97.0\%), (c) cosine similarity analysis for embedding quality assessment, and (d) LLM-grounded explanation through attribution-to-text conversion. This design choice trades no classification performance for substantially richer interpretability.
 
 \subsection{What Does the Embedding Learn?}
 
@@ -333,12 +333,12 @@ UMAP silhouette score & 0.23 \\
 
 The embedding space captures biologically meaningful structure: IBD patients exhibit greater heterogeneity than healthy controls (cosine similarity 0.54 vs 0.64), consistent with the known diversity of IBD presentations. kNN retrieval achieves 97.0\% test accuracy, confirming that the representation encodes disease-relevant information that can be accessed without the MLP classifier.
 
-\subsection{SHAP Reliability}
+\subsection{LOO Attribution Reliability}
 
 \begin{table}[ht]
 \centering
-\caption{\textbf{SHAP reliability analysis across 5 folds.}}
-\label{tab:shap}
+\caption{\textbf{LOO Attribution Reliability analysis across 5 folds.}}
+\label{tab:loo}
 \begin{tabular}{lc}
 \toprule
 \textbf{Metric} & \textbf{Value} \\
@@ -355,19 +355,19 @@ Prevalence-importance correlation & $r{=}0.05$ ($p{>}0.05$) \\
 
 While top-50 Jaccard similarity is low (0.07), Spearman rank correlation is strong ($\rho{=}0.72$), indicating consistent \textit{rank ordering} of genus importance across folds. The low Jaccard reflects that many genera carry overlapping diagnostic information—different folds may select functionally equivalent but taxonomically distinct genera (e.g., different SCFA producers). This is consistent with IBD as a community-level dysbiosis, not driven by single genera.
 
-The deletion test confirms biological relevance: removing the top-50 SHAP-identified genera reduces AUC by 0.039, 5.6$\times$ more than random deletion (0.007). SHAP importance is uncorrelated with genus prevalence ($r{=}0.05$), indicating the model attends to diagnostic value rather than frequency.
+The deletion test confirms biological relevance: removing the top-50 LOO-identified genera reduces AUC by 0.039, 5.6$\times$ more than random deletion (0.007). LOO importance is uncorrelated with genus prevalence ($r{=}0.05$), indicating the model attends to diagnostic value rather than frequency.
 
 \subsection{LLM Explanation Benchmark}
 
 \begin{table}[ht]
 \centering
 \caption{\textbf{LLM explanation validation (50 test samples, Qwen2-7B-Instruct).}
-Three prompt variants evaluated: Raw (genus list only), SHAP (classifier output + SHAP attributions),
-SHAP+Lit (SHAP + literature context). Bold indicates best.}
+Three prompt variants evaluated: Raw (genus list only), LOO (classifier output + LOO attributions),
+LOO+Lit (LOO + literature context). Bold indicates best.}
 \label{tab:llm}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Metric} & \textbf{Raw LLM} & \textbf{SHAP+LLM} & \textbf{SHAP+Lit+LLM} \\
+\textbf{Metric} & \textbf{Raw LLM} & \textbf{LOO+LLM} & \textbf{LOO+Lit+LLM} \\
 \midrule
 Hallucinated genera (avg/response) & 0.30 & \textbf{0.00} & 0.02 \\
 Input genera mentioned (avg) & 3.2 & 5.1 & \textbf{5.4} \\
@@ -377,9 +377,9 @@ Prediction consistency (\%) & 53\% & \textbf{98\%} & 94\% \\
 \end{tabular}
 \end{table}
 
-SHAP grounding eliminates hallucination entirely (0.0 vs 0.3 genera/response) and achieves 98\% prediction consistency—the LLM's explanation aligns with the classifier's output. Adding literature context (variant C) slightly reduces performance (94\% consistency, 0.68 specificity), likely because the model discovers non-canonical markers that literature annotations may contradict.
+LOO grounding eliminates hallucination entirely (0.0 vs 0.3 genera/response) and achieves 98\% prediction consistency—the LLM's explanation aligns with the classifier's output. Adding literature context (variant C) slightly reduces performance (94\% consistency, 0.68 specificity), likely because the model discovers non-canonical markers that literature annotations may contradict.
 
-\textbf{Case Study}: Patient 2538.1003527 (IBD, $p{=}1.000$). Top SHAP genera: Caldicellulosiruptor $\uparrow$, Desulfitobacterium $\uparrow$, Defluviitoga $\downarrow$, Thermoflavimicrobium $\downarrow$, Chryseobacterium $\downarrow$. SHAP-grounded LLM: ``The classifier predicted IBD based on the enrichment of genera associated with gut inflammation (Caldicellulosiruptor, Desulfitobacterium) and depletion of genera typically found in healthy gut microbiomes (Defluviitoga, Thermoflavimicrobium). This pattern is consistent with the dysbiosis observed in IBD patients, where pro-inflammatory genera proliferate at the expense of commensal species.''
+\textbf{Case Study}: Patient 2538.1003527 (IBD, $p{=}1.000$). Top LOO-attributed genera: Caldicellulosiruptor $\uparrow$, Desulfitobacterium $\uparrow$, Defluviitoga $\downarrow$, Thermoflavimicrobium $\downarrow$, Chryseobacterium $\downarrow$. LOO-grounded LLM: ``The classifier predicted IBD based on the enrichment of genera associated with gut inflammation (Caldicellulosiruptor, Desulfitobacterium) and depletion of genera typically found in healthy gut microbiomes (Defluviitoga, Thermoflavimicrobium). This pattern is consistent with the dysbiosis observed in IBD patients, where pro-inflammatory genera proliferate at the expense of commensal species.''
 
 \subsection{Calibration}
 
@@ -404,24 +404,24 @@ With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus—sufficient
 
 \subsection{When LLMs Help}
 
-The LLM fails as a classifier (70.7\% $\pm$ 11.9\%) but succeeds as an interpreter when SHAP-grounded (0 hallucination, 98\% consistency). This asymmetry motivates ProCyon v2's dual-branch design: classification and interpretation are separate concerns requiring different optimization.
+The LLM fails as a classifier (70.7\% $\pm$ 11.9\%) but succeeds as an interpreter when LOO-grounded (0 hallucination, 98\% consistency). This asymmetry motivates ProCyon v2's dual-branch design: classification and interpretation are separate concerns requiring different optimization.
 
-\subsection{Why SHAP Is Reliable Despite Low Jaccard}
+\subsection{Why LOO Attribution Is Reliable Despite Low Jaccard}
 
-IBD is a community-level dysbiosis, not driven by single genera. Different folds select functionally equivalent but taxonomically distinct genera, producing low Jaccard (0.07) but high Spearman $\rho$ (0.72). The consistent \textit{rank ordering} of importance—combined with deletion test validation—confirms that SHAP captures genuine signal.
+IBD is a community-level dysbiosis, not driven by single genera. Different folds select functionally equivalent but taxonomically distinct genera, producing low Jaccard (0.07) but high Spearman $\rho$ (0.72). The consistent \textit{rank ordering} of importance—combined with deletion test validation—confirms that LOO attribution captures genuine signal.
 
 \subsection{Limitations}
 
-(1) External validation on independent clinical cohorts (TCMA, HMP) is needed. (2) SHAP measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary—the model discovers novel features that await biological validation.
+(1) External validation on independent clinical cohorts (TCMA, HMP) is needed. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary—the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
 % ═══════════════════════════════════════
 \section{Conclusion}
 
-ProCyon v2 demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57\% accuracy on IBD diagnosis, exceeding a 34M pretrained MGM Transformer by 41.7pp. The embedding dimension saturates at $E{=}512$ (760K params), and cross-cohort validation confirms generalization (merged$\rightarrow$clean: 88.62\%). SHAP attributions are reliable (Spearman $\rho{=}0.72$, deletion test validated), and SHAP-grounded LLM explanations achieve zero hallucination with 98\% consistency.
+ProCyon v2 demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57\% accuracy on IBD diagnosis, exceeding a 34M pretrained MGM Transformer by 41.7pp. The embedding dimension saturates at $E{=}512$ (760K params), and cross-cohort validation confirms generalization (merged$\rightarrow$clean: 88.62\%). LOO attributions are reliable (Spearman $\rho{=}0.72$, deletion test validated), and LOO-grounded LLM explanations achieve zero hallucination with 98\% consistency.
 
-The core insight is the \textbf{separation of concerns}: the model discovers patterns from data, SHAP provides evidence for those patterns, and the LLM explains the evidence in natural language. Each component is optimized for its specific role, and the pipeline is verifiable at every stage.
+The core insight is the \textbf{separation of concerns}: the model discovers patterns from data, LOO attribution provides evidence for those patterns, and the LLM explains the evidence in natural language. Each component is optimized for its specific role, and the pipeline is verifiable at every stage.
 
 % ═══════════════════════════════════════
 % REFERENCES

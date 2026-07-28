@@ -1,0 +1,40 @@
+{
+  "authoritative_numbers": {
+    "main_ensemble_acc": "0.9257",
+    "main_ensemble_std": "0.0048",
+    "main_auc": "0.9750",
+    "best_single_acc": "0.9341",
+    "best_single_auc": "0.9815",
+    "e512_acc": "0.9341",
+    "e512_auc": "0.9815",
+    "n_train": 659,
+    "n_test": 167,
+    "procyon_params": 944898,
+    "e512_params": 760066
+  },
+  "bootstrap": {
+    "acc_95ci": [
+      0.8862275449101796,
+      0.9640718562874252
+    ],
+    "auc_95ci": [
+      0.961682751776081,
+      0.9933493527633517
+    ]
+  },
+  "cohort_structure": {
+    "agp_train": 0,
+    "ftp_train": 0,
+    "agp_test": 0,
+    "ftp_test": 0,
+    "other_test": 167,
+    "per_source_performance": {}
+  },
+  "number_consistency_notes": {
+    "92.57%": "5-seed ensemble mean on test set (authoritative main number)",
+    "93.41%": "Best single seed (42) with E=512/768",
+    "92.81%": "Previous ensemble result (predictions.csv, slightly different training)",
+    "92.46%": "Old 5-seed result from earlier experiment (run_final_backbone.py)",
+    "92.22%": "Seed 456/789/1024 result (consistent across seeds)"
+  }
+}
