@@ -111,5 +111,5 @@ ax.annotate('Correct\ninductive bias', xy=(2, 91.6), xytext=(3, 85),
            arrowprops=dict(arrowstyle='->', color='#4CAF50', lw=1.5))
 
 plt.tight_layout()
-plt.savefig(f'{OUT}/inductive_bias_figure.png', dpi=200, bbox_inches='tight')
+plt.savefig(f'{OUT}/inductive_bias_figure.png', dpi=120)
 print(f"Saved: {OUT}/inductive_bias_figure.png")

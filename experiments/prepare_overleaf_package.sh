@@ -16,20 +16,10 @@ mkdir -p "$PKG_DIR/figures" "$PKG_DIR/tables"
 cp "$ANALYSIS/main.tex" "$PKG_DIR/"
 cp "$ANALYSIS/references.bib" "$PKG_DIR/"
 
-# 3. Copy all figures
-echo "Copying figures..."
-for fig in dataset_architecture_figure week1_figure \
-           shap_reliability calibration_error_cases \
-           inductive_bias_figure paper_figure_shap_analysis \
-           phase1_representation_analysis phase35_heterogeneity \
-           phase36_robustness phase3_biological_validation \
-           umap_visualization; do
-    src="$ANALYSIS/${fig}.png"
-    if [ -f "$src" ]; then
-        cp "$src" "$PKG_DIR/figures/"
-        echo "  + figures/${fig}.png"
-    fi
-done
+# 3. Convert and copy all figures (Overleaf-safe: RGB, max 2200px)
+echo "Converting figures..."
+python3 "$PROJECT_DIR/experiments/convert_figures_for_overleaf.py"
+echo "  + $(ls "$PKG_DIR/figures/" | wc -l) figures converted (RGB, <=2200px)"
 
 # 4. Copy LaTeX table fragments
 echo "Copying tables..."
