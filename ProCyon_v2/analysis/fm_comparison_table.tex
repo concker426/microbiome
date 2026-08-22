@@ -1,0 +1,28 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{Comparison of microbiome foundation models.}
+ProCyon v2 achieves competitive performance with 30$\times$ fewer parameters
+and no pretraining, while providing LOO attribution and LLM-based interpretation.}
+\label{tab:fm_comparison}
+\begin{tabular}{p{2.5cm}p{2.5cm}p{2.2cm}p{2.2cm}p{3cm}p{1.5cm}}
+\toprule
+\textbf{Model} & \textbf{Architecture} & \textbf{Granularity} & \textbf{Pretraining} & \textbf{Interpretability} & \textbf{Weights} \\
+\midrule
+  MGM & 6-layer Transformer (34M) & Genus-level & Next-genus prediction, 263k samples & Attention + leave-one-genus-out & Yes \\
+  BiomeGPT & Transformer + dual embedding (species + abundance bin) & Species-level & Masked abundance prediction, 13.3k samples & CLS attention analysis & No \\
+  Waypoint/Atlas & Transformer variants (6M-170M) & Genus-level & 539k+ samples & Not emphasized & No \\
+  ProCyon v2 (ours) & SimpleEmb + MLP (1.1M), no Transformer & Genus-level & None (random init) & LOO attribution + LLM explanation & Yes \\
+\bottomrule
+\end{tabular}
+\vspace{4pt}
+\begin{tabular}{ll}
+\toprule
+\textbf{Model} & \textbf{IBD/Healthy classification (our evaluation)} \\
+\midrule
+  MGM & 50.9\% (held-out test), 85.3\% (group-CV) \\
+  BiomeGPT & N/A (weights not public; reported 0.921 AUROC 10-fold CV) \\
+  Waypoint/Atlas & N/A (weights not public) \\
+  \textbf{ProCyon v2} & \textbf{92.57\% (held-out test), 91.41\% (group-CV)} \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,62 @@
+{
+  "exp_a_attribution_vs_foldchange": {
+    "all": {
+      "rho": -0.23455369845692928,
+      "p": 5.9232974016809026e-06,
+      "n": 365
+    },
+    "prev>=10": {
+      "rho": 0.009187417536563647,
+      "p": 0.9009529601823179,
+      "n": 186
+    },
+    "prev>=50": {
+      "rho": 0.10742423809387712,
+      "p": 0.2684665958711523,
+      "n": 108
+    },
+    "prev>=200": {
+      "rho": 0.1642208537730926,
+      "p": 0.18763380683210137,
+      "n": 66
+    }
+  },
+  "exp_b_study_effect": {
+    "intra_source_cosine": 0.5712766051292419,
+    "intra_disease_cosine": 0.5389209985733032,
+    "intra_healthy_cosine": 0.6427770853042603,
+    "n_sources": 1
+  },
+  "exp_e_top30_genera": [
+    "Sphingobacterium",
+    "Herminiimonas",
+    "Propionigenium",
+    "Garciella",
+    "Coccomyxa",
+    "Alcanivorax",
+    "Butyricimonas",
+    "Thalassobius",
+    "Agarivorans",
+    "Alicyclobacillus",
+    "Sediminicola",
+    "Slackia",
+    "Litorilinea",
+    "Rubellimicrobium",
+    "Fluviicola",
+    "Cloacibacillus",
+    "Desulfomicrobium",
+    "Wohlfahrtiimonas",
+    "planctomycete",
+    "Amorphomonas",
+    "Desulfocapsa",
+    "Halomicronema",
+    "Salinimicrobium",
+    "Niabella",
+    "Oceanicella",
+    "Anaeroplasma",
+    "Streptobacillus",
+    "Williamsia",
+    "Magnetospirillum",
+    "Longilinea"
+  ]
+}
