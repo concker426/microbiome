@@ -391,10 +391,10 @@ DeepSets & Permutation-invariant & \ding{55} & \textbf{0.9162} & \textbf{0.9731}
 Three findings emerge from this comparison:
 
 \textbf{Finding 1: MGM's failure is associated with its pretraining strategy, not the Transformer architecture per se.}
-FT-Transformer—a generic Transformer with no pretraining—achieves 91.0\% ACC, 40.1pp above MGM's 50.9\%. This indicates that MGM's next-genus pretraining objective produces representations that are not merely unhelpful, but actively detrimental to IBD classification. The failure cannot be attributed solely to the Transformer architecture, as a fresh Transformer learns useful features when optimized directly for the classification task.
+FT-Transformer~\cite{fttransformer2022}—a generic Transformer with no pretraining—achieves 91.0\% ACC, 40.1pp above MGM's 50.9\%. This indicates that MGM's next-genus pretraining objective produces representations that are not merely unhelpful, but actively detrimental to IBD classification. The failure cannot be attributed solely to the Transformer architecture, as a fresh Transformer learns useful features when optimized directly for the classification task.
 
 \textbf{Finding 2: Permutation-invariant set structure is a more appropriate inductive bias for microbiome abundance data.}
-DeepSets and ProCyon v2—both permutation-invariant by design—achieve 91.6\% ACC, exceeding FT-Transformer's 91.0\% (+0.6pp). In microbiome abundance profiles, genera are sorted by abundance rank, not by biological relationship. Adjacent positions carry no meaningful sequential dependency. A model that treats the input as an unordered \emph{set} of genera, rather than an ordered \emph{sequence}, more faithfully reflects the data structure. The 0.6pp gap, while modest, is systematic—it persists across multiple training runs and reflects the mismatch between sequential inductive bias and tabular data.
+DeepSets~\cite{deepsets2017} and ProCyon v2—both permutation-invariant by design—achieve 91.6\% ACC, exceeding FT-Transformer's 91.0\% (+0.6pp). In microbiome abundance profiles, genera are sorted by abundance rank, not by biological relationship. Adjacent positions carry no meaningful sequential dependency. A model that treats the input as an unordered \emph{set} of genera, rather than an ordered \emph{sequence}, more faithfully reflects the data structure. The 0.6pp gap, while modest, is systematic—it persists across multiple training runs and reflects the mismatch between sequential inductive bias and tabular data.
 
 \begin{figure}[ht]
 \centering
@@ -682,6 +682,10 @@ Ning et al.\ \textit{MGM as a large-scale pretrained foundation model for microb
 Advanced Science, 2025.\
 \url{https://www.biorxiv.org/content/10.1101/2024.12.30.630825v1}
 
+\bibitem{biomegpt2026}
+Medearis, N.~A., Zhu, S., Zomorrodi, A.~R.\ \textit{BiomeGPT: A foundation model for the human gut microbiome.}\
+bioRxiv, 2026.\ DOI: 10.64898/2026.01.05.697599.
+
 \bibitem{waypoint2026}
 Waypoint/Atlas.\ \textit{Learning the Language of the Microbiome with Transformers.}\
 bioRxiv, 2026.\
@@ -690,6 +694,14 @@ bioRxiv, 2026.\
 \bibitem{procyon2025}
 ProCyon.\ \textit{A foundation model for multimodal protein-centric tasks.}\
 2025.
+
+\bibitem{deepsets2017}
+Zaheer, M., et al.\ \textit{Deep Sets.}\
+NeurIPS, 2017.
+
+\bibitem{fttransformer2022}
+Gorishniy, Y., Rubachev, I., Babenko, A.\ \textit{FT-Transformer: A Transformer for Tabular Data.}\
+arXiv:2106.11959, 2022.
 
 \bibitem{paidimarri2024}
 Paidimarri et al.\ \textit{Gut Microbiota and Inflammatory Bowel Disease.}\
