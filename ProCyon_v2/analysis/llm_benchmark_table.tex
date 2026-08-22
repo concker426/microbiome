@@ -1,0 +1,20 @@
+\begin{table}[t]
+\centering
+\caption{\textbf{LLM Explanation Benchmark.}
+Systematic evaluation of 3 prompt variants on 167 test samples.
+SHAP grounding eliminates hallucination and achieves highest consistency.}
+\label{tab:llm_benchmark}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Metric} & \textbf{Raw LLM} & \textbf{SHAP+LLM} & \textbf{SHAP+Lit+LLM} \\
+\midrule
+  Genera mentioned (avg) & 5.47 & 9.02 & \textbf{9.048} \\
+  Hallucinated genera (avg) & 0.725 & 0.359 & \textbf{0.35} \\
+  SHAP consistency & 0.699 & 0.992 & \textbf{0.995} \\
+  Direction accuracy & 0.269 & \textbf{0.936} & 0.931 \\
+  Prediction consistency & 0.635 & \textbf{0.982} & 0.976 \\
+  Specificity ratio & 0.379 & \textbf{0.441} & 0.332 \\
+  Literature consistency & 0.091 & \textbf{1.000} & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{table}

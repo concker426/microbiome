@@ -19,7 +19,7 @@ DATA_DIR = '/hd/liujx/microbiome_llm_project/data/qiita_ibd/clean_2538'
 os.makedirs(OUT_DIR, exist_ok=True)
 
 DEVICE = 'cuda:0'; MAX_NEW = 300; SEED = 42
-N_BENCHMARK = 150
+N_BENCHMARK = 167
 
 print("=" * 60)
 print("EXP 6: LLM EXPLANATION BENCHMARK")

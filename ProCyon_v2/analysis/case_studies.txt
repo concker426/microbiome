@@ -1,0 +1,115 @@
+ProCyon v2 — Case Studies
+======================================================================
+
+
+──────────────────────────────────────────────────────────────────────
+Case 1: Correct prediction, good explanation
+──────────────────────────────────────────────────────────────────────
+Sample ID: 2538.1002713
+True: Disease | Predicted: IBD (p=1.000)
+
+--- Raw LLM ---
+The provided microbiome profile shows a dominance of anaerobic and facultative anaerobic bacteria, which is common in the gut. However, the presence of certain genera like *Caldanaerocella*, *Wohlfahrtiimonas*, and *Helicobacter* could be indicative of dysbiosis associated with IBD. *Caldanaerocella* is not typically found in healthy guts, while *Wohlfahrtiimonas* and *Helicobacter* have been linked to inflammatory conditions. The abundance of more common commensal genera like *Enterococcus* and *Parvimonas* suggests a mixed microbial community but does not rule out an underlying condition. Overall, while this profile is not diagnostic for IBD alone, it warrants further investigation to confirm any potential links to gut inflammation.
+
+--- SHAP + LLM ---
+The classifier predicted Inflammatory Bowel Disease (IBD) with 100% confidence based on the altered abundances of certain bacterial genera in the patient's gut microbiome. Specifically, increased abundances of Wohlfahrtiimonas, Anaerococcus, Halomicronema, Helicobacter, Paracraurococcus, and Enterococcus were noted. These genera are often associated with conditions such as IBD, where pro-inflammatory bacteria can dominate. Conversely, decreased abundances of Caldanaerocella, Kitasatospora, Candidatus Hamiltonella, Candidatus Koribacter, and Candidatus Regiella suggest a disruption in the normal balance that typically suppresses inflammation. These shifts in microbial composition likely contribute to the pathogenesis of IBD through various mechanisms, including increased intestinal permeability, altered immune responses, and dysregulation of the host-microbiota interaction.
+
+--- SHAP + Lit + LLM ---
+The classifier predicted IBD (Inflammatory Bowel Disease) based on the altered abundance of specific bacterial genera in the patient's gut microbiome. Several genera showed increased abundances that are often associated with IBD, such as Wohlfahrtiimonas, Anaerococcus, Halomicronema, Helicobacter, Paracraurococcus, and Enterococcus. These increases can disrupt the normal gut flora balance, leading to inflammation. Conversely, decreased abundances of genera like Caldanaerocella, Kitasatospora, Candidatus Hamiltonella, Candidatus Koribacter, Candidatus Regiella, and Ethanoligenens, which are typically associated with a healthy gut, further support the IBD prediction. Literature supports that alterations in these specific genera can contribute to the pathogenesis of IBD through changes in gut barrier function, increased intestinal permeability, and immune system activation.
+
+Top SHAP genera:
+  Caldanaerocella: DECREASED in IBD (imp=0.0000)
+  Sporomusa: INCREASED in IBD (imp=0.0000)
+  Kitasatospora: DECREASED in IBD (imp=-0.0000)
+  Candidatus Hamiltonella: DECREASED in IBD (imp=0.0000)
+  Candidatus Koribacter: DECREASED in IBD (imp=-0.0000)
+  Candidatus Regiella: DECREASED in IBD (imp=-0.0000)
+  Wohlfahrtiimonas: INCREASED in IBD (imp=0.0000)
+  Anaerococcus: INCREASED in IBD (imp=0.0000)
+  Halomicronema: INCREASED in IBD (imp=0.0000)
+  Janibacter: DECREASED in IBD (imp=-0.0000)
+
+
+──────────────────────────────────────────────────────────────────────
+Case 2: Correct prediction, borderline confidence
+──────────────────────────────────────────────────────────────────────
+Sample ID: 2538.1000031
+True: Disease | Predicted: IBD (p=0.555)
+
+--- Raw LLM ---
+The provided gut microbiome composition includes several genera that are commonly associated with inflammatory processes and disease states. For instance, the presence of Helicobacter, Escherichia, and Taylorella suggests potential pathogenic activity, as these genera can be linked to inflammation and infection. Additionally, the dominance of Actinobacillus, which is often found in conditions associated with dysbiosis, further indicates a possible imbalance that could contribute to IBD. Conversely, the presence of Methanosaeta, which is typically involved in methane production and is less common in healthy guts, might also suggest an altered microbial ecosystem. Overall, this composition leans towards a profile indicative of IBD, characterized by an imbalance and potential pathogen presence.
+
+--- SHAP + LLM ---
+The classifier predicted IBD with a confidence of 55.5%, likely due to the increased abundance of several genera known to be associated with inflammation and altered gut homeostasis. Specifically, genera like *Streptosporangium*, *Actinobacillus*, *Sporomusa*, *Halomicronema*, *Cloacibacillus*, *Eikenella*, and *Helicobacter* have been linked to pro-inflammatory responses and dysbiosis in the gut microbiome. For instance, *Halomicronema* and *Helicobacter* are often found in conditions associated with intestinal inflammation. Conversely, decreased abundances of beneficial taxa such as *Candidatus Hamiltonella* and *Kitasatospora*, which are generally associated with a healthy gut microbiome, could contribute to the prediction. The significant increase in *Asarum* and *Ethanoligenens*, and the notable increase in *Caldanaerocella* and *Candidatus Koribacter* further support the classifier's prediction, as changes in these genera can indicate an imbalance in gut microbial communities associated with IBD.
+
+--- SHAP + Lit + LLM ---
+The classifier predicted IBD based on the significant abundance of certain genera associated with this condition. Specifically, the increased presence of genera like Streptosporangium (importance=0.2848), Actinobacillus (importance=0.3446), Helicobacter (importance=0.3562), and Cloacibacillus (not explicitly mentioned but inferred from related genera) is indicative of disrupted gut homeostasis often observed in IBD patients. Literature suggests that elevated levels of Streptosporangium and Actinobacillus are associated with inflammation and dysbiosis. Additionally, the increased abundance of Helicobacter, known for its role in gastrointestinal infections, supports this prediction. The decreased abundance of other genera like Kitasatospora and Candidatus Regiella, which are typically found in healthy guts, further indicates a shift in microbial balance consistent with IBD.
+
+Top SHAP genera:
+  Caldanaerocella: INCREASED in IBD (imp=0.0103)
+  Streptosporangium: INCREASED in IBD (imp=0.2848)
+  Candidatus Hamiltonella: INCREASED in IBD (imp=0.1072)
+  Kitasatospora: DECREASED in IBD (imp=-0.0863)
+  Actinobacillus: INCREASED in IBD (imp=0.3446)
+  Sporomusa: INCREASED in IBD (imp=0.0846)
+  Halomicronema: INCREASED in IBD (imp=0.4458)
+  Candidatus Koribacter: DECREASED in IBD (imp=-0.0743)
+  Candidatus Regiella: DECREASED in IBD (imp=-0.1047)
+  Alloscardovia: DECREASED in IBD (imp=-0.0351)
+
+
+──────────────────────────────────────────────────────────────────────
+Case 3: Wrong prediction
+──────────────────────────────────────────────────────────────────────
+Sample ID: 2538.1003420
+True: Disease | Predicted: HEALTHY (p=0.179)
+
+--- Raw LLM ---
+The given gut microbiome composition includes several genera that are often associated with Inflammatory Bowel Disease (IBD), such as Helicobacter, Methanosaeta, and possibly Slackia, which can indicate an imbalanced microbiome potentially linked to IBD. Conversely, genera like Streptosporangium and Sporomusa are more commonly associated with a healthy gut microbiome. The presence of other genera like Caldanaerocella and CM44 is less indicative of IBD but does not necessarily suggest a healthy state either. Further analysis, including quantitative data and comparison with a healthy reference, would be necessary to make a more definitive assessment.
+
+--- SHAP + LLM ---
+The classifier predicted the patient's gut microbiome as healthy with high confidence (82.1%) due to the overall composition of the microbiome. Several genera showed increased abundances that are typically associated with a healthy gut, such as Wohlfahrtiimonas, Streptosporangium, Parvibaculum, and Sporomusa. These genera play crucial roles in various biological functions, including enhancing immune function, producing short-chain fatty acids, and maintaining gut barrier integrity. Conversely, some genera like Stenotrophomonas and Sediminicola were found at decreased levels, which is often indicative of a healthier state when they are present in lower abundance. The increased presence of potentially beneficial genera outweighs the slight decreases in others, leading to the overall healthy classification.
+
+--- SHAP + Lit + LLM ---
+The classifier predicted the patient to be healthy with high confidence (82.1%). This prediction is supported by the predominance of genera associated with a healthy gut microbiome, such as increased abundances of Wohlfahrtiimonas, Streptosporangium, Janibacter, Parvibaculum, Sporomusa, and Ethanoligenens. These genera are often linked to beneficial functions like enhanced metabolic capabilities and immune system support. Conversely, some genera like Stenotrophomonas, which is typically decreased in healthy individuals, were found in increased abundance, but this could be context-dependent or not indicative of pathology given the overall healthy classification. The literature supports that a balanced presence of these genera contributes significantly to a healthy gut environment.
+
+Top SHAP genera:
+  Caldanaerocella: DECREASED in IBD (imp=-0.0084)
+  Wohlfahrtiimonas: INCREASED in IBD (imp=0.1187)
+  Ucs1325: INCREASED in IBD (imp=0.0237)
+  Janibacter: INCREASED in IBD (imp=0.0266)
+  Streptosporangium: INCREASED in IBD (imp=0.0617)
+  Slackia: INCREASED in IBD (imp=0.0651)
+  CM44: INCREASED in IBD (imp=0.0215)
+  Parvibaculum: INCREASED in IBD (imp=0.0524)
+  Kitasatospora: DECREASED in IBD (imp=-0.0598)
+  Methanosaeta: DECREASED in IBD (imp=-0.0010)
+
+
+──────────────────────────────────────────────────────────────────────
+Case 4: Extreme IBD (high confidence)
+──────────────────────────────────────────────────────────────────────
+Sample ID: 2538.1002713
+True: Disease | Predicted: IBD (p=1.000)
+
+--- Raw LLM ---
+The provided microbiome profile shows a dominance of anaerobic and facultative anaerobic bacteria, which is common in the gut. However, the presence of certain genera like *Caldanaerocella*, *Wohlfahrtiimonas*, and *Helicobacter* could be indicative of dysbiosis associated with IBD. *Caldanaerocella* is not typically found in healthy guts, while *Wohlfahrtiimonas* and *Helicobacter* have been linked to inflammatory conditions. The abundance of more common commensal genera like *Enterococcus* and *Parvimonas* suggests a mixed microbial community but does not rule out an underlying condition. Overall, while this profile is not diagnostic for IBD alone, it warrants further investigation to confirm any potential links to gut inflammation.
+
+--- SHAP + LLM ---
+The classifier predicted Inflammatory Bowel Disease (IBD) with 100% confidence based on the altered abundances of certain bacterial genera in the patient's gut microbiome. Specifically, increased abundances of Wohlfahrtiimonas, Anaerococcus, Halomicronema, Helicobacter, Paracraurococcus, and Enterococcus were noted. These genera are often associated with conditions such as IBD, where pro-inflammatory bacteria can dominate. Conversely, decreased abundances of Caldanaerocella, Kitasatospora, Candidatus Hamiltonella, Candidatus Koribacter, and Candidatus Regiella suggest a disruption in the normal balance that typically suppresses inflammation. These shifts in microbial composition likely contribute to the pathogenesis of IBD through various mechanisms, including increased intestinal permeability, altered immune responses, and dysregulation of the host-microbiota interaction.
+
+--- SHAP + Lit + LLM ---
+The classifier predicted IBD (Inflammatory Bowel Disease) based on the altered abundance of specific bacterial genera in the patient's gut microbiome. Several genera showed increased abundances that are often associated with IBD, such as Wohlfahrtiimonas, Anaerococcus, Halomicronema, Helicobacter, Paracraurococcus, and Enterococcus. These increases can disrupt the normal gut flora balance, leading to inflammation. Conversely, decreased abundances of genera like Caldanaerocella, Kitasatospora, Candidatus Hamiltonella, Candidatus Koribacter, Candidatus Regiella, and Ethanoligenens, which are typically associated with a healthy gut, further support the IBD prediction. Literature supports that alterations in these specific genera can contribute to the pathogenesis of IBD through changes in gut barrier function, increased intestinal permeability, and immune system activation.
+
+Top SHAP genera:
+  Caldanaerocella: DECREASED in IBD (imp=0.0000)
+  Sporomusa: INCREASED in IBD (imp=0.0000)
+  Kitasatospora: DECREASED in IBD (imp=-0.0000)
+  Candidatus Hamiltonella: DECREASED in IBD (imp=0.0000)
+  Candidatus Koribacter: DECREASED in IBD (imp=-0.0000)
+  Candidatus Regiella: DECREASED in IBD (imp=-0.0000)
+  Wohlfahrtiimonas: INCREASED in IBD (imp=0.0000)
+  Anaerococcus: INCREASED in IBD (imp=0.0000)
+  Halomicronema: INCREASED in IBD (imp=0.0000)
+  Janibacter: DECREASED in IBD (imp=-0.0000)
+
