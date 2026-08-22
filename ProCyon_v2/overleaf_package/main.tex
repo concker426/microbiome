@@ -22,7 +22,7 @@
 \maketitle
 
 \begin{abstract}
-We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder—nn.Embedding with masked mean pooling, no pretraining, no Transformer—achieves 92.57\% IBD diagnosis accuracy (AUC=0.975) on the held-out test set, statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%; 6.1pp under grouped CV); (2) XGBoost on raw genus abundance is a strong baseline, but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (93.41\%), requiring only 760K parameters; (4) cross-dataset transfer evaluation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (70.7\% $\pm$ 11.9\% instability) but excels as an interpreter when grounded by LOO attributions—halving hallucination (0.72 to 0.36 genera/response), achieving 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
+We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder—nn.Embedding with masked mean pooling, no pretraining, no Transformer—achieves 92.57\% IBD diagnosis accuracy (AUC=0.975) on the held-out test set, statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%; 6.1pp under grouped CV); (2) XGBoost on raw genus abundance is a strong baseline, but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out), requiring only 760K parameters; (4) cross-dataset transfer evaluation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (70.7\% $\pm$ 11.9\% instability) but excels as an interpreter when grounded by LOO attributions—halving hallucination (0.72 to 0.36 genera/response), achieving 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
 \end{abstract}
 
 % ═══════════════════════════════════════
@@ -47,7 +47,7 @@ This paper systematically investigates these questions through controlled experi
   \item \textbf{Architecture minimalism}: SimpleEmb (nn.Embedding + mean pool + MLP, 1.1M params, random init) achieves 92.57\% ACC, exceeding MGM's 34M-param pretrained Transformer (50.9\%) by 41.7pp
   \item \textbf{Comprehensive baseline comparison}: 9 methods compared on identical train/test split with 6 performance metrics
   \item \textbf{Component ablation}: Isolate contributions of embedding, random projection, non-linearity, and end-to-end training
-  \item \textbf{Embedding dimension analysis}: Performance saturates at $E{=}512$ (93.41\% ACC, 760K params)
+  \item \textbf{Embedding dimension analysis}: Performance saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out; 760K params)
   \item \textbf{Cross-dataset transfer}: Training on $5\times$ larger diverse data improves cross-dataset generalization by 26.8pp
   \item \textbf{LOO Attribution Reliability}: Spearman $\rho{=}0.72$ rank consistency, deletion test validation, literature direction agreement (5/6)
   \item \textbf{LLM explanation benchmark} ($n{=}167$): LOO grounding halves hallucination (0.72 to 0.36/response), achieves 98\% consistency and 0.94 direction accuracy
@@ -331,24 +331,26 @@ Notably, under grouped CV the multi-hot presence vector fed to an MLP (0.912) is
 
 \begin{table}[ht]
 \centering
-\caption{\textbf{Embedding dimension ablation.} Performance saturates at $E{=}512$.
-MLP hidden dim $=$ $\min(E, 256)$.}
+\caption{\textbf{Embedding dimension ablation under the exact input-grouped 3$\times$5-fold CV protocol.}
+Only the embedding dimension changes; all other architecture and optimization settings are fixed.
+Held-out test set results are shown for reference in parentheses.}
 \label{tab:embedding}
 \begin{tabular}{lcccccr}
 \toprule
-\textbf{$E$} & \textbf{ACC} & \textbf{AUC} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{Params} \\
+\textbf{$E$} & \textbf{Params} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
 \midrule
-32  & 0.9042 & 0.9653 & 0.9213 & 0.8817 & 0.9011 & 40K \\
-64  & 0.9162 & 0.9757 & 0.9341 & 0.9140 & 0.9239 & 83K \\
-128 & 0.9102 & 0.9570 & 0.9341 & 0.9140 & 0.9239 & 174K \\
-256 & 0.9102 & 0.9656 & 0.9222 & 0.8925 & 0.9071 & 381K \\
-\textbf{512} & \textbf{0.9341} & \textbf{0.9815} & \textbf{0.9444} & \textbf{0.9140} & \textbf{0.9290} & \textbf{760K} \\
-768 & \textbf{0.9341} & \textbf{0.9815} & 0.9444 & 0.9140 & 0.9290 & 1.14M \\
+16  & 24,994 & 0.855 $\pm$ 0.027 & 0.854 $\pm$ 0.027 & 0.924 $\pm$ 0.020 & 0.918 $\pm$ 0.041 \\
+32  & 48,706 & 0.879 $\pm$ 0.033 & 0.878 $\pm$ 0.034 & 0.941 $\pm$ 0.019 & 0.944 $\pm$ 0.022 \\
+64  & 96,130 & 0.906 $\pm$ 0.021 & 0.905 $\pm$ 0.021 & 0.956 $\pm$ 0.016 & 0.954 $\pm$ 0.031 \\
+128 & 190,978 & 0.908 $\pm$ 0.024 & 0.907 $\pm$ 0.024 & 0.957 $\pm$ 0.015 & 0.956 $\pm$ 0.026 \\
+256 & 380,674 & 0.909 $\pm$ 0.020 & 0.909 $\pm$ 0.020 & 0.956 $\pm$ 0.015 & 0.952 $\pm$ 0.037 \\
+\textbf{512} & \textbf{760,066} & \textbf{0.914} $\pm$ 0.020 & \textbf{0.913} $\pm$ 0.019 & \textbf{0.957} $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
+768 & 1,139,458 & \textbf{0.914} $\pm$ 0.016 & \textbf{0.913} $\pm$ 0.016 & 0.957 $\pm$ 0.015 & 0.952 $\pm$ 0.035 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Performance saturates at $E{=}512$ (ACC 93.41\%, AUC 0.9815). Extending to $E{=}768$ provides no benefit but increases parameters by 50\%. For $E{\leq}256$, the embedding dimension becomes a bottleneck ($-2.4$pp ACC). With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus—sufficient capacity for diagnostic representation learning.
+Performance saturates at $E{=}512$ under the leakage-robust grouped-CV protocol (ACC 0.9141, AUROC 0.9572). Extending to $E{=}768$ provides no benefit but increases parameters by 50\%. For $E{\leq}256$, the embedding dimension becomes a bottleneck (up to $-5.9$pp ACC at $E{=}16$). With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus—sufficient capacity for diagnostic representation learning. The held-out test set shows the same saturation pattern (93.41\% ACC at both $E{=}512$ and $E{=}768$).
 
 \subsection{Within-Dataset and Cross-Dataset Transfer Evaluation}
 
@@ -386,24 +388,23 @@ Unlike foundation models requiring hundreds of thousands of pretraining samples,
 
 \begin{table}[ht]
 \centering
-\caption{\textbf{Data efficiency (nested group-CV).}
-Performance as a function of training data fraction.}
+\caption{\textbf{Nested grouped-CV learning curves (AUROC).}
+The training fraction is sampled from only the outer training groups.}
 \label{tab:learning}
-\begin{tabular}{lccccc}
+\begin{tabular}{lccc}
 \toprule
-\textbf{Training Data} & \multicolumn{3}{c}{\textbf{ACC}} & \multicolumn{2}{c}{\textbf{AUROC}} \\
-\textbf{Fraction} & HistGB & MLP & ProCyon (E$=$64) & HistGB & ProCyon (E$=$64) \\
+\textbf{Train fraction} & \textbf{HGB} & \textbf{Presence+MLP} & \textbf{Embedding64+MLP (ours)} \\
 \midrule
-20\% & 0.8464 & 0.8705 & 0.8244 & 0.9222 & 0.8995 \\
-40\% & 0.8927 & 0.9004 & 0.8664 & 0.9619 & 0.9290 \\
-60\% & 0.9125 & 0.9004 & 0.8883 & 0.9719 & 0.9467 \\
-80\% & 0.9197 & 0.9060 & 0.9008 & 0.9763 & 0.9508 \\
-100\% & \textbf{0.9250} & 0.9117 & 0.9057 & \textbf{0.9791} & 0.9564 \\
+20\% & 0.922 $\pm$ 0.027 & 0.940 $\pm$ 0.019 & 0.900 $\pm$ 0.027 \\
+40\% & 0.962 $\pm$ 0.012 & 0.959 $\pm$ 0.011 & 0.929 $\pm$ 0.022 \\
+60\% & 0.972 $\pm$ 0.010 & 0.965 $\pm$ 0.011 & 0.947 $\pm$ 0.015 \\
+80\% & 0.976 $\pm$ 0.009 & 0.966 $\pm$ 0.010 & 0.951 $\pm$ 0.017 \\
+100\% & \textbf{0.979} $\pm$ 0.010 & 0.969 $\pm$ 0.012 & 0.956 $\pm$ 0.016 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-With only 20\% of training data (134 samples), ProCyon v2 achieves 82.4\% ACC, rising to 90.6\% at full data. HistGradientBoosting shows the strongest data efficiency (84.6\% at 20\%), consistent with tree ensembles' sample efficiency on tabular data, while the embedding-based model requires more data to learn genus representations but converges to competitive performance. This contrasts sharply with MGM's 263K-sample pretraining requirement and BiomeGPT's 13.3K-sample corpus.
+At 20\% of training data (134 samples), the embedding-based model reaches AUROC 0.900, rising to 0.956 at full data—while requiring no pretraining corpus whatsoever. Presence+MLP starts stronger (0.940 at 20\%) because multi-hot vectors carry the signal directly, but the embedding model closes most of the gap by 100\%. HistGradientBoosting shows the strongest data efficiency throughout, consistent with tree ensembles' sample efficiency on tabular data. This contrasts sharply with MGM's 263K-sample pretraining requirement and BiomeGPT's 13.3K-sample corpus: ProCyon v2's total training data (659 labeled samples) is 400$\times$ smaller than MGM's pretraining corpus.
 
 \begin{figure}[ht]
 \centering
