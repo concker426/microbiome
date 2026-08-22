@@ -15,6 +15,10 @@ mkdir -p "$PKG_DIR/figures" "$PKG_DIR/tables"
 # 2. Copy main files
 cp "$ANALYSIS/main.tex" "$PKG_DIR/"
 cp "$ANALYSIS/references.bib" "$PKG_DIR/"
+if [ -f "$ANALYSIS/supplementary.tex" ]; then
+    cp "$ANALYSIS/supplementary.tex" "$PKG_DIR/"
+    echo "  + supplementary.tex"
+fi
 
 # 3. Convert and copy all figures (Overleaf-safe: RGB, max 2200px)
 echo "Converting figures..."
