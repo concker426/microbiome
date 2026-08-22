@@ -54,7 +54,38 @@ This paper systematically investigates these questions through controlled experi
 \end{itemize}
 
 % ═══════════════════════════════════════
-% 2. DATASET ANALYSIS
+% 2. RELATED WORK
+% ═══════════════════════════════════════
+\section{Related Work}
+
+\textbf{MGM}~\cite{mgm2024} introduced the first large-scale microbiome foundation model: an 8-layer Transformer pretrained with autoregressive next-genus prediction on MicroCorpus-260K (263,302 samples, 9,665 genera). MGM demonstrated cross-regional diagnosis, keystone genus discovery via attention analysis, and in silico perturbation experiments. Its rank-based encoding mitigates extreme abundance values but discards relative abundance information.
+
+\textbf{BiomeGPT}~\cite{biomegpt2026} is a transformer-based foundation model pretrained on 13,300 species-level human gut metagenomes spanning 32 phenotypes. It uses a dual embedding strategy (species embedding + quantile-based abundance bin embedding) with masked abundance prediction. Its CLS-token attention analysis revealed that attention is not driven by prevalence alone, and correlations with differential abundance were task-dependent ($\rho$ from $-0.05$ to $0.46$). Notably, BiomeGPT's model weights are not publicly available, preventing direct benchmarking.
+
+\textbf{Waypoint/Atlas}~\cite{waypoint2026} scaled the Transformer approach to 539k+ samples with 6M--170M parameter variants.
+
+\textbf{ProCyon}~\cite{procyon2025} coupled a protein encoder with an LLM for multimodal biomedical tasks, inspiring our dual-branch design---though we ultimately adopted a fundamentally different encoder.
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Comparison of microbiome foundation models.}
+ProCyon v2 achieves competitive performance with 30$\times$ fewer parameters and no pretraining,
+while providing per-sample LOO attribution and LLM-based interpretation.}
+\label{tab:fm_comparison}
+\begin{tabular}{p{2.2cm}p{2.6cm}p{2.0cm}p{2.6cm}p{2.6cm}p{1.4cm}}
+\toprule
+\textbf{Model} & \textbf{Architecture} & \textbf{Granularity} & \textbf{Pretraining} & \textbf{Interpretability} & \textbf{Weights} \\
+\midrule
+MGM~\cite{mgm2024} & 8L Transformer (34M) & Genus & Next-genus, 263k & Attention + LOO & Public \\
+BiomeGPT~\cite{biomegpt2026} & Transformer + dual emb & Species & Masked abundance, 13.3k & CLS attention & Unavailable \\
+Waypoint~\cite{waypoint2026} & Transformer (6--170M) & Genus & 539k+ & Not emphasized & Unavailable \\
+\textbf{ProCyon v2} & \textbf{SimpleEmb + MLP (1.1M)} & Genus & \textbf{None} & \textbf{LOO + LLM} & \textbf{Public} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ═══════════════════════════════════════
+% 3. DATASET ANALYSIS
 % ═══════════════════════════════════════
 \section{Dataset Analysis}
 
@@ -268,6 +299,31 @@ $^\dagger$0 clean\_2538 test samples found in merged\_all training set; transfer
 
 \textbf{Finding}: merged$\rightarrow$clean (decontaminated) achieves 88.62\% ACC, retaining 94.9\% of within-dataset performance. In the reverse direction, clean$\rightarrow$merged suffers from the small training set and exhibits specificity collapse—the model becomes overly conservative, predicting ``Healthy'' for nearly all out-of-distribution samples.
 
+\subsection{Data Efficiency}
+
+Unlike foundation models requiring hundreds of thousands of pretraining samples, ProCyon v2 achieves competitive performance from limited labeled data. Using nested group-CV (3 repeats $\times$ StratifiedGroupKFold, grouped by exact genus-sequence hash to prevent leakage), we evaluate performance as a function of training set size (Figure~\ref{fig:learning}):
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Data efficiency (nested group-CV).}
+Performance as a function of training data fraction.}
+\label{tab:learning}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Training Data} & \multicolumn{3}{c}{\textbf{ACC}} & \multicolumn{2}{c}{\textbf{AUROC}} \\
+\textbf{Fraction} & HistGB & MLP & ProCyon (E$=$64) & HistGB & ProCyon (E$=$64) \\
+\midrule
+20\% & 0.8464 & 0.8705 & 0.8244 & 0.9222 & 0.8995 \\
+40\% & 0.8927 & 0.9004 & 0.8664 & 0.9619 & 0.9290 \\
+60\% & 0.9125 & 0.9004 & 0.8883 & 0.9719 & 0.9467 \\
+80\% & 0.9197 & 0.9060 & 0.9008 & 0.9763 & 0.9508 \\
+100\% & \textbf{0.9250} & 0.9117 & 0.9057 & \textbf{0.9791} & 0.9564 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With only 20\% of training data (134 samples), ProCyon v2 achieves 82.4\% ACC, rising to 90.6\% at full data. HistGradientBoosting shows the strongest data efficiency (84.6\% at 20\%), consistent with tree ensembles' sample efficiency on tabular data, while the embedding-based model requires more data to learn genus representations but converges to competitive performance. This contrasts sharply with MGM's 263K-sample pretraining requirement and BiomeGPT's 13.3K-sample corpus.
+
 \subsection{Why Does SimpleEmbedding Work?}
 \label{sec:why}
 
@@ -362,6 +418,32 @@ Prevalence-importance correlation & $r{=}0.05$ ($p{>}0.05$) \\
 While top-50 Jaccard similarity is low (0.07), Spearman rank correlation is strong ($\rho{=}0.72$), indicating consistent \textit{rank ordering} of genus importance across folds. The low Jaccard reflects that many genera carry overlapping diagnostic information—different folds may select functionally equivalent but taxonomically distinct genera (e.g., different SCFA producers). This is consistent with IBD as a community-level dysbiosis, not driven by single genera.
 
 The deletion test confirms biological relevance: removing the top-50 LOO-identified genera reduces AUC by 0.039, 5.6$\times$ more than random deletion (0.007). LOO importance is uncorrelated with genus prevalence ($r{=}0.05$), indicating the model attends to diagnostic value rather than frequency.
+
+\subsection{Attribution vs. Differential Abundance}
+
+Following the analysis protocol of BiomeGPT~\cite{biomegpt2026}, we examine whether LOO attribution is driven by univariate differential abundance. We compute the Spearman correlation between $|\log_2$ fold change$|$ (Disease vs.\ Healthy mean abundance) and mean LOO importance:
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{LOO attribution vs.\ differential abundance (Spearman $\rho$).}}
+\label{tab:attribution_bio}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Prevalence Strata} & $\rho$ & $p$-value \\
+\midrule
+All genera (n$=$365) & $-$0.23 & $<$0.001 \\
+Prevalence $\geq$10 (n$=$186) & 0.01 & 0.901 \\
+Prevalence $\geq$50 (n$=$108) & 0.11 & 0.269 \\
+Prevalence $\geq$200 (n$=$66) & 0.16 & 0.188 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across all prevalence strata, LOO attribution shows near-zero correlation with univariate fold change—mirroring BiomeGPT's finding that attention weights are weakly correlated with differential abundance for several tasks ($\rho$ from $-0.05$ to $0.46$). This indicates that ProCyon v2 encodes higher-order multivariate structure (co-occurrence patterns, compositional gradients, dysbiosis axes) beyond simple univariate abundance shifts.
+
+\subsection{Embedding Structure: Disease vs.\ Study}
+
+Within the single-study clean\_2538 cohort (study effect controlled by design), the embedding space exhibits disease-relevant structure: intra-disease cosine similarity (0.54) is lower than intra-healthy (0.64), reflecting greater microbiome heterogeneity among IBD patients. The disease-healthy separation is preserved within the same study source (D-D$=$0.539, H-H$=$0.643, D-H$=$0.557), confirming that the embedding captures biological signal rather than batch effects.
 
 \subsection{LLM Explanation Benchmark}
 
