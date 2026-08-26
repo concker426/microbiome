@@ -775,6 +775,10 @@ Three factors explain MGM's failure (50.9\% ACC): (1) \textbf{Mismatched pretrai
 
 SimpleEmb (1.1M params, random init) learns 366 independent genus embeddings directly optimized for classification. This is the correct inductive bias for tabular microbiome data.
 
+\subsection{Generalization Across Independent Cohorts}
+
+The leave-one-source-out evaluation (Section~5.5) shows that all classifiers degrade substantially on independent cohorts: external AUC on the balanced 10317 cohort reaches only 0.595 (SimpleEmb) to 0.688 (Random Forest), versus 0.973 in-family, consistent with the well-documented dominance of batch effects over biological signal in cross-study microbiome data. Two observations are noteworthy. First, Random Forest trained on raw abundance transfers best, indicating that feature-level abundance patterns are more robust to compositional and technical shifts than learned embedding spaces, consistent with the grouped-CV finding that tree ensembles match or exceed the embedding classifier. Second, the SimpleEmb classifier achieves 51.0\% disease identification on Study~11484, in line with the 51.6\% reported for a 50k-pretrained MGM encoder, suggesting that simple and complex encoders face the same batch-effect barrier. These results position the embedding architecture as an interpretable within-cohort diagnostic tool and motivate batch-effect correction as the path toward clinical deployment.
+
 \subsection{Why 512 Dimensions Are Sufficient}
 
 With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus --- sufficient for diagnostic representation. Beyond this, additional dimensions encode noise. This also explains why raw 1226-dim features perform well (XGBoost: 92.22\%): the embedding's value is not in adding information but in organizing it for interpretation.
@@ -789,7 +793,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Limitations}
 
-(1) External validation on an independent IBD cohort (Study 11484) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
+(1) Leave-one-source-out external validation on four independent cohorts (10317, 1939, 11484, 10283) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
