@@ -384,27 +384,31 @@ $^\dagger$0 clean\_2538 test samples found in merged\_all training set; transfer
 \textbf{Finding}: merged$\rightarrow$clean (decontaminated) achieves 88.62\% ACC, retaining 94.9\% of within-dataset performance. In the reverse direction, clean$\rightarrow$merged suffers from the small training set and exhibits specificity collapse --- the model becomes overly conservative, predicting ``Healthy'' for nearly all out-of-distribution samples.
 
 
-\subsection{External Cohort Validation (Study 11484)}
+\subsection{Leave-One-Source-Out External Validation}
 
-To probe generalization beyond the AGP/FTP cohorts, we evaluate the same clean\_2538-trained models on Study 11484, an independent US IBD cohort (96 samples, all IBD) processed through the identical Qiita genus-level pipeline. Table~\ref{tab:external} reports the disease identification rate (the fraction of the 96 IBD samples correctly predicted as Disease).
+To probe generalization beyond the AGP/FTP cohorts, we evaluate the clean\_2538-trained SimpleEmb classifier and tree baselines on four independent cohorts, using a unified Qiita genus-level representation (1223-genus abundance vectors, rank-tokenized identically across sources) so that all models consume a consistent feature space. The in-family holdout (study 2538) reaches 92.8\% ACC / 0.973 AUC, matching the main benchmark. Table~\ref{tab:external} reports external performance.
 
 \begin{table}[ht]
 \centering
-\caption{\textbf{External validation on Study 11484 (independent US IBD cohort, $n{=}96$, all IBD).}
-Models are trained exclusively on clean\_2538; disease identification rate = fraction of the 96 IBD samples correctly predicted as Disease.}
+\caption{\textbf{Leave-one-source-out external validation on four independent cohorts.}
+Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484 and 10283 are disease-only cohorts (disease identification rate reported).}
 \label{tab:external}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Model} & \textbf{Disease ident. rate} & \textbf{ACC} \\
+\textbf{Cohort} & \textbf{$n$} & \textbf{SimpleEmb} & \textbf{HGB} & \textbf{RF} \\
 \midrule
-SimpleEmb + MLP (ProCyon v2) & 0.156 & 0.156 \\
-HistGradientBoosting & 0.552 & 0.552 \\
-Random Forest & \textbf{0.802} & \textbf{0.802} \\
+\multicolumn{5}{l}{\textit{Balanced external cohort (with controls, AUC)}} \\
+10317 (194 IBD / 388 H) & 582 & 0.595 & 0.630 & \textbf{0.688} \\
+\midrule
+\multicolumn{5}{l}{\textit{Disease-only cohorts (disease identification rate)}} \\
+1939 & 1359 & 0.358 & 0.506 & \textbf{0.694} \\
+11484 & 96 & 0.510 & 0.521 & \textbf{0.750} \\
+10283 & 568 & 0.125 & 0.118 & \textbf{0.143} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The SimpleEmb classifier exhibits severe specificity collapse on the external cohort (73/96 samples assigned disease probability $<bash.1), identifying only 15.6\% of true IBD samples --- while maintaining 93.4\% held-out accuracy within AGP/FTP. This is consistent with the batch-effect analysis of Section~6.4: embeddings are dominated by study-specific compositional patterns rather than universal IBD biology. Notably, Random Forest trained on raw abundance retains 80.2\% disease identification, suggesting that tree ensembles feature-level decisions are more robust to batch shifts than the learned embedding space. These results confirm limitation~(1): external validation on independent clinical cohorts remains the central open challenge for embedding-based microbiome classifiers.
+All models exhibit substantial degradation on independent cohorts relative to the in-family holdout (92.8\% ACC), confirming that batch effects across studies remain the dominant obstacle to microbiome-based diagnosis. The SimpleEmb classifier retains partial discriminative signal on the balanced 10317 cohort (AUC 0.595) and its Study-11484 disease identification (51.0\%) is consistent with the 51.6\% previously reported for a 50k-pretrained MGM encoder. However, Random Forest trained on raw abundance generalizes better (AUC 0.688 on 10317; 69.4\% on 1939), echoing the grouped-CV finding that tree ensembles transfer most strongly. These results confirm limitation~(1): external validation on independent clinical cohorts is the central open challenge for embedding-based microbiome classifiers.
 
 \subsection{Data Efficiency}
 
@@ -785,7 +789,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Limitations}
 
-(1) External validation on an independent IBD cohort (Study 11484) confirms severe generalization failure: the SimpleEmb classifier identifies only 15.6\% of external IBD samples (vs. 80.2\% for Random Forest), underscoring that batch effects remain the central open challenge; validation on further cohorts (TCMA, HMP) is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
+(1) External validation on an independent IBD cohort (Study 11484) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
