@@ -383,6 +383,29 @@ $^\dagger$0 clean\_2538 test samples found in merged\_all training set; transfer
 
 \textbf{Finding}: merged$\rightarrow$clean (decontaminated) achieves 88.62\% ACC, retaining 94.9\% of within-dataset performance. In the reverse direction, clean$\rightarrow$merged suffers from the small training set and exhibits specificity collapse --- the model becomes overly conservative, predicting ``Healthy'' for nearly all out-of-distribution samples.
 
+
+\subsection{External Cohort Validation (Study 11484)}
+
+To probe generalization beyond the AGP/FTP cohorts, we evaluate the same clean\_2538-trained models on Study 11484, an independent US IBD cohort (96 samples, all IBD) processed through the identical Qiita genus-level pipeline. Table~\ref{tab:external} reports the disease identification rate (the fraction of the 96 IBD samples correctly predicted as Disease).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{External validation on Study 11484 (independent US IBD cohort, $n{=}96$, all IBD).}
+Models are trained exclusively on clean\_2538; disease identification rate = fraction of the 96 IBD samples correctly predicted as Disease.}
+\label{tab:external}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{Disease ident. rate} & \textbf{ACC} \\
+\midrule
+SimpleEmb + MLP (ProCyon v2) & 0.156 & 0.156 \\
+HistGradientBoosting & 0.552 & 0.552 \\
+Random Forest & \textbf{0.802} & \textbf{0.802} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The SimpleEmb classifier exhibits severe specificity collapse on the external cohort (73/96 samples assigned disease probability $<bash.1), identifying only 15.6\% of true IBD samples --- while maintaining 93.4\% held-out accuracy within AGP/FTP. This is consistent with the batch-effect analysis of Section~6.4: embeddings are dominated by study-specific compositional patterns rather than universal IBD biology. Notably, Random Forest trained on raw abundance retains 80.2\% disease identification, suggesting that tree ensembles feature-level decisions are more robust to batch shifts than the learned embedding space. These results confirm limitation~(1): external validation on independent clinical cohorts remains the central open challenge for embedding-based microbiome classifiers.
+
 \subsection{Data Efficiency}
 
 Unlike foundation models requiring hundreds of thousands of pretraining samples, ProCyon v2 achieves competitive performance from limited labeled data. Using nested group-CV (3 repeats $\times$ StratifiedGroupKFold, grouped by exact genus-sequence hash to prevent leakage), we evaluate performance as a function of training set size (Figure~\ref{fig:learning}):
@@ -736,7 +759,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Limitations}
 
-(1) External validation on independent clinical cohorts (TCMA, HMP) is needed. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
+(1) External validation on an independent IBD cohort (Study 11484) confirms severe generalization failure: the SimpleEmb classifier identifies only 15.6\% of external IBD samples (vs. 80.2\% for Random Forest), underscoring that batch effects remain the central open challenge; validation on further cohorts (TCMA, HMP) is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
