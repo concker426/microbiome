@@ -80,8 +80,10 @@ rng = np.random.RandomState(SEED)
 def sample_examples(k):
     """Sample k balanced examples from training data."""
     n_each = k // 2 + (k % 2)
-    h_samples = list(rng.choice(train_healthy, min(n_each, len(train_healthy)), replace=False))
-    d_samples = list(rng.choice(train_disease, min(k - len(h_samples), len(train_disease)), replace=False))
+    h_idx = rng.choice(len(train_healthy), min(n_each, len(train_healthy)), replace=False)
+    h_samples = [train_healthy[int(i)] for i in h_idx]
+    d_idx = rng.choice(len(train_disease), min(k - len(h_samples), len(train_disease)), replace=False)
+    d_samples = [train_disease[int(i)] for i in d_idx]
     examples = h_samples + d_samples
     rng.shuffle(examples)
     return examples

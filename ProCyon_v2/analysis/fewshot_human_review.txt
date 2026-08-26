@@ -1,0 +1,291 @@
+FEW-SHOT LLM EVALUATION - HUMAN REVIEW
+======================================================================
+
+
+──────────────────────────────────────────────────────────────────────
+k = 0
+Accuracy: 0.4200 (42/100)
+──────────────────────────────────────────────────────────────────────
+
+Sample 1: 2538.1002713
+  True: Disease | LLM: Healthy | CLF: Disease (p=1.000)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Enterococcus, Paracoccus, and Ethanoligenens, along with the absence of known pathogenic genera typically associated with Inflammatory Bowel Disease (IBD), such as certain species of Escherichia, Clostridium, or Bacteroides, suggests a healthy gut m
+
+Sample 2: 2538.1001431
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.000)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Escherichia, Enterococcus, and several others that are commonly found in a healthy gut microbiome suggests a balanced microbial community. The absence of specific markers typically associated with Inflammatory Bowel Disease (IBD) such as certain pat
+
+Sample 3: 2538.1002120
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.996)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Methanosaeta, which is associated with methane production and is commonly found in the healthy human gut, and the absence of typical IBD-associated bacteria suggest a healthy gut microbiome. Additionally, the composition includes a variety of genera
+
+Sample 4: 2538.1000637
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.001)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+The provided microbiome composition does not show an overrepresentation of bacteria typically associated with Inflammatory Bowel Disease (IBD), such as certain species of Anaerostipes, Faecalibacterium, and Prevotella that are often depleted in IBD patients. The genera present su
+
+Sample 5: 2538.1001137
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.206)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+The patient's gut microbiome composition does not show a significant overrepresentation of genera commonly associated with Inflammatory Bowel Disease (IBD), such as Prevotella, Bacteroides, or certain species of Escherichia/Shigella. The presence of genera like Enterococcus, Arth
+
+Sample 6: 2538.1001232
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.850)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Caldanaerocella, Kitasatospora, Paracraurococcus, and others suggests a diverse and balanced gut microbiome. The absence of common markers typically associated with Inflammatory Bowel Disease (IBD), such as specific pathogenic bacteria like certain 
+
+Sample 7: 2538.1002630
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.982)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Methanosaeta, Sporomusa, and Ferrimonas suggests a balanced gut microbiome rich in methanogens and butyrate-producing bacteria, which are typically associated with a healthy gut. The absence of known pathogenic genera commonly associated with Inflam
+
+Sample 8: 2538.1003420
+  True: Disease | LLM: Healthy | CLF: Healthy (p=0.179)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+The patient's gut microbiome composition does not show the typical imbalances or specific genera associated with Inflammatory Bowel Disease (IBD). The presence of a diverse range of bacterial genera, including those involved in methane production (Methanosaeta), suggests a balanc
+
+Sample 9: 2538.1000915
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.005)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+The presence of genera such as Enterococcus, Cloacibacillus, and Succinivibrio, along with the absence of known pathogenic genera typically associated with Inflammatory Bowel Disease (IBD) such as certain species of Escherichia, Bilophila, or Faecalibacterium in reduced numbers, 
+
+Sample 10: 2538.1000728
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.002)
+  Correct: True
+  Response: Diagnosis: Healthy. The presence of genera such as Enterococcus, Streptosporangium, and Cloacibacillus is more commonly associated with a healthy gut microbiome. While some of the listed genera can be found in individuals without IBD, their presence does not strongly suggest Inflammatory Bowel Disea
+
+
+──────────────────────────────────────────────────────────────────────
+k = 1
+Accuracy: 0.5960 (59/99)
+──────────────────────────────────────────────────────────────────────
+
+Sample 1: 2538.1002713
+  True: Disease | LLM: Healthy | CLF: Disease (p=1.000)
+  Correct: False
+  Response: Diagnosis: Healthy. The new patient's microbiome contains several genera present in the healthy patient's sample, such as Caldanaerocella, Kitasatospora, Halomicronema, Janibacter, Ethanoligenens, Helicobacter, Paracoccus, and others. The presence of these genera suggests a similar healthy microbial
+
+Sample 2: 2538.1001431
+  True: Healthy | LLM: Disease | CLF: Healthy (p=0.000)
+  Correct: False
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The new patient's microbiome shows an increased presence of potential pathogenic bacteria such as Escherichia, Enterococcus, Arcobacter, and Leptotrichia, which are often associated with inflammatory bowel diseases (IBD). In contrast, the previous healthy patient
+
+Sample 3: 2538.1002120
+  True: Disease | LLM: Disease | CLF: Disease (p=0.996)
+  Correct: True
+  Response: Based on the comparison of the microbiomes, the new patient's microbiome contains several species that are also present in the healthy patient's microbiome, such as Caldanaerocella, Kitasatospora, Ethanoligenens, Sporomusa, Helicobacter, Streptosporangium, Eikenella, and Janibacter. However, the pre
+
+Sample 4: 2538.1000637
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.001)
+  Correct: True
+  Response: Diagnosis: Healthy. The new patient's microbiome shares several genera with the healthy patient, such as Caldanaerocella, Streptosporangium, Kitasatospora, Ethanoligenens, Sporomusa, and Helicobacter. Additionally, the presence of beneficial genera like Arthrospira, Actinobacillus, and Enterococcus,
+
+Sample 5: 2538.1001137
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.206)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains several genera present in the healthy example, such as Caldanaerocella, Helicobacter, Halomicronema, Sporomusa, Eikenella, and Arthrospira. Additionally, while it includes some less common genera like Ucs1325 and Tsukamurella, the 
+
+Sample 6: 2538.1001232
+  True: Disease | LLM: Disease | CLF: Disease (p=0.850)
+  Correct: True
+  Response: Based on the comparison of the microbiome compositions, the new patient's microbiome shows a higher presence of potential pathogenic species such as Escherichia, Taylorella, and Afifella, which are not present or are present in much lower quantities in the healthy microbiome example provided. Theref
+
+Sample 7: 2538.1002630
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.982)
+  Correct: False
+  Response: Based on the provided examples, the presence of a diverse range of bacteria including several that are typically found in healthy gut microbiomes suggests a balanced community. The new patient's microbiome contains a mix of common genera such as Caldanaerocella, Kitasatospora, Paracoccus, and Sporom
+
+Sample 8: 2538.1003420
+  True: Disease | LLM: Disease | CLF: Healthy (p=0.179)
+  Correct: True
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The presence of species such as Wohlfahrtiimonas, Ucs1325, CM44, Leptotrichia, and Alloscardovia in the new patient's microbiome suggests an imbalance that is more characteristic of inflammatory bowel disease (IBD). These species are less prevalent or absent in a
+
+Sample 9: 2538.1000915
+  True: Healthy | LLM: Disease | CLF: Healthy (p=0.005)
+  Correct: False
+  Response: Based on the comparison of the microbiomes provided, the new patient's microbiome contains several species that are also present in the healthy microbiome, such as Caldanaerocella, Kitasatospora, Ethanoligenens, and Streptosporangium. However, it also includes some species like Anaerococcus, Helicob
+
+Sample 10: 2538.1000728
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.002)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome includes several genera present in the healthy microbiome example, such as Caldanaerocella, Ethanoligenens, Candidatus Regiella, Helicobacter, Kitasatospora, Paracoccus, Sporomusa, and Streptosporangium. Additionally, the presence of other 
+
+
+──────────────────────────────────────────────────────────────────────
+k = 3
+Accuracy: 0.5500 (55/100)
+──────────────────────────────────────────────────────────────────────
+
+Sample 1: 2538.1002713
+  True: Disease | LLM: Healthy | CLF: Disease (p=1.000)
+  Correct: False
+  Response: Diagnosis: Healthy. The presence of diverse genera such as Caldanaerocella, Kitasatospora, Candidatus Hamiltonella, Candidatus Koribacter, Candidatus Regiella, and others suggests a balanced microbiome. The absence of pathogenic genera typically associated with disease, such as Taylorella, Arcobacte
+
+Sample 2: 2538.1001431
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.000)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of bacteria found in both healthy and diseased states, but it also includes several common healthy taxa such as Caldanaerocella, Kitasatospora, Candidatus Regiella, Sporomusa, Tetragenococcus, Enterococcus, Ethanoligenens, St
+
+Sample 3: 2538.1002120
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.996)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of genera found in both healthy and diseased states. However, the presence of several genera like Caldanaerocella, Kitasatospora, Ethanoligenens, and Sporomusa, which are common in healthy microbiomes from the examples provid
+
+Sample 4: 2538.1000637
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.001)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+The new patient's microbiome contains a mix of genera present in both healthy and diseased patients, but it also includes several genera that are more commonly associated with healthy microbiomes, such as Caldanaerocella, Kitasatospora, Streptosporangium, Candidatus Regiella, Par
+
+Sample 5: 2538.1001137
+  True: Healthy | LLM: Disease | CLF: Healthy (p=0.206)
+  Correct: False
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The presence of pathogenic genera such as Taylorella, Arcobacter, Tsukamurella, and Kytococcus, along with the absence of some beneficial bacteria that were present in the healthy microbiomes, suggests an imbalance indicative of a disease state. Additionally, the
+
+Sample 6: 2538.1001232
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.850)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of genera present in both healthy and diseased samples, but it also includes several genera found in healthy samples (such as Caldanaerocella, Kitasatospora, Paracraurococcus, Sporomusa, Ethanoligenens, Candidatus Hamiltonell
+
+Sample 7: 2538.1002630
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.982)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of genera found in both healthy and diseased states, but it notably includes several genera associated with a healthy gut such as Caldanaerocella, Kitasatospora, Ethanoligenens, and Sporomusa. Additionally, the presence of Ta
+
+Sample 8: 2538.1003420
+  True: Disease | LLM: Healthy | CLF: Healthy (p=0.179)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of bacteria present in both healthy and diseased patients, but it also includes several genera such as Caldanaerocella, Streptosporangium, Kitasatospora, and Helicobacter, which are common in healthy microbiomes. The presence
+
+Sample 9: 2538.1000915
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.005)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of genera found in both healthy and diseased states, but it also includes several genera that were associated with healthy microbiomes in the given examples, such as Caldanaerocella, Kitasatospora, Streptosporangium, Ethanoli
+
+Sample 10: 2538.1000728
+  True: Healthy | LLM: Disease | CLF: Healthy (p=0.002)
+  Correct: False
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The new patient's microbiome contains a mix of bacteria present in both healthy and disease states, but notably includes species like Taylorella, Arcobacter, Tsukamurella, and Kytococcus, which were found in the microbiome associated with a diseased state in the 
+
+
+──────────────────────────────────────────────────────────────────────
+k = 5
+Accuracy: 0.6200 (62/100)
+──────────────────────────────────────────────────────────────────────
+
+Sample 1: 2538.1002713
+  True: Disease | LLM: Healthy | CLF: Disease (p=1.000)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains several genera that were present in the healthy patients' microbiomes, such as Streptosporangium, Paracraurococcus, Eikenella, and others. Additionally, it lacks some genera that were associated with disease states, such as Arcobac
+
+Sample 2: 2538.1001431
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.000)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains several taxa that were present in the healthy patients' microbiomes (e.g., Alloscardovia, Streptosporangium, Helicobacter, Natronococcus) and lacks some of the taxa that were associated with disease in the given examples (e.g., Arc
+
+Sample 3: 2538.1002120
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.996)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of taxa present in both healthy and diseased patients, but it also includes several taxa that are more commonly associated with healthy individuals (like Streptosporangium, Sporomusa, Halomicronema, and Sodalis). The presence
+
+Sample 4: 2538.1000637
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.001)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of taxa found in both healthy and diseased states, but it also includes several species that were associated with healthy microbiomes in the provided examples. Additionally, there is no clear majority of disease-associated ta
+
+Sample 5: 2538.1001137
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.206)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of taxa that appear in both healthy and disease states, but it lacks some specific taxa found exclusively in diseased states (like Arcobacter and Kytococcus in the disease examples). The presence of more common healthy taxa s
+
+Sample 6: 2538.1001232
+  True: Disease | LLM: Disease | CLF: Disease (p=0.850)
+  Correct: True
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The new patient's microbiome contains a mix of bacterial species that are present in both healthy and diseased states, but it also includes several species that are more commonly associated with disease conditions, such as "Caldanaerocella," "Kitasatospora," and 
+
+Sample 7: 2538.1002630
+  True: Disease | LLM: Healthy | CLF: Disease (p=0.982)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains several species that are also present in healthy microbiomes from the examples provided, such as Streptosporangium, Sporomusa, and Enterococcus. Additionally, it lacks the specific combination of bacteria that were present in the m
+
+Sample 8: 2538.1003420
+  True: Disease | LLM: Healthy | CLF: Healthy (p=0.179)
+  Correct: False
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains several taxa that were present in the microbiomes of healthy patients in the provided examples, such as Streptosporangium, Kitasatospora, Candidatus Regiella, Sporomusa, Helicobacter, and Ethanoligenens. Additionally, the absence o
+
+Sample 9: 2538.1000915
+  True: Healthy | LLM: Healthy | CLF: Healthy (p=0.005)
+  Correct: True
+  Response: Diagnosis: Healthy
+
+Reasoning: The new patient's microbiome contains a mix of bacteria present in both healthy and disease states, but it notably lacks some of the pathogenic or disease-indicative bacteria present in the microbiomes associated with the "Disease" diagnosis, such as Arcobacter and Kyt
+
+Sample 10: 2538.1000728
+  True: Healthy | LLM: Disease | CLF: Healthy (p=0.002)
+  Correct: False
+  Response: Diagnosis: Disease (IBD)
+
+Reasoning: The presence of a mix of bacterial species, including pathogenic ones like Arcobacter and Taylorella, along with a significant overlap with microbiomes associated with disease states, particularly those containing Caldanaerocella, Candidatus Regiella, Ethanoligen
+
