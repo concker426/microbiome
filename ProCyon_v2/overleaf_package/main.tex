@@ -274,7 +274,7 @@ MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 
 \end{tabular}
 \end{table}
 
-\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation.
+\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$).
 
 \begin{figure}[ht]
 \centering
@@ -803,6 +803,24 @@ The core insight is the \textbf{separation of concerns}: the model discovers pat
 % ═══════════════════════════════════════
 % REFERENCES
 % ═══════════════════════════════════════
+\section*{Data Availability}
+The clean\_2538, merged\_all and combined datasets were assembled from publicly available Qiita studies (studies 2538, 10283, 1939 and 10317) together with the American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts. External validation cohorts comprise Qiita studies 11484 and 1629 (raw BIOM tables and mapping files are available from the Qiita repository). Processed genus-abundance vectors, genus sequences and labels underlying the reported results are available from the authors upon request.
+
+\section*{Code Availability}
+All model training, evaluation and analysis code is publicly available at \url{https://github.com/concker426/microbiome}. Model checkpoints and reproduction scripts are included in the repository.
+
+\section*{Ethics Statement}
+This study is a secondary analysis of de-identified, publicly available human gut microbiome data (AGP/FTP via the Qiita platform, and Qiita studies 2538, 10283, 1939, 10317, 11484 and 1629). All contributing original studies obtained informed consent and institutional review board approval; no new human data were collected for this work, and no additional ethics approval was required.
+
+\section*{Author Contributions}
+To be completed by the authors.
+
+\section*{Competing Interests}
+The authors declare no competing interests.
+
+\section*{Acknowledgements}
+To be completed by the authors.
+
 \begin{thebibliography}{10}
 
 \bibitem{mgm2024}

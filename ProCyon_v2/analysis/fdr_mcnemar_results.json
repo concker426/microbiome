@@ -1,0 +1,122 @@
+[
+  {
+    "comparison": "SimpleEmb vs BernoulliNB",
+    "n": 375,
+    "disc_B": 216,
+    "disc_C": 159,
+    "p_raw": 0.003772344990281087,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.015089379961124348
+  },
+  {
+    "comparison": "SimpleEmb vs ExtraTrees",
+    "n": 156,
+    "disc_B": 79,
+    "disc_C": 77,
+    "p_raw": 0.9362204013023135,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.9362204013023135
+  },
+  {
+    "comparison": "SimpleEmb vs HistGradientBoosting",
+    "n": 139,
+    "disc_B": 75,
+    "disc_C": 64,
+    "p_raw": 0.39641508495172656,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.5946226274275899
+  },
+  {
+    "comparison": "SimpleEmb vs KNN",
+    "n": 329,
+    "disc_B": 213,
+    "disc_C": 116,
+    "p_raw": 9.819755826464298e-08,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 1.1783706991757159e-06
+  },
+  {
+    "comparison": "SimpleEmb vs LinearSVM",
+    "n": 278,
+    "disc_B": 133,
+    "disc_C": 145,
+    "p_raw": 0.5094955118443169,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.6793273491257558
+  },
+  {
+    "comparison": "SimpleEmb vs LogisticRegression",
+    "n": 197,
+    "disc_B": 88,
+    "disc_C": 109,
+    "p_raw": 0.15399515472928663,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.2814083860599209
+  },
+  {
+    "comparison": "SimpleEmb vs MGM+LR",
+    "n": 286,
+    "disc_B": 161,
+    "disc_C": 125,
+    "p_raw": 0.038304434907125894,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.11491330472137767
+  },
+  {
+    "comparison": "SimpleEmb vs MGM+MLP",
+    "n": 299,
+    "disc_B": 154,
+    "disc_C": 145,
+    "p_raw": 0.6436869744705723,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.7724243693646867
+  },
+  {
+    "comparison": "SimpleEmb vs MGM+RF",
+    "n": 406,
+    "disc_B": 186,
+    "disc_C": 220,
+    "p_raw": 0.10135319735747884,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.24324767365794925
+  },
+  {
+    "comparison": "SimpleEmb vs MLP",
+    "n": 235,
+    "disc_B": 115,
+    "disc_C": 120,
+    "p_raw": 0.794212476445464,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.866413610667779
+  },
+  {
+    "comparison": "SimpleEmb vs RBFSVM",
+    "n": 228,
+    "disc_B": 125,
+    "disc_C": 103,
+    "p_raw": 0.1641548918682872,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.2814083860599209
+  },
+  {
+    "comparison": "SimpleEmb vs RandomForest",
+    "n": 151,
+    "disc_B": 55,
+    "disc_C": 96,
+    "p_raw": 0.0010647254407627992,
+    "acc_SimpleEmb": 1.0,
+    "acc_other": 1.0,
+    "q_bh": 0.006388352644576795
+  }
+]
