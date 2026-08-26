@@ -23,7 +23,7 @@
 \maketitle
 
 \begin{abstract}
-We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder --- nn.Embedding with masked mean pooling, no pretraining, no Transformer --- achieves 92.57\% IBD diagnosis accuracy (AUC=0.975) on the held-out test set, statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%; 6.1pp under grouped CV); (2) XGBoost on raw genus abundance is a strong baseline, but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out), requiring only 760K parameters; (4) cross-dataset transfer evaluation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (70.7\% $\pm$ 11.9\% instability) but excels as an interpreter when grounded by LOO attributions --- halving hallucination (0.72 to 0.36 genera/response), achieving 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
+We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder --- nn.Embedding with masked mean pooling, no pretraining, no Transformer --- achieves 92.57\% IBD diagnosis accuracy (AUC=0.975) on the held-out test set, statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%; 6.1pp under grouped CV); (2) XGBoost on raw genus abundance is a strong baseline, but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out), requiring only 760K parameters; (4) cross-dataset transfer evaluation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (42--62\% accuracy across zero- to five-shot prompting, vs.\ 92\% for the trained classifier) but excels as an interpreter when grounded by LOO attributions --- halving hallucination (0.72 to 0.36 genera/response), achieving 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
 \end{abstract}
 
 % ═══════════════════════════════════════
@@ -383,6 +383,29 @@ $^\dagger$0 clean\_2538 test samples found in merged\_all training set; transfer
 
 \textbf{Finding}: merged$\rightarrow$clean (decontaminated) achieves 88.62\% ACC, retaining 94.9\% of within-dataset performance. In the reverse direction, clean$\rightarrow$merged suffers from the small training set and exhibits specificity collapse --- the model becomes overly conservative, predicting ``Healthy'' for nearly all out-of-distribution samples.
 
+
+\subsection{External Cohort Validation (Study 11484)}
+
+To probe generalization beyond the AGP/FTP cohorts, we evaluate the same clean\_2538-trained models on Study 11484, an independent US IBD cohort (96 samples, all IBD) processed through the identical Qiita genus-level pipeline. Table~\ref{tab:external} reports the disease identification rate (the fraction of the 96 IBD samples correctly predicted as Disease).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{External validation on Study 11484 (independent US IBD cohort, $n{=}96$, all IBD).}
+Models are trained exclusively on clean\_2538; disease identification rate = fraction of the 96 IBD samples correctly predicted as Disease.}
+\label{tab:external}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Model} & \textbf{Disease ident. rate} & \textbf{ACC} \\
+\midrule
+SimpleEmb + MLP (ProCyon v2) & 0.156 & 0.156 \\
+HistGradientBoosting & 0.552 & 0.552 \\
+Random Forest & \textbf{0.802} & \textbf{0.802} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The SimpleEmb classifier exhibits severe specificity collapse on the external cohort (73/96 samples assigned disease probability $<bash.1), identifying only 15.6\% of true IBD samples --- while maintaining 93.4\% held-out accuracy within AGP/FTP. This is consistent with the batch-effect analysis of Section~6.4: embeddings are dominated by study-specific compositional patterns rather than universal IBD biology. Notably, Random Forest trained on raw abundance retains 80.2\% disease identification, suggesting that tree ensembles feature-level decisions are more robust to batch shifts than the learned embedding space. These results confirm limitation~(1): external validation on independent clinical cohorts remains the central open challenge for embedding-based microbiome classifiers.
+
 \subsection{Data Efficiency}
 
 Unlike foundation models requiring hundreds of thousands of pretraining samples, ProCyon v2 achieves competitive performance from limited labeled data. Using nested group-CV (3 repeats $\times$ StratifiedGroupKFold, grouped by exact genus-sequence hash to prevent leakage), we evaluate performance as a function of training set size (Figure~\ref{fig:learning}):
@@ -695,6 +718,32 @@ All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
 
 The disagreement cases reveal complementary behavior: SimpleEmb+MLP correctly identifies healthy samples that confuse both tree and Transformer models, and uniquely handles extreme low-richness IBD samples (4 tokens) where MGM fails. Conversely, HGB recovers borderline disease cases that SimpleEmb misses. The high-confidence false positive with a single active token (likely a degenerate or sequencing-artifact profile) fools all three models, and the two-token false negative is missed only by SimpleEmb --- these extreme low-richness samples, corresponding to the Cluster~1 subtype (Section~3.3), are a systematic failure mode warranting dedicated handling.
 
+
+\subsection{Few-Shot Prompting Evaluation}
+
+Beyond explanation, we ask whether Qwen2-7B-Instruct can perform IBD diagnosis directly through in-context learning. We evaluate $k\in\{0,1,3,5\}$ examples of (genus list, diagnosis) pairs sampled from the training set, on 100 held-out test samples (Table~\ref{tab:fewshot}).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Few-shot LLM evaluation on IBD diagnosis ($n{=}100$).}
+Qwen2-7B-Instruct is given $k$ examples of (genus list, diagnosis) pairs and asked to predict on new test samples. The specialized classifier (SimpleEmb+MLP) outperforms the LLM by a large margin, demonstrating that domain-specific training is necessary for microbiome-based diagnosis.}
+\label{tab:fewshot}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{ACC} & \textbf{F1} & \textbf{Uncertain} & \textbf{Correct/Total} \\
+\midrule
+LLM (k=0, zero-shot) & 0.420 & 0.296 & 0 & 42/100 \\
+LLM (k=1, 1-shot) & 0.596 & 0.594 & 1 & 59/99 \\
+LLM (k=3, 3-shot) & 0.550 & 0.549 & 0 & 55/100 \\
+LLM (k=5, 5-shot) & 0.620 & 0.618 & 0 & 62/100 \\
+\midrule
+\textbf{ProCyon v2 (trained)} & \textbf{0.920} & \textbf{---} & 0 & 92/100 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Even with five in-context examples, the LLM reaches only 62.0\% accuracy, far below the 92.0\% of the trained classifier on the identical samples. Adding examples provides no reliable scaling (k$=$1: 59.6\%, k$=$3: 55.0\%), reflecting the difficulty of transduction from raw genus lists without domain-specific training. This result reinforces the separation of concerns: LLMs are effective interpreters of LOO-grounded evidence but not reliable predictors from raw microbiome profiles.
+
 \subsection{Calibration}
 
 ProCyon v2 produces well-calibrated probabilities: Expected Calibration Error (ECE) $=$ 0.0496, Brier Score $=$ 0.0555. Most predictions concentrate near 0 or 1 (64 samples in [0.0, 0.1), 66 in [0.9, 1.0]), with only 8 samples in the ambiguous [0.3, 0.7] range. When the model assigns ${\geq}90\%$ probability to IBD, the empirical disease rate is 100\%.
@@ -728,7 +777,7 @@ With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus --- sufficie
 
 \subsection{When LLMs Help}
 
-The LLM fails as a classifier (70.7\% $\pm$ 11.9\%) but succeeds as an interpreter when LOO-grounded: hallucination halves (0.72 to 0.36 genera/response), prediction consistency reaches 98\%, and direction accuracy reaches 0.94. This asymmetry motivates ProCyon v2's dual-branch design: classification and interpretation are separate concerns requiring different optimization.
+The LLM fails as a classifier (42--62\% accuracy across zero- to five-shot prompting, vs.\ 92\% for the trained classifier) but succeeds as an interpreter when LOO-grounded: hallucination halves (0.72 to 0.36 genera/response), prediction consistency reaches 98\%, and direction accuracy reaches 0.94. This asymmetry motivates ProCyon v2's dual-branch design: classification and interpretation are separate concerns requiring different optimization.
 
 \subsection{Why LOO Attribution Is Reliable Despite Low Jaccard}
 
@@ -736,7 +785,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Limitations}
 
-(1) External validation on independent clinical cohorts (TCMA, HMP) is needed. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
+(1) External validation on an independent IBD cohort (Study 11484) confirms severe generalization failure: the SimpleEmb classifier identifies only 15.6\% of external IBD samples (vs. 80.2\% for Random Forest), underscoring that batch effects remain the central open challenge; validation on further cohorts (TCMA, HMP) is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
