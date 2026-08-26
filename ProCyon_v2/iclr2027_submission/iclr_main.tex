@@ -66,7 +66,7 @@ The 366 observed genera exhibit a strong long-tail distribution: only 42 genera 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/dataset_architecture_figure.png}
+\includegraphics[width=0.78\textwidth]{figures/dataset_architecture_figure.png}
 \caption{\textbf{Dataset statistics and architecture comparison.}
 (A) ProCyon v2 vs.\ MGM architecture side-by-side. (B--G) Class distribution,
 genus prevalence distribution, richness, top-30 prevalent genera, long-tail cumulative
@@ -297,7 +297,29 @@ LOO attribution shows near-zero correlation with univariate fold change across p
 Within the single-study cohort, disease-healthy separation is preserved (D-D 0.539, H-H 0.643, D-H 0.557), confirming the embedding captures biological signal rather than batch effects (Appendix).
 \subsection{LLM Explanation Benchmark}
 
-Table~\ref{tab:llm} summarizes the 167-sample evaluation of three prompt variants (Raw, LOO, LOO+Lit). LOO grounding halves hallucination (0.72 to 0.36 genera/response), raises prediction consistency from 63\% to 98\%, and improves direction accuracy from 0.27 to 0.94; adding literature context provides no further gain, consistent with the model discovering dataset-specific patterns beyond canonical markers. Four representative cases (correct, borderline, misclassified, extreme-IBD) illustrate that explanations mirror model confidence and expose atypical microbiomes in false negatives.
+Table~\ref{tab:llm} summarizes the 167-sample evaluation of three prompt variants (Raw, LOO, LOO+Lit). LOO grounding halves hallucination (0.72 to 0.36 genera/response), raises prediction consistency from 63\% to 98\%, and improves direction accuracy from 0.27 to 0.94; adding literature context provides no further gain, consistent with the model discovering dataset-specific patterns beyond canonical markers.
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{LLM explanation validation (all 167 test samples, Qwen2-7B-Instruct).}
+Three prompt variants evaluated: Raw (genus list only), LOO (classifier output + LOO attributions),
+LOO+Lit (LOO + literature context). Bold indicates best.}
+\label{tab:llm}
+\begin{tabular}{p{6.0cm}ccc}
+\toprule
+\textbf{Metric} & \textbf{Raw LLM} & \textbf{LOO+LLM} & \textbf{LOO+Lit+LLM} \\
+\midrule
+Hallucinated genera (avg/response) & 0.72 & \textbf{0.36} & 0.35 \\
+Input genera mentioned (avg) & 5.47 & 9.02 & \textbf{9.05} \\
+LOO consistency (mentioned genera in top-15) & 0.70 & 0.99 & \textbf{1.00} \\
+Direction accuracy & 0.27 & \textbf{0.94} & 0.93 \\
+Prediction consistency (\%) & 63\% & \textbf{98\%} & 98\% \\
+Specificity ratio (biol. mechanisms) & 0.38 & \textbf{0.44} & 0.33 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Four representative cases (correct, borderline, misclassified, extreme-IBD) illustrate that explanations mirror model confidence and expose atypical microbiomes in false negatives.
 \subsection{Few-Shot Prompting Evaluation}
 
 Beyond explanation, we ask whether Qwen2-7B-Instruct can perform IBD diagnosis directly through in-context learning. We evaluate $k\in\{0,1,3,5\}$ examples of (genus list, diagnosis) pairs sampled from the training set, on 100 held-out test samples (Table~\ref{tab:fewshot}).
@@ -382,6 +404,16 @@ The authors declare no competing interests.
 
 \section*{Acknowledgements}
 To be completed by the authors.
+
+\subsection*{AI Use Statement}
+(This section is required and does not count toward the page limit.)
+
+In this work, we used generative AI tools (large language model-based assistants) for drafting and editing manuscript text, for code generation and debugging, and for assistance with experimental analysis and figure preparation. We have not used generative AI tools for data collection or human-subject research, and no such tools were involved in study design or interpretation of results. We have reviewed all AI-assisted work, including text, claims, and code, and we take full responsibility for the final content of this work.
+
+\subsection*{Reproducibility Statement}
+(This section is recommended and does not count toward the page limit.)
+
+The complete pipeline is reproducible: the model architecture and training hyperparameters are specified in Section~4; evaluation protocols (leakage-robust grouped cross-validation, leave-one-source-out external validation, and statistical tests) are detailed in Section~5 and the Appendix; the codebase is available at an anonymized repository link (for review); processed genus sequences, vectors, labels, and reproduction scripts are included in the repository.
 
 \bibliography{references}
 \bibliographystyle{iclr2027_conference}
@@ -711,4 +743,24 @@ All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
 \end{tabular}
 \end{table}
 
+
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/learning_curve.png}
+\caption{\textbf{Data efficiency (nested group-CV).}
+(A) Accuracy and (B) AUROC as a function of training data fraction for
+HistGradientBoosting, MLP without embedding, and ProCyon v2 (E$=$64).}
+\label{fig:learning}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/shap_reliability.png}
+\caption{\textbf{LOO attribution reliability.}
+(A) Spearman rank correlation matrix across 5 folds. (B) Deletion test: AUC drop when
+removing top-K LOO-identified genera vs.\ random genera. (C) Real vs.\ permuted-label
+LOO importance distributions. (D) Prevalence vs.\ importance scatter.}
+\label{fig:loo_reliability}
+\end{figure}
 \end{document}
