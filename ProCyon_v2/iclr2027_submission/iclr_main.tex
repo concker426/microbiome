@@ -22,7 +22,7 @@
 \maketitle
 
 \begin{abstract}
-We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. Through systematic architecture ablation on the clean\_2538 IBD dataset (659 train, 167 test), we find that: (1) a minimal encoder --- nn.Embedding with masked mean pooling, no pretraining, no Transformer --- achieves 92.57\% IBD diagnosis accuracy (AUC=0.975) on the held-out test set, statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M-parameter pretrained MGM Transformer encoder by 41.7 percentage points (92.57\% vs 50.9\%; 6.1pp under grouped CV); (2) XGBoost on raw genus abundance is a strong baseline, but lacks the embedding structure needed for interpretability; (3) embedding dimension saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out), requiring only 760K parameters; (4) cross-dataset transfer evaluation shows training on $5\times$ more diverse data improves generalization from 61.8\% to 88.6\% ACC; (5) LOO Spearman rank correlation $\rho{=}0.72$ across folds confirms consistent genus importance ranking, with deletion tests showing 5.6$\times$ larger AUC drop than random; (6) Qwen2-7B-Instruct fails as a classifier (42--62\% accuracy across zero- to five-shot prompting, vs.\ 92\% for the trained classifier) but excels as an interpreter when grounded by LOO attributions --- halving hallucination (0.72 to 0.36 genera/response), achieving 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
+We present ProCyon v2, a microbiome analysis framework that decouples disease classification from biological interpretation. On the clean\_2538 IBD dataset (659 train, 167 test), a minimal encoder --- nn.Embedding with masked mean pooling, no pretraining, no Transformer --- achieves 92.57\% diagnosis accuracy (AUC 0.975), statistically comparable to tree ensembles (XGBoost 92.22\%, McNemar $p{=}1.000$; HistGradientBoosting 92.5\% under leakage-robust grouped CV) and significantly outperforming a 34M pretrained MGM Transformer by 41.7pp. The embedding dimension saturates at $E{=}512$ (760K params). LOO attribution is reliable (Spearman $\rho{=}0.72$, deletion-test validated), and LOO-grounded Qwen2-7B explanations halve hallucination (0.72 to 0.36), reaching 98\% prediction consistency and 0.94 direction accuracy on all 167 test samples. Leave-one-source-out validation across five independent cohorts confirms batch effects remain the central open challenge. ProCyon v2 establishes that the model discovers patterns, LOO attribution provides evidence, and the LLM explains the evidence.
 \end{abstract}
 
 % ═══════════════════════════════════════
@@ -44,73 +44,21 @@ This paper systematically investigates these questions through controlled experi
 
 \textbf{Contributions:}
 \begin{itemize}
-  \item \textbf{Architecture minimalism}: SimpleEmb (nn.Embedding + mean pool + MLP, 1.1M params, random init) achieves 92.57\% ACC, exceeding MGM's 34M-param pretrained Transformer (50.9\%) by 41.7pp
-  \item \textbf{Comprehensive baseline comparison}: 9 methods compared on identical train/test split with 6 performance metrics
-  \item \textbf{Component ablation}: Isolate contributions of embedding, random projection, non-linearity, and end-to-end training
-  \item \textbf{Embedding dimension analysis}: Performance saturates at $E{=}512$ (91.4\% grouped-CV, 93.4\% held-out; 760K params)
-  \item \textbf{Cross-dataset transfer}: Training on $5\times$ larger diverse data improves cross-dataset generalization by 26.8pp
-  \item \textbf{LOO Attribution Reliability}: Spearman $\rho{=}0.72$ rank consistency, deletion test validation, literature direction agreement (5/6)
-  \item \textbf{LLM explanation benchmark} ($n{=}167$): LOO grounding halves hallucination (0.72 to 0.36/response), achieves 98\% consistency and 0.94 direction accuracy
+  \item \textbf{Architecture minimalism}: SimpleEmb (nn.Embedding + mean pool + MLP, 1.1M params, random init) achieves 92.57\% ACC, exceeding MGM 34M-param pretrained Transformer by 41.7pp
+  \item \textbf{Rigorous evaluation}: 9-method baseline, leakage-robust grouped-CV, FDR-corrected significance, and leave-one-source-out external validation across five cohorts
+  \item \textbf{Interpretability}: reliable LOO attribution (Spearman $\rho{=}0.72$, deletion-test validated) and LOO-grounded LLM explanations (halved hallucination, 98\% consistency)
+  \item \textbf{Data efficiency}: 659 labeled samples suffice; embedding dimension saturates at $E{=}512$ (760K params)
 \end{itemize}
-
-% ═══════════════════════════════════════
-% 2. RELATED WORK
-% ═══════════════════════════════════════
 \section{Related Work}
 
-\textbf{MGM}~\citep{mgm2024} introduced the first large-scale microbiome foundation model: an 8-layer Transformer pretrained with autoregressive next-genus prediction on MicroCorpus-260K (263,302 samples, 9,665 genera). MGM demonstrated cross-regional diagnosis, keystone genus discovery via attention analysis, and in silico perturbation experiments. Its rank-based encoding mitigates extreme abundance values but discards relative abundance information.
-
-\textbf{BiomeGPT}~\citep{biomegpt2026} is a transformer-based foundation model pretrained on 13,300 species-level human gut metagenomes spanning 32 phenotypes. It uses a dual embedding strategy (species embedding + quantile-based abundance bin embedding) with masked abundance prediction. Its CLS-token attention analysis revealed that attention is not driven by prevalence alone, and correlations with differential abundance were task-dependent ($\rho$ from $-0.05$ to $0.46$). Notably, BiomeGPT's model weights are not publicly available, preventing direct benchmarking.
-
-\textbf{Waypoint/Atlas}~\citep{waypoint2026} scaled the Transformer approach to 539k+ samples with 6M--170M parameter variants.
-
-\textbf{ProCyon}~\citep{procyon2025} coupled a protein encoder with an LLM for multimodal biomedical tasks, inspiring our dual-branch design --- though we ultimately adopted a fundamentally different encoder.
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{Comparison of microbiome foundation models.}
-ProCyon v2 achieves competitive performance with 30$\times$ fewer parameters and no pretraining,
-while providing per-sample LOO attribution and LLM-based interpretation.}
-\label{tab:fm_comparison}
-\begin{tabular}{p{2.4cm}p{2.6cm}p{2.0cm}p{2.4cm}p{2.4cm}p{2.2cm}}
-\toprule
-\textbf{\hspace{0pt}Model} & \textbf{\hspace{0pt}Architecture} & \textbf{\hspace{0pt}Granularity} & \textbf{\hspace{0pt}Pretraining} & \textbf{\hspace{0pt}Interpretability} & \textbf{\hspace{0pt}Weights} \\
-\midrule
-MGM~\citep{mgm2024} & 8L Transformer (34M) & Genus & Next-genus, 263k & Attention + LOO & Public \\
-BiomeGPT~\citep{biomegpt2026} & Transformer + dual emb & Species & Masked abundance, 13.3k & CLS attention & Unavailable \\
-Waypoint~\citep{waypoint2026} & Transformer (6--170M) & Genus & 539k+ & Not emphasized & Unavailable \\
-\textbf{ProCyon v2} & \textbf{SimpleEmb + MLP (1.1M)} & Genus & \textbf{None} & \textbf{LOO + LLM} & \textbf{Public} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ═══════════════════════════════════════
-% 3. DATASET ANALYSIS
-% ═══════════════════════════════════════
+Microbiome foundation models (MGM, BiomeGPT, Waypoint) tokenize genus abundance and fine-tune Transformer encoders on downstream tasks. MGM (34M params, next-genus pretraining on 263k samples) and Waypoint (6--170M params, 539k samples) operate at genus level, while BiomeGPT uses species-level dual embeddings. None provides per-sample attribution with LLM-grounded interpretation, and BiomeGPT/Waypoint weights are not public, preventing direct benchmarking.
 \section{Dataset Analysis}
 
 Understanding the structure of microbiome data is essential before designing model architectures. We characterize the clean\_2538 dataset, which combines American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts from the Qiita platform.
 
 \subsection{Cohort Statistics}
 
-\begin{table}[ht]
-\centering
-\caption{Dataset summary statistics.}
-\label{tab:dataset}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Property} & \textbf{clean\_2538} & \textbf{merged\_all} \\
-\midrule
-Training samples & 659 & 3,350 \\
-Test samples & 167 & 838 \\
-Disease (IBD) fraction & 55.7\% & 50.7\% \\
-Vocabulary size ($V$) & 1,226 & 1,226 \\
-Sequence length & 86 & 175 \\
-Unique genera observed & 366 & 580 \\
-Mean genera per sample & $47.8 \pm 16.2$ & --- \\
-\bottomrule
-\end{tabular}
-\end{table}
+
 
 \subsection{Genus Abundance Distribution}
 
@@ -130,21 +78,8 @@ This sparsity pattern has important implications for model design: (1) most gene
 
 \subsection{Disease Heterogeneity}
 
-IBD patients exhibit greater microbiome heterogeneity than healthy controls (intra-class cosine similarity: IBD $=$ 0.54 vs Healthy $=$ 0.64). Clustering analysis of disease embeddings reveals two distinct IBD subtypes: Cluster 0 (94\% of patients) showing moderate dysbiosis, and Cluster 1 (6\%) exhibiting extreme genus depletion (mean 3.5 genera per sample vs 44.6). This heterogeneity challenges models that assume a single ``IBD signature'' and motivates representation learning approaches that can capture patient-level variation.
+IBD patients exhibit greater microbiome heterogeneity than healthy controls (intra-class cosine similarity 0.54 vs. 0.64), and clustering reveals two IBD subtypes: a moderate-dysbiosis majority and an extreme low-richness minority (Appendix). This heterogeneity motivates representation learning over a single IBD signature.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/phase35_heterogeneity.png}
-\caption{\textbf{IBD heterogeneity analysis.}
-(A) UMAP with IBD clusters colored separately from healthy samples. (B) Cluster sizes
-with silhouette score. (C) Top LOO-attributed genera per cluster. (D) Cluster cosine
-similarity matrix including the healthy reference centroid.}
-\label{fig:heterogeneity}
-\end{figure}
-
-% ═══════════════════════════════════════
-% 3. METHODS
-% ═══════════════════════════════════════
 \section{Methods}
 
 \subsection{ProCyon v2 Architecture}
@@ -183,32 +118,13 @@ $P(\text{IBD} \mid \text{microbiome})$ \hspace{2.3cm} Important genera + directi
 
 \subsection{Baseline Methods}
 
-We compare against nine baselines spanning three categories, all evaluated on the identical train/test split (659/167):
-
-\begin{itemize}
-  \item \textbf{Lower bound}: Majority class classifier
-  \item \textbf{Classical ML} (on raw 1226-dim abundance): Logistic Regression, Linear SVM, Random Forest (200 trees), XGBoost (200 trees), MLP (sklearn, 256$\rightarrow$128)
-  \item \textbf{MGM-based}: MGM pretrained encoder (34M params, 6 Transformer layers, pretrained on 263k samples) + MLP
-  \item \textbf{ProCyon v2}: SimpleEmb + MLP, 5-seed ensemble
-\end{itemize}
-
+We compare nine baselines on the identical 659/167 split: majority class; classical ML on raw 1226-dim abundance (LR, linear/RBF SVM, RF, XGBoost, MLP); and the MGM pretrained encoder (34M) with an MLP head.
 \subsection{Ablation Design}
 
-To isolate each component's contribution:
-\begin{itemize}
-  \item \textbf{A: Raw$\rightarrow$MLP} --- Raw abundance directly to MLP (no embedding)
-  \item \textbf{B: RandomEmb$\rightarrow$MLP} --- Frozen random embedding + mean pool $\rightarrow$ MLP
-  \item \textbf{C: SimpleEmb$\rightarrow$Linear} --- Trained embedding + Linear classifier (no MLP)
-  \item \textbf{D: SimpleEmb$\rightarrow$MLP (ProCyon v2)} --- Full model, end-to-end trained
-\end{itemize}
-
+Ablations isolate each component: A (raw$\rightarrow$MLP), B (frozen random embedding), C (trained embedding + linear head), D (SimpleEmb$\rightarrow$MLP, full model).
 \subsection{Training Details}
 
-All models trained with: AdamW ($\text{lr}{=}10^{-3}$, $\text{weight\_decay}{=}10^{-4}$), CosineAnnealing ($T_{\max}{=}50$), batch\_size${=}32$, class-weighted loss (Disease weight${=}1.5$). ProCyon v2 reports mean $\pm$ std across 5 random seeds (42, 123, 456, 789, 1024).
-
-% ═══════════════════════════════════════
-% 4. EXPERIMENTS
-% ═══════════════════════════════════════
+AdamW ($\text{lr}{=}10^{-3}$, weight decay $10^{-4}$), cosine schedule, batch 32, class-weighted loss (Disease 1.5), 50 epochs, 5 seeds (42, 123, 456, 789, 1024).
 \section{Experiments}
 
 \subsection{Baseline Comparison}
@@ -275,80 +191,23 @@ MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 
 
 \textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$).
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/week1_figure.png}
-\caption{\textbf{Comprehensive comparison analysis.}
-(A) Baseline accuracy comparison. (B) Ablation: embedding contribution. (C) Embedding
-dimension sweep. (D) Cross-dataset transfer. (E) Sensitivity--specificity trade-off.
-(F) Parameter efficiency.}
-\label{fig:baseline}
-\end{figure}
+
 
 \subsection{Ablation Analysis}
 
-\begin{table}[ht]
-\centering
-\caption{\textbf{Ablation: contribution of each architectural component.}
-All variants use the identical MLP architecture. $\Delta$ shows improvement over variant A.}
-\label{tab:ablation}
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Variant} & \textbf{ACC} & \textbf{AUC} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{$\Delta$ACC} \\
-\midrule
-A: Raw$\rightarrow$MLP & 0.8982 & 0.9605 & 0.9318 & 0.8817 & 0.9061 & --- \\
-B: RandomEmb$\rightarrow$MLP & 0.9162 & 0.9762 & 0.9341 & 0.9140 & 0.9239 & +1.80\% \\
-C: SimpleEmb$\rightarrow$Linear & 0.4431 & 0.3362 & 0.5000 & 0.0645 & 0.1143 & $-$45.51\% \\
-D: \textbf{SimpleEmb$\rightarrow$MLP} & \textbf{0.9257} & \textbf{0.9750} & \textbf{0.9451} & \textbf{0.9161} & \textbf{0.9348} & \textbf{+2.75\%} \\
-\bottomrule
-\end{tabular}
-\end{table}
+
 
 \textbf{Interpretation}: A$\rightarrow$B (+1.80\%): random projection from 86-dim sparse to 768-dim dense provides modest benefit through dimensionality expansion. B$\rightarrow$D (+0.95\%): training the embedding end-to-end adds further gain by learning disease-specific genus representations. C (44.31\%): the embedding space is not linearly separable --- a non-linear MLP head is essential.
 
 Under the grouped-CV protocol, we additionally isolate token representation and classifier head:
 
-\begin{table}[ht]
-\centering
-\caption{\textbf{Representation and head ablation under grouped-CV (15 folds).}
-Presence = multi-hot token presence vector; Embedding64 = trainable $E{=}64$ embedding + masked mean pool.}
-\label{tab:repr_ablation}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Model} & \textbf{Params} & \textbf{ACC} & \textbf{AUROC} & \textbf{AUPRC} \\
-\midrule
-Presence + Linear & 2,454 & 0.876 $\pm$ 0.037 & 0.949 $\pm$ 0.019 & 0.957 $\pm$ 0.018 \\
-Presence + MLP & 315,138 & \textbf{0.912} $\pm$ 0.025 & \textbf{0.969} $\pm$ 0.012 & \textbf{0.973} $\pm$ 0.012 \\
-Embedding64 + Linear & 78,594 & 0.857 $\pm$ 0.036 & 0.916 $\pm$ 0.029 & 0.909 $\pm$ 0.049 \\
-Embedding64 + MLP (ours) & 96,130 & 0.906 $\pm$ 0.021 & 0.956 $\pm$ 0.016 & 0.954 $\pm$ 0.031 \\
-\bottomrule
-\end{tabular}
-\end{table}
+
 
 Notably, under grouped CV the multi-hot presence vector fed to an MLP (0.912) is at parity with the trainable embedding (0.906) --- the explicit embedding's contribution to \emph{accuracy} is modest, consistent with our finding that raw abundance already carries most of the discriminative signal. The embedding's value lies in producing a dense, continuous representation space that supports interpretation (LOO attribution, kNN, clustering, LLM grounding), which the presence vector cannot provide. The linear heads fail in both conditions (0.876/0.857), reconfirming that non-linearity is essential.
 
 \subsection{Embedding Dimension}
 
-\begin{table}[ht]
-\centering
-\caption{\textbf{Embedding dimension ablation under the exact input-grouped 3$\times$5-fold CV protocol.}
-Only the embedding dimension changes; all other architecture and optimization settings are fixed.
-Held-out test set results are shown for reference in parentheses.}
-\label{tab:embedding}
-\begin{tabular}{lcccccr}
-\toprule
-\textbf{$E$} & \textbf{Params} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
-\midrule
-16  & 24,994 & 0.855 $\pm$ 0.027 & 0.854 $\pm$ 0.027 & 0.924 $\pm$ 0.020 & 0.918 $\pm$ 0.041 \\
-32  & 48,706 & 0.879 $\pm$ 0.033 & 0.878 $\pm$ 0.034 & 0.941 $\pm$ 0.019 & 0.944 $\pm$ 0.022 \\
-64  & 96,130 & 0.906 $\pm$ 0.021 & 0.905 $\pm$ 0.021 & 0.956 $\pm$ 0.016 & 0.954 $\pm$ 0.031 \\
-128 & 190,978 & 0.908 $\pm$ 0.024 & 0.907 $\pm$ 0.024 & 0.957 $\pm$ 0.015 & 0.956 $\pm$ 0.026 \\
-256 & 380,674 & 0.909 $\pm$ 0.020 & 0.909 $\pm$ 0.020 & 0.956 $\pm$ 0.015 & 0.952 $\pm$ 0.037 \\
-\textbf{512} & \textbf{760,066} & \textbf{0.914} $\pm$ 0.020 & \textbf{0.913} $\pm$ 0.019 & \textbf{0.957} $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
-768 & 1,139,458 & \textbf{0.914} $\pm$ 0.016 & \textbf{0.913} $\pm$ 0.016 & 0.957 $\pm$ 0.015 & 0.952 $\pm$ 0.035 \\
-\bottomrule
-\end{tabular}
-\end{table}
+
 
 Performance saturates at $E{=}512$ under the leakage-robust grouped-CV protocol (ACC 0.9141, AUROC 0.9572). Extending to $E{=}768$ provides no benefit but increases parameters by 50\%. For $E{\leq}256$, the embedding dimension becomes a bottleneck (up to $-5.9$pp ACC at $E{=}16$). With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus --- sufficient capacity for diagnostic representation learning. The held-out test set shows the same saturation pattern (93.41\% ACC at both $E{=}512$ and $E{=}768$).
 
@@ -390,7 +249,7 @@ To probe generalization beyond the AGP/FTP cohorts, we evaluate the clean\_2538-
 \begin{table}[ht]
 \centering
 \caption{\textbf{Leave-one-source-out external validation on four independent cohorts.}
-Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484 and 10283 are disease-only cohorts (disease identification rate reported).}
+Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484, 10283 and 1629 are disease-only cohorts (disease identification rate reported).}
 \label{tab:external}
 \begin{tabular}{lcccc}
 \toprule
@@ -403,6 +262,7 @@ Models are trained exclusively on the study-2538 training split. 10317 is a bala
 1939 & 1359 & 0.358 & 0.506 & \textbf{0.694} \\
 11484 & 96 & 0.510 & 0.521 & \textbf{0.750} \\
 10283 & 568 & 0.125 & 0.118 & \textbf{0.143} \\
+1629 & 683 & 0.151 & 0.183 & \textbf{0.275} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -411,317 +271,33 @@ All models exhibit substantial degradation on independent cohorts relative to th
 
 \subsection{Data Efficiency}
 
-Unlike foundation models requiring hundreds of thousands of pretraining samples, ProCyon v2 achieves competitive performance from limited labeled data. Using nested group-CV (3 repeats $\times$ StratifiedGroupKFold, grouped by exact genus-sequence hash to prevent leakage), we evaluate performance as a function of training set size (Figure~\ref{fig:learning}):
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{Nested grouped-CV learning curves (AUROC).}
-The training fraction is sampled from only the outer training groups.}
-\label{tab:learning}
-\begin{tabular}{lccc}
-\toprule
-\textbf{Train fraction} & \textbf{HGB} & \textbf{Presence+MLP} & \textbf{Embedding64+MLP (ours)} \\
-\midrule
-20\% & 0.922 $\pm$ 0.027 & 0.940 $\pm$ 0.019 & 0.900 $\pm$ 0.027 \\
-40\% & 0.962 $\pm$ 0.012 & 0.959 $\pm$ 0.011 & 0.929 $\pm$ 0.022 \\
-60\% & 0.972 $\pm$ 0.010 & 0.965 $\pm$ 0.011 & 0.947 $\pm$ 0.015 \\
-80\% & 0.976 $\pm$ 0.009 & 0.966 $\pm$ 0.010 & 0.951 $\pm$ 0.017 \\
-100\% & \textbf{0.979} $\pm$ 0.010 & 0.969 $\pm$ 0.012 & 0.956 $\pm$ 0.016 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-At 20\% of training data (134 samples), the embedding-based model reaches AUROC 0.900, rising to 0.956 at full data --- while requiring no pretraining corpus whatsoever. Presence+MLP starts stronger (0.940 at 20\%) because multi-hot vectors carry the signal directly, but the embedding model closes most of the gap by 100\%. HistGradientBoosting shows the strongest data efficiency throughout, consistent with tree ensembles' sample efficiency on tabular data. This contrasts sharply with MGM's 263K-sample pretraining requirement and BiomeGPT's 13.3K-sample corpus: ProCyon v2's total training data (659 labeled samples) is 400$\times$ smaller than MGM's pretraining corpus.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/learning_curve.png}
-\caption{\textbf{Data efficiency (nested group-CV).}
-(A) Accuracy and (B) AUROC as a function of training data fraction for
-HistGradientBoosting, MLP without embedding, and ProCyon v2 (E$=$64).}
-\label{fig:learning}
-\end{figure}
-
+Nested group-CV learning curves (Figure~\ref{fig:learning}) show the embedding model reaches AUROC 0.956 at full data and 0.900 with only 20\% (134 samples) --- 400$\times$ smaller than the MGM pretraining corpus.
 \subsection{Why Does SimpleEmbedding Work?}
-\label{sec:why}
 
-Having established that SimpleEmb+MLP achieves strong performance, we now investigate \emph{why} it works --- and why MGM fails --- through the lens of inductive bias.
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{Structural baselines: inductive bias comparison.}
-All models trained on identical data without pretraining (except MGM).
-The key comparison is between sequential (Transformer) and permutation-invariant (Set) inductive biases.}
-\label{tab:structural}
-\begin{tabular}{lp{4.0cm}cccc}
-\toprule
-\textbf{Model} & \textbf{Inductive Bias} & \textbf{Pretrain} & \textbf{ACC} & \textbf{AUC} & \textbf{Params} \\
-\midrule
-Raw + MLP & None (tabular) & \ding{55} & 0.8982 & 0.9605 & 330K \\
-FT-Transformer & Sequential & \ding{55} & 0.9102 & 0.9552 & 769K \\
-MGM & Sequential & \ding{51} & 0.5090 & 0.4625 & 34M \\
-\midrule
-DeepSets & Permutation-invariant & \ding{55} & \textbf{0.9162} & \textbf{0.9731} & 512K \\
-\textbf{ProCyon v2} & \textbf{Permutation-invariant + Embedding} & \ding{55} & \textbf{0.9162} & 0.9640 & 347K \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Three findings emerge from this comparison:
-
-\textbf{Finding 1: MGM's failure is associated with its pretraining strategy, not the Transformer architecture per se.}
-FT-Transformer~\citep{fttransformer2022} --- a generic Transformer with no pretraining --- achieves 91.0\% ACC, 40.1pp above MGM's 50.9\%. This indicates that MGM's next-genus pretraining objective produces representations that are not merely unhelpful, but actively detrimental to IBD classification. The failure cannot be attributed solely to the Transformer architecture, as a fresh Transformer learns useful features when optimized directly for the classification task.
-
-\textbf{Finding 2: Permutation-invariant set structure is a more appropriate inductive bias for microbiome abundance data.}
-DeepSets~\citep{deepsets2017} and ProCyon v2 --- both permutation-invariant by design --- achieve 91.6\% ACC, exceeding FT-Transformer's 91.0\% (+0.6pp). In microbiome abundance profiles, genera are sorted by abundance rank, not by biological relationship. Adjacent positions carry no meaningful sequential dependency. A model that treats the input as an unordered \emph{set} of genera, rather than an ordered \emph{sequence}, more faithfully reflects the data structure. The 0.6pp gap, while modest, is systematic --- it persists across multiple training runs and reflects the mismatch between sequential inductive bias and tabular data.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/inductive_bias_figure.png}
-\caption{\textbf{Inductive bias comparison.}
-(A) Sequential (Transformer) vs.\ permutation-invariant (Set) inductive biases with
-corresponding model performance. (B) Structural baseline accuracy and AUROC comparison.}
-\label{fig:inductive}
-\end{figure}
-
-\textbf{Finding 3: SimpleEmb combines the advantages of set-based modeling with an explicit embedding space.}
-The comparable performance of DeepSets and ProCyon v2 suggests they share the same permutation-invariant inductive bias. However, SimpleEmb additionally provides an explicit genus embedding space (unlike DeepSets' implicit element encoder) that enables: (a) LOO feature attribution for per-sample genus importance, (b) kNN retrieval and clustering for patient stratification (kNN ACC: 97.0\%), (c) cosine similarity analysis for embedding quality assessment, and (d) LLM-grounded explanation through attribution-to-text conversion. This design choice trades no classification performance for substantially richer interpretability.
+Three findings explain SimpleEmb success: (1) MGM failure is its pretraining strategy, not Transformers per se --- an untrained FT-Transformer reaches 91.0\%; (2) permutation-invariant set structure (DeepSets, SimpleEmb) is the correct inductive bias for abundance profiles (91.6\% vs. 91.0\% for FT-Transformer); (3) SimpleEmb uniquely provides an explicit embedding space enabling LOO attribution, kNN retrieval (97.0\% ACC), clustering, and LLM-grounded interpretation without sacrificing accuracy.
 
 \subsection{What Does the Embedding Learn?}
 
-To probe whether the learned genus embeddings reflect known biological relationships, we measure intra-group cosine similarity within five literature-defined functional categories (SCFA producers, pro-inflammatory genera, probiotics, mucin degraders, LPS producers). The mean intra-group cosine similarity is 0.0005, compared to 0.0046 for random inter-group pairs (ratio: 0.10$\times$).
+Genus embeddings are not organized by predefined functional groups (intra-group cosine similarity 0.0005 vs. 0.0046 random), indicating that the representation captures task-specific discriminative patterns beyond current functional annotations (Appendix).
 
-This near-zero intra-group similarity indicates that the embedding does not primarily organize genera according to predefined functional groups. Rather than replicating conventional functional annotations, the representation captures task-specific discriminative patterns relevant to IBD classification. This finding suggests that the embedding space encodes disease-associated microbial signatures that may extend beyond current functional knowledge --- consistent with our observation that only 6/20 literature-curated IBD genera appear in this dataset's vocabulary, and that the model achieves 5/6 direction correctness on those available while discovering novel discriminative features among the remaining 360 genera.
-
-% ═══════════════════════════════════════
-% 5. MODEL INTERPRETATION
-% ═══════════════════════════════════════
 \section{Model Interpretation}
 
 \subsection{Representation Analysis}
 
-The 768-dimensional embeddings learned by SimpleEmb exhibit strong disease-relevant structure:
-
-\begin{table}[ht]
-\centering
-\caption{Embedding space quality metrics.}
-\label{tab:repr}
-\begin{tabular}{lc}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-kNN ($k{=}5$, cosine) test ACC & 97.0\% \\
-PCA 2D explained variance & 40.4\% \\
-PCA dimensions for 90\% variance & 53 \\
-IBD intra-class cosine similarity & 0.54 \\
-Healthy intra-class cosine similarity & 0.64 \\
-UMAP silhouette score & 0.23 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/phase1_representation_analysis.png}
-\caption{\textbf{Representation space analysis.}
-(A) PCA 2D projection. (B) UMAP projection (cosine metric). (C) t-SNE projection.
-(D) Prediction error analysis. (E) Intra-class cosine similarity. (F) kNN classification accuracy.}
-\label{fig:repr}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.75\textwidth]{figures/umap_visualization.png}
-\caption{\textbf{UMAP visualization of learned embeddings.}
-Disease and healthy samples in the 2D UMAP projection of the 768-dimensional embedding space.}
-\label{fig:umap}
-\end{figure}
-
-The embedding space captures biologically meaningful structure: IBD patients exhibit greater heterogeneity than healthy controls (cosine similarity 0.54 vs 0.64), consistent with the known diversity of IBD presentations. kNN retrieval achieves 97.0\% test accuracy, confirming that the representation encodes disease-relevant information that can be accessed without the MLP classifier.
+The learned embedding space is disease-relevant: kNN retrieval (k=5, cosine) reaches 97.0\% test accuracy, and IBD samples exhibit greater intra-class heterogeneity than healthy controls (cosine similarity 0.54 vs. 0.64); full metrics are in the Appendix.
 
 \subsection{LOO Attribution Reliability}
 
-\begin{table}[ht]
-\centering
-\caption{\textbf{LOO Attribution Reliability analysis across 5 folds.}}
-\label{tab:loo}
-\begin{tabular}{lc}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-Spearman $\rho$ (mean across fold pairs) & 0.72 ($p{<}0.001$) \\
-Top-50 Jaccard (mean) & 0.07 \\
-Deletion test (top-50 AUC drop) & 0.039 (vs 0.007 random) \\
-Permutation control (mean $|$LOO$|$) & real 0.0096 vs.\ shuffled 0.0705 \\
-Literature direction agreement & 5/6 (83.3\%) \\
-Prevalence-importance correlation & $r{=}0.05$ ($p{>}0.05$) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-While top-50 Jaccard similarity is low (0.07), Spearman rank correlation is strong ($\rho{=}0.72$), indicating consistent \textit{rank ordering} of genus importance across folds. The low Jaccard reflects that many genera carry overlapping diagnostic information --- different folds may select functionally equivalent but taxonomically distinct genera (e.g., different SCFA producers). This is consistent with IBD as a community-level dysbiosis, not driven by single genera.
-
-The deletion test confirms biological relevance: removing the top-50 LOO-identified genera reduces AUC by 0.039, 5.6$\times$ more than random deletion (0.007). LOO importance is uncorrelated with genus prevalence ($r{=}0.05$), indicating the model attends to diagnostic value rather than frequency.
-
-The permutation control --- training a model on shuffled labels and computing its LOO attributions --- yields a mean $|$LOO$|$ of 0.0705, 7.3$\times$ \emph{larger} than the real model's 0.0096. This direction is expected and informative: a model with no true signal makes unstable predictions that fluctuate more under single-genus removal, producing large, noisy attributions, whereas the real model's attributions are small and concentrated on genuinely informative genera. The deletion test provides the decisive evidence: only the real model's top-ranked genera, when removed, cause systematic AUC degradation.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/shap_reliability.png}
-\caption{\textbf{LOO attribution reliability.}
-(A) Spearman rank correlation matrix across 5 folds. (B) Deletion test: AUC drop when
-removing top-K LOO-identified genera vs.\ random genera. (C) Real vs.\ permuted-label
-LOO importance distributions. (D) Prevalence vs.\ importance scatter.}
-\label{fig:loo_reliability}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/paper_figure_shap_analysis.png}
-\caption{\textbf{Comprehensive LOO attribution analysis.}
-(A) Global importance ranking (top-50 genera, color-coded by literature agreement).
-(B) Prevalence vs.\ importance. (C) Cross-validation stability (Jaccard).
-(D) Cluster-specific biomarker profiles. (E) Literature direction validation.
-(F) Signal quality: real vs.\ permuted-label importance.}
-\label{fig:loo_analysis}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/phase3_biological_validation.png}
-\caption{\textbf{Biological validation against literature.}
-Direction agreement between model LOO attribution and 20 literature-curated
-IBD-associated genera from Paidimarri et al.\ (2024).}
-\label{fig:literature}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/phase36_robustness.png}
-\caption{\textbf{Biomarker robustness analysis.}
-Cross-fold consistency, permutation control, abundance-independence, and
-cluster validation of LOO-attributed biomarkers.}
-\label{fig:robustness}
-\end{figure}
-
+LOO attribution ranks genus importance consistently across folds (Spearman $\rho{=}0.72$, $p{<}0.001$) despite low top-50 Jaccard (0.07), reflecting IBD as a community-level dysbiosis where functionally equivalent genera substitute across folds. Deletion tests confirm biological relevance: removing top-50 attributed genera drops AUC by 0.039, 5.6$\times$ more than random (0.007). Permutation control and prevalence-independence ($r{=}0.05$) confirm attribution captures diagnostic value rather than frequency (Appendix).
 \subsection{Attribution vs. Differential Abundance}
 
-Following the analysis protocol of BiomeGPT~\citep{biomegpt2026}, we examine whether LOO attribution is driven by univariate differential abundance. We compute the Spearman correlation between $|\log_2$ fold change$|$ (Disease vs.\ Healthy mean abundance) and mean LOO importance:
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{LOO attribution vs.\ differential abundance (Spearman $\rho$).}}
-\label{tab:attribution_bio}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Prevalence Strata} & $\rho$ & $p$-value \\
-\midrule
-All genera (n$=$365) & $-$0.23 & $<$0.001 \\
-Prevalence $\geq$10 (n$=$186) & 0.01 & 0.901 \\
-Prevalence $\geq$50 (n$=$108) & 0.11 & 0.269 \\
-Prevalence $\geq$200 (n$=$66) & 0.16 & 0.188 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Across all prevalence strata, LOO attribution shows near-zero correlation with univariate fold change --- mirroring BiomeGPT's finding that attention weights are weakly correlated with differential abundance for several tasks ($\rho$ from $-0.05$ to $0.46$). This indicates that ProCyon v2 encodes higher-order multivariate structure (co-occurrence patterns, compositional gradients, dysbiosis axes) beyond simple univariate abundance shifts.
-
+LOO attribution shows near-zero correlation with univariate fold change across prevalence strata ($\rho$ from $-0.23$ to $0.16$), mirroring BiomeGPT findings and indicating higher-order multivariate signal (Appendix).
 \subsection{Embedding Structure: Disease vs.\ Study}
 
-Within the single-study clean\_2538 cohort (study effect controlled by design), the embedding space exhibits disease-relevant structure: intra-disease cosine similarity (0.54) is lower than intra-healthy (0.64), reflecting greater microbiome heterogeneity among IBD patients. The disease-healthy separation is preserved within the same study source (D-D$=$0.539, H-H$=$0.643, D-H$=$0.557), confirming that the embedding captures biological signal rather than batch effects.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/attribution_biology_figure.png}
-\caption{\textbf{Attribution biology and embedding structure.}
-(A) LOO importance vs.\ $|\log_2$ fold change$|$ scatter (prevalence $\geq$50).
-(B) Intra-class cosine similarity: disease vs.\ healthy. (C) Data efficiency comparison.}
-\label{fig:attribution_bio}
-\end{figure}
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.75\textwidth]{figures/embedding_heatmap.png}
-\caption{\textbf{Genus embedding similarity heatmap.}
-Cosine similarity among the top-30 LOO-important genera in the learned embedding space.}
-\label{fig:heatmap}
-\end{figure}
-
+Within the single-study cohort, disease-healthy separation is preserved (D-D 0.539, H-H 0.643, D-H 0.557), confirming the embedding captures biological signal rather than batch effects (Appendix).
 \subsection{LLM Explanation Benchmark}
 
-\begin{table}[ht]
-\centering
-\caption{\textbf{LLM explanation validation (all 167 test samples, Qwen2-7B-Instruct).}
-Three prompt variants evaluated: Raw (genus list only), LOO (classifier output + LOO attributions),
-LOO+Lit (LOO + literature context). Bold indicates best.}
-\label{tab:llm}
-\begin{tabular}{p{6.0cm}ccc}
-\toprule
-\textbf{Metric} & \textbf{Raw LLM} & \textbf{LOO+LLM} & \textbf{LOO+Lit+LLM} \\
-\midrule
-Hallucinated genera (avg/response) & 0.72 & \textbf{0.36} & 0.35 \\
-Input genera mentioned (avg) & 5.47 & 9.02 & \textbf{9.05} \\
-LOO consistency (mentioned genera in top-15) & 0.70 & 0.99 & \textbf{1.00} \\
-Direction accuracy & 0.27 & \textbf{0.94} & 0.93 \\
-Prediction consistency (\%) & 63\% & \textbf{98\%} & 98\% \\
-Specificity ratio (biol. mechanisms) & 0.38 & \textbf{0.44} & 0.33 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Across all 167 test samples, LOO grounding halves hallucination (0.72$\rightarrow$0.36 genera/response) and raises prediction consistency from 63\% to 98\%. Direction accuracy --- whether the LLM correctly describes each mentioned genus as increased or decreased in IBD --- jumps from 0.27 to 0.94. Adding literature context provides no further improvement, consistent with the model discovering dataset-specific discriminative patterns beyond canonical markers.
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{Stratified LLM explanation quality (LOO+LLM variant, 167 samples).}}
-\label{tab:llm_stratified}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Stratum} & $n$ & \textbf{Hallucination} & \textbf{Consistency} & \textbf{Direction} \\
-\midrule
-Healthy samples & 74 & 0.42 & 0.97 & 0.92 \\
-IBD samples & 93 & 0.31 & 0.99 & 0.95 \\
-Correct predictions & 155 & 0.37 & 0.98 & 0.94 \\
-Wrong predictions & 12 & 0.17 & 1.00 & 0.91 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Explanation quality is consistent across strata, with slightly higher hallucination on healthy samples (0.42 vs 0.31) and uniformly high prediction consistency ($\geq$0.97).
-
-\textbf{Case Studies.} Four representative cases illustrate the pipeline (full outputs in Supplementary Material):
-
-\textbf{Case 1 --- Correct prediction, strong explanation} (Patient 2538.1002713, IBD, $p{=}1.000$): The LOO-grounded LLM attributes the prediction to enriched pro-inflammatory genera and depleted commensals, with all mentioned genera traceable to the model's top-15 LOO attributions.
-
-\textbf{Case 2 --- Borderline confidence} (Patient 2538.1000031, IBD, $p{=}0.555$): Near the decision boundary, the LOO-grounded explanation correctly notes the mixed pattern of protective and pathogenic genera, mirroring the model's uncertainty.
-
-\textbf{Case 3 --- Misclassification} (Patient 2538.1003420, true IBD, predicted Healthy, $p{=}0.179$): A false negative where the model confidently missed disease. The explanation reveals that key disease-associated genera were absent from this patient's profile --- an atypical IBD microbiome that merits further investigation.
-
-\textbf{Case 4 --- Extreme IBD} (Patient 2538.1002120, IBD, $p{=}0.996$): Multiple strong LOO attributions across pro-inflammatory genera; the explanation integrates them into a coherent dysbiosis narrative consistent with the literature.
-
-\begin{table}[ht]
-\centering
-\caption{\textbf{Out-of-fold case analysis (grouped split, seed 42).}
-Values are disease probabilities from three models on the same held-out samples.
-Extreme low-richness samples (1--4 active tokens) expose failure modes of all models.}
-\label{tab:cases}
-\begin{tabular}{p{3.2cm}p{2.2cm}p{1.7cm}ccc}
-\toprule
-\textbf{Case} & \textbf{Truth} & \textbf{Active tokens} & \textbf{\shortstack{SimpleEmb\\+MLP}} & \textbf{HGB} & \textbf{\shortstack{MGM\\+MLP}} \\
-\midrule
-SimpleEmb correct; HGB wrong & Healthy & 86 & H (0.003) & D (0.883) & D (0.887) \\
-HGB correct; SimpleEmb wrong & Disease & 86 & H (0.104) & D (0.997) & H (0.175) \\
-SimpleEmb correct; MGM wrong & Disease & 4 & D (1.000) & D (0.749) & H (0.398) \\
-High-conf.\ false positive & Healthy & 1 & D (1.000) & D (0.824) & D (1.000) \\
-High-conf.\ false negative & Disease & 2 & H (0.000) & D (0.749) & D (0.889) \\
-All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The disagreement cases reveal complementary behavior: SimpleEmb+MLP correctly identifies healthy samples that confuse both tree and Transformer models, and uniquely handles extreme low-richness IBD samples (4 tokens) where MGM fails. Conversely, HGB recovers borderline disease cases that SimpleEmb misses. The high-confidence false positive with a single active token (likely a degenerate or sequencing-artifact profile) fools all three models, and the two-token false negative is missed only by SimpleEmb --- these extreme low-richness samples, corresponding to the Cluster~1 subtype (Section~3.3), are a systematic failure mode warranting dedicated handling.
-
-
+Table~\ref{tab:llm} summarizes the 167-sample evaluation of three prompt variants (Raw, LOO, LOO+Lit). LOO grounding halves hallucination (0.72 to 0.36 genera/response), raises prediction consistency from 63\% to 98\%, and improves direction accuracy from 0.27 to 0.94; adding literature context provides no further gain, consistent with the model discovering dataset-specific patterns beyond canonical markers. Four representative cases (correct, borderline, misclassified, extreme-IBD) illustrate that explanations mirror model confidence and expose atypical microbiomes in false negatives.
 \subsection{Few-Shot Prompting Evaluation}
 
 Beyond explanation, we ask whether Qwen2-7B-Instruct can perform IBD diagnosis directly through in-context learning. We evaluate $k\in\{0,1,3,5\}$ examples of (genus list, diagnosis) pairs sampled from the training set, on 100 held-out test samples (Table~\ref{tab:fewshot}).
@@ -753,15 +329,7 @@ ProCyon v2 produces well-calibrated probabilities: Expected Calibration Error (E
 
 Only 12 errors out of 167 test samples (7.2\%): 5 false positives (Healthy$\rightarrow$IBD, moderate confidence 0.71--0.86) and 7 false negatives (IBD$\rightarrow$Healthy, very low confidence 0.007--0.056). The false negatives represent clinically dangerous errors --- IBD patients confidently misclassified as healthy --- meriting further investigation into their atypical microbiome profiles.
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.95\textwidth]{figures/calibration_error_cases.png}
-\caption{\textbf{Calibration, error analysis, and case studies.}
-(A) Calibration curve (ECE$=$0.05, Brier$=$0.056). (B) Prediction confidence distribution.
-(C) Confusion matrix. (D) Error profile: false positives vs.\ false negatives.
-(E) LLM explanation validation summary. (F) Case study overview.}
-\label{fig:calibration}
-\end{figure}
+
 
 % ═══════════════════════════════════════
 % 6. DISCUSSION
@@ -770,33 +338,24 @@ Only 12 errors out of 167 test samples (7.2\%): 5 false positives (Healthy$\righ
 
 \subsection{Why SimpleEmb Beats MGM}
 
-Three factors explain MGM's failure (50.9\% ACC): (1) \textbf{Mismatched pretraining}: next-genus prediction captures co-occurrence patterns, not disease-discriminative patterns. (2) \textbf{Transformer overparameterization}: 6-layer self-attention learns spurious sequential dependencies in abundance-sorted genus sequences that have no biological sequential structure. (3) \textbf{Data distribution mismatch}: MGM was pretrained on diverse environments (soil, marine, human gut) whose genus co-occurrence patterns differ fundamentally from human IBD.
-
-SimpleEmb (1.1M params, random init) learns 366 independent genus embeddings directly optimized for classification. This is the correct inductive bias for tabular microbiome data.
+MGM failure (50.9\% ACC) stems from mismatched next-genus pretraining, Transformer overparameterization on abundance-sorted sequences, and a data distribution mismatch with human IBD. SimpleEmb (1.1M params, random init) learns genus embeddings directly optimized for classification --- the correct inductive bias for tabular microbiome data.
 
 \subsection{Generalization Across Independent Cohorts}
 
-The leave-one-source-out evaluation (Section~5.5) shows that all classifiers degrade substantially on independent cohorts: external AUC on the balanced 10317 cohort reaches only 0.595 (SimpleEmb) to 0.688 (Random Forest), versus 0.973 in-family, consistent with the well-documented dominance of batch effects over biological signal in cross-study microbiome data. Two observations are noteworthy. First, Random Forest trained on raw abundance transfers best, indicating that feature-level abundance patterns are more robust to compositional and technical shifts than learned embedding spaces, consistent with the grouped-CV finding that tree ensembles match or exceed the embedding classifier. Second, the SimpleEmb classifier achieves 51.0\% disease identification on Study~11484, in line with the 51.6\% reported for a 50k-pretrained MGM encoder, suggesting that simple and complex encoders face the same batch-effect barrier. These results position the embedding architecture as an interpretable within-cohort diagnostic tool and motivate batch-effect correction as the path toward clinical deployment.
-
+All classifiers degrade substantially on independent cohorts (external AUC 0.595--0.688 on 10317 vs. 0.973 in-family), consistent with batch effects dominating cross-study microbiome data. Random Forest transfers best, indicating feature-level patterns are more robust than learned embeddings; SimpleEmb's Study-11484 rate (51.0\%) matches a 50k-pretrained MGM encoder (51.6\%), showing simple and complex encoders face the same barrier.
 \subsection{Why 512 Dimensions Are Sufficient}
 
 With 366 unique genera, $E{=}512$ provides 1.4 dimensions per genus --- sufficient for diagnostic representation. Beyond this, additional dimensions encode noise. This also explains why raw 1226-dim features perform well (XGBoost: 92.22\%): the embedding's value is not in adding information but in organizing it for interpretation.
 
 \subsection{When LLMs Help}
 
-The LLM fails as a classifier (42--62\% accuracy across zero- to five-shot prompting, vs.\ 92\% for the trained classifier) but succeeds as an interpreter when LOO-grounded: hallucination halves (0.72 to 0.36 genera/response), prediction consistency reaches 98\%, and direction accuracy reaches 0.94. This asymmetry motivates ProCyon v2's dual-branch design: classification and interpretation are separate concerns requiring different optimization.
-
+The LLM fails as a classifier (42--62\% accuracy across zero- to five-shot prompting vs. 92\% trained) but succeeds as an interpreter when LOO-grounded: hallucination halves, consistency reaches 98\%, direction accuracy 0.94. This asymmetry motivates the dual-branch design: classification and interpretation are separate concerns.
 \subsection{Why LOO Attribution Is Reliable Despite Low Jaccard}
 
-IBD is a community-level dysbiosis, not driven by single genera. Different folds select functionally equivalent but taxonomically distinct genera, producing low Jaccard (0.07) but high Spearman $\rho$ (0.72). The consistent \textit{rank ordering} of importance --- combined with deletion test validation --- confirms that LOO attribution captures genuine signal.
-
+Low Jaccard (0.07) but high Spearman $\rho$ (0.72) reflects functional substitution across folds, and the deletion test confirms attribution captures genuine signal --- consistent with IBD as a community-level dysbiosis.
 \subsection{Limitations}
 
-(1) Leave-one-source-out external validation on four independent cohorts (10317, 1939, 11484, 10283) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
-
-% ═══════════════════════════════════════
-% 7. CONCLUSION
-% ═══════════════════════════════════════
+(1) Leave-one-source-out validation on five cohorts shows batch effects remain the central open challenge (external AUC 0.595 on 10317; trees generalize better). (2) LOO attribution measures predictive contribution, not causation. (3) LLM explanations await clinical validation. (4) Only IBD is evaluated. (5) Only 6/20 literature-curated IBD genera appear in the vocabulary; novel features await biological validation.
 \section{Conclusion}
 
 ProCyon v2 demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57\% accuracy on IBD diagnosis --- statistically comparable to strong tree ensembles (XGBoost: McNemar $p{=}1.000$; HistGradientBoosting: 92.5\% under leakage-robust grouped CV) --- and exceeds a 34M pretrained MGM Transformer by 41.7pp on the held-out split and by 6.1pp under grouped CV. The embedding dimension saturates at $E{=}512$ (760K params), and cross-dataset transfer confirms generalization (merged$\rightarrow$clean: 88.62\%). LOO attributions are reliable (Spearman $\rho{=}0.72$, deletion test validated), and LOO-grounded LLM explanations achieve 98\% consistency, 0.94 direction accuracy, and halved hallucination.
@@ -807,7 +366,7 @@ The core insight is the \textbf{separation of concerns}: the model discovers pat
 % REFERENCES
 % ═══════════════════════════════════════
 \section*{Data Availability}
-The clean\_2538, merged\_all and combined datasets were assembled from publicly available Qiita studies (studies 2538, 10283, 1939 and 10317) together with the American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts. External validation cohorts comprise Qiita studies 11484 and 1629 (raw BIOM tables and mapping files are available from the Qiita repository). Processed genus-abundance vectors, genus sequences and labels underlying the reported results are available from the authors upon request.
+The clean\_2538, merged\_all and combined datasets were assembled from publicly available Qiita studies (studies 2538, 10283, 1939 and 10317) together with the American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts. External validation cohorts comprise Qiita studies 11484 (96 samples), 1629 (683 Crohn’s disease samples) and the disease-only Qiita studies 10283 and 1939; raw BIOM tables and mapping files are available from the Qiita repository. Processed genus-abundance vectors, genus sequences and labels underlying the reported results are available from the authors upon request.
 
 \section*{Code Availability}
 All model training, evaluation and analysis code is publicly available at \url{https://github.com/concker426/microbiome}. Model checkpoints and reproduction scripts are included in the repository.
@@ -826,5 +385,330 @@ To be completed by the authors.
 
 \bibliography{references}
 \bibliographystyle{iclr2027_conference}
+
+
+
+\appendix
+\section{Supplementary Tables and Figures}
+
+\begin{table}[ht]
+\centering
+\caption{Dataset summary statistics.}
+\label{tab:dataset}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Property} & \textbf{clean\_2538} & \textbf{merged\_all} \\
+\midrule
+Training samples & 659 & 3,350 \\
+Test samples & 167 & 838 \\
+Disease (IBD) fraction & 55.7\% & 50.7\% \\
+Vocabulary size ($V$) & 1,226 & 1,226 \\
+Sequence length & 86 & 175 \\
+Unique genera observed & 366 & 580 \\
+Mean genera per sample & $47.8 \pm 16.2$ & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/week1_figure.png}
+\caption{\textbf{Comprehensive comparison analysis.}
+(A) Baseline accuracy comparison. (B) Ablation: embedding contribution. (C) Embedding
+dimension sweep. (D) Cross-dataset transfer. (E) Sensitivity--specificity trade-off.
+(F) Parameter efficiency.}
+\label{fig:baseline}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Comparison of microbiome foundation models.}
+ProCyon v2 achieves competitive performance with 30$\times$ fewer parameters and no pretraining,
+while providing per-sample LOO attribution and LLM-based interpretation.}
+\label{tab:fm_comparison}
+\begin{tabular}{p{2.4cm}p{2.6cm}p{2.0cm}p{2.4cm}p{2.4cm}p{2.2cm}}
+\toprule
+\textbf{\hspace{0pt}Model} & \textbf{\hspace{0pt}Architecture} & \textbf{\hspace{0pt}Granularity} & \textbf{\hspace{0pt}Pretraining} & \textbf{\hspace{0pt}Interpretability} & \textbf{\hspace{0pt}Weights} \\
+\midrule
+MGM~\citep{mgm2024} & 8L Transformer (34M) & Genus & Next-genus, 263k & Attention + LOO & Public \\
+BiomeGPT~\citep{biomegpt2026} & Transformer + dual emb & Species & Masked abundance, 13.3k & CLS attention & Unavailable \\
+Waypoint~\citep{waypoint2026} & Transformer (6--170M) & Genus & 539k+ & Not emphasized & Unavailable \\
+\textbf{ProCyon v2} & \textbf{SimpleEmb + MLP (1.1M)} & Genus & \textbf{None} & \textbf{LOO + LLM} & \textbf{Public} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Nested grouped-CV learning curves (AUROC).}
+The training fraction is sampled from only the outer training groups.}
+\label{tab:learning}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Train fraction} & \textbf{HGB} & \textbf{Presence+MLP} & \textbf{Embedding64+MLP (ours)} \\
+\midrule
+20\% & 0.922 $\pm$ 0.027 & 0.940 $\pm$ 0.019 & 0.900 $\pm$ 0.027 \\
+40\% & 0.962 $\pm$ 0.012 & 0.959 $\pm$ 0.011 & 0.929 $\pm$ 0.022 \\
+60\% & 0.972 $\pm$ 0.010 & 0.965 $\pm$ 0.011 & 0.947 $\pm$ 0.015 \\
+80\% & 0.976 $\pm$ 0.009 & 0.966 $\pm$ 0.010 & 0.951 $\pm$ 0.017 \\
+100\% & \textbf{0.979} $\pm$ 0.010 & 0.969 $\pm$ 0.012 & 0.956 $\pm$ 0.016 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/inductive_bias_figure.png}
+\caption{\textbf{Inductive bias comparison.}
+(A) Sequential (Transformer) vs.\ permutation-invariant (Set) inductive biases with
+corresponding model performance. (B) Structural baseline accuracy and AUROC comparison.}
+\label{fig:inductive}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/phase1_representation_analysis.png}
+\caption{\textbf{Representation space analysis.}
+(A) PCA 2D projection. (B) UMAP projection (cosine metric). (C) t-SNE projection.
+(D) Prediction error analysis. (E) Intra-class cosine similarity. (F) kNN classification accuracy.}
+\label{fig:repr}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{LOO Attribution Reliability analysis across 5 folds.}}
+\label{tab:loo}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Spearman $\rho$ (mean across fold pairs) & 0.72 ($p{<}0.001$) \\
+Top-50 Jaccard (mean) & 0.07 \\
+Deletion test (top-50 AUC drop) & 0.039 (vs 0.007 random) \\
+Permutation control (mean $|$LOO$|$) & real 0.0096 vs.\ shuffled 0.0705 \\
+Literature direction agreement & 5/6 (83.3\%) \\
+Prevalence-importance correlation & $r{=}0.05$ ($p{>}0.05$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/calibration_error_cases.png}
+\caption{\textbf{Calibration, error analysis, and case studies.}
+(A) Calibration curve (ECE$=$0.05, Brier$=$0.056). (B) Prediction confidence distribution.
+(C) Confusion matrix. (D) Error profile: false positives vs.\ false negatives.
+(E) LLM explanation validation summary. (F) Case study overview.}
+\label{fig:calibration}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/phase35_heterogeneity.png}
+\caption{\textbf{IBD heterogeneity analysis.}
+(A) UMAP with IBD clusters colored separately from healthy samples. (B) Cluster sizes
+with silhouette score. (C) Top LOO-attributed genera per cluster. (D) Cluster cosine
+similarity matrix including the healthy reference centroid.}
+\label{fig:heterogeneity}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Ablation: contribution of each architectural component.}
+All variants use the identical MLP architecture. $\Delta$ shows improvement over variant A.}
+\label{tab:ablation}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Variant} & \textbf{ACC} & \textbf{AUC} & \textbf{Prec.} & \textbf{Rec.} & \textbf{F1} & \textbf{$\Delta$ACC} \\
+\midrule
+A: Raw$\rightarrow$MLP & 0.8982 & 0.9605 & 0.9318 & 0.8817 & 0.9061 & --- \\
+B: RandomEmb$\rightarrow$MLP & 0.9162 & 0.9762 & 0.9341 & 0.9140 & 0.9239 & +1.80\% \\
+C: SimpleEmb$\rightarrow$Linear & 0.4431 & 0.3362 & 0.5000 & 0.0645 & 0.1143 & $-$45.51\% \\
+D: \textbf{SimpleEmb$\rightarrow$MLP} & \textbf{0.9257} & \textbf{0.9750} & \textbf{0.9451} & \textbf{0.9161} & \textbf{0.9348} & \textbf{+2.75\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Representation and head ablation under grouped-CV (15 folds).}
+Presence = multi-hot token presence vector; Embedding64 = trainable $E{=}64$ embedding + masked mean pool.}
+\label{tab:repr_ablation}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{Params} & \textbf{ACC} & \textbf{AUROC} & \textbf{AUPRC} \\
+\midrule
+Presence + Linear & 2,454 & 0.876 $\pm$ 0.037 & 0.949 $\pm$ 0.019 & 0.957 $\pm$ 0.018 \\
+Presence + MLP & 315,138 & \textbf{0.912} $\pm$ 0.025 & \textbf{0.969} $\pm$ 0.012 & \textbf{0.973} $\pm$ 0.012 \\
+Embedding64 + Linear & 78,594 & 0.857 $\pm$ 0.036 & 0.916 $\pm$ 0.029 & 0.909 $\pm$ 0.049 \\
+Embedding64 + MLP (ours) & 96,130 & 0.906 $\pm$ 0.021 & 0.956 $\pm$ 0.016 & 0.954 $\pm$ 0.031 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Embedding dimension ablation under the exact input-grouped 3$\times$5-fold CV protocol.}
+Only the embedding dimension changes; all other architecture and optimization settings are fixed.
+Held-out test set results are shown for reference in parentheses.}
+\label{tab:embedding}
+\begin{tabular}{lcccccr}
+\toprule
+\textbf{$E$} & \textbf{Params} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
+\midrule
+16  & 24,994 & 0.855 $\pm$ 0.027 & 0.854 $\pm$ 0.027 & 0.924 $\pm$ 0.020 & 0.918 $\pm$ 0.041 \\
+32  & 48,706 & 0.879 $\pm$ 0.033 & 0.878 $\pm$ 0.034 & 0.941 $\pm$ 0.019 & 0.944 $\pm$ 0.022 \\
+64  & 96,130 & 0.906 $\pm$ 0.021 & 0.905 $\pm$ 0.021 & 0.956 $\pm$ 0.016 & 0.954 $\pm$ 0.031 \\
+128 & 190,978 & 0.908 $\pm$ 0.024 & 0.907 $\pm$ 0.024 & 0.957 $\pm$ 0.015 & 0.956 $\pm$ 0.026 \\
+256 & 380,674 & 0.909 $\pm$ 0.020 & 0.909 $\pm$ 0.020 & 0.956 $\pm$ 0.015 & 0.952 $\pm$ 0.037 \\
+\textbf{512} & \textbf{760,066} & \textbf{0.914} $\pm$ 0.020 & \textbf{0.913} $\pm$ 0.019 & \textbf{0.957} $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
+768 & 1,139,458 & \textbf{0.914} $\pm$ 0.016 & \textbf{0.913} $\pm$ 0.016 & 0.957 $\pm$ 0.015 & 0.952 $\pm$ 0.035 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Structural baselines: inductive bias comparison.}
+All models trained on identical data without pretraining (except MGM).
+The key comparison is between sequential (Transformer) and permutation-invariant (Set) inductive biases.}
+\label{tab:structural}
+\begin{tabular}{lp{4.0cm}cccc}
+\toprule
+\textbf{Model} & \textbf{Inductive Bias} & \textbf{Pretrain} & \textbf{ACC} & \textbf{AUC} & \textbf{Params} \\
+\midrule
+Raw + MLP & None (tabular) & \ding{55} & 0.8982 & 0.9605 & 330K \\
+FT-Transformer & Sequential & \ding{55} & 0.9102 & 0.9552 & 769K \\
+MGM & Sequential & \ding{51} & 0.5090 & 0.4625 & 34M \\
+\midrule
+DeepSets & Permutation-invariant & \ding{55} & \textbf{0.9162} & \textbf{0.9731} & 512K \\
+\textbf{ProCyon v2} & \textbf{Permutation-invariant + Embedding} & \ding{55} & \textbf{0.9162} & 0.9640 & 347K \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Embedding space quality metrics.}
+\label{tab:repr}
+\begin{tabular}{lc}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+kNN ($k{=}5$, cosine) test ACC & 97.0\% \\
+PCA 2D explained variance & 40.4\% \\
+PCA dimensions for 90\% variance & 53 \\
+IBD intra-class cosine similarity & 0.54 \\
+Healthy intra-class cosine similarity & 0.64 \\
+UMAP silhouette score & 0.23 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/umap_visualization.png}
+\caption{\textbf{UMAP visualization of learned embeddings.}
+Disease and healthy samples in the 2D UMAP projection of the 768-dimensional embedding space.}
+\label{fig:umap}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/paper_figure_shap_analysis.png}
+\caption{\textbf{Comprehensive LOO attribution analysis.}
+(A) Global importance ranking (top-50 genera, color-coded by literature agreement).
+(B) Prevalence vs.\ importance. (C) Cross-validation stability (Jaccard).
+(D) Cluster-specific biomarker profiles. (E) Literature direction validation.
+(F) Signal quality: real vs.\ permuted-label importance.}
+\label{fig:loo_analysis}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/phase3_biological_validation.png}
+\caption{\textbf{Biological validation against literature.}
+Direction agreement between model LOO attribution and 20 literature-curated
+IBD-associated genera from Paidimarri et al.\ (2024).}
+\label{fig:literature}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/phase36_robustness.png}
+\caption{\textbf{Biomarker robustness analysis.}
+Cross-fold consistency, permutation control, abundance-independence, and
+cluster validation of LOO-attributed biomarkers.}
+\label{fig:robustness}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{LOO attribution vs.\ differential abundance (Spearman $\rho$).}}
+\label{tab:attribution_bio}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Prevalence Strata} & $\rho$ & $p$-value \\
+\midrule
+All genera (n$=$365) & $-$0.23 & $<$0.001 \\
+Prevalence $\geq$10 (n$=$186) & 0.01 & 0.901 \\
+Prevalence $\geq$50 (n$=$108) & 0.11 & 0.269 \\
+Prevalence $\geq$200 (n$=$66) & 0.16 & 0.188 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/attribution_biology_figure.png}
+\caption{\textbf{Attribution biology and embedding structure.}
+(A) LOO importance vs.\ $|\log_2$ fold change$|$ scatter (prevalence $\geq$50).
+(B) Intra-class cosine similarity: disease vs.\ healthy. (C) Data efficiency comparison.}
+\label{fig:attribution_bio}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/embedding_heatmap.png}
+\caption{\textbf{Genus embedding similarity heatmap.}
+Cosine similarity among the top-30 LOO-important genera in the learned embedding space.}
+\label{fig:heatmap}
+\end{figure}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Stratified LLM explanation quality (LOO+LLM variant, 167 samples).}}
+\label{tab:llm_stratified}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Stratum} & $n$ & \textbf{Hallucination} & \textbf{Consistency} & \textbf{Direction} \\
+\midrule
+Healthy samples & 74 & 0.42 & 0.97 & 0.92 \\
+IBD samples & 93 & 0.31 & 0.99 & 0.95 \\
+Correct predictions & 155 & 0.37 & 0.98 & 0.94 \\
+Wrong predictions & 12 & 0.17 & 1.00 & 0.91 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Out-of-fold case analysis (grouped split, seed 42).}
+Values are disease probabilities from three models on the same held-out samples.
+Extreme low-richness samples (1--4 active tokens) expose failure modes of all models.}
+\label{tab:cases}
+\begin{tabular}{p{3.2cm}p{2.2cm}p{1.7cm}ccc}
+\toprule
+\textbf{Case} & \textbf{Truth} & \textbf{Active tokens} & \textbf{\shortstack{SimpleEmb\\+MLP}} & \textbf{HGB} & \textbf{\shortstack{MGM\\+MLP}} \\
+\midrule
+SimpleEmb correct; HGB wrong & Healthy & 86 & H (0.003) & D (0.883) & D (0.887) \\
+HGB correct; SimpleEmb wrong & Disease & 86 & H (0.104) & D (0.997) & H (0.175) \\
+SimpleEmb correct; MGM wrong & Disease & 4 & D (1.000) & D (0.749) & H (0.398) \\
+High-conf.\ false positive & Healthy & 1 & D (1.000) & D (0.824) & D (1.000) \\
+High-conf.\ false negative & Disease & 2 & H (0.000) & D (0.749) & D (0.889) \\
+All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \end{document}

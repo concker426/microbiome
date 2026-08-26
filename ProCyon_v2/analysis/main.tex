@@ -391,7 +391,7 @@ To probe generalization beyond the AGP/FTP cohorts, we evaluate the clean\_2538-
 \begin{table}[ht]
 \centering
 \caption{\textbf{Leave-one-source-out external validation on four independent cohorts.}
-Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484 and 10283 are disease-only cohorts (disease identification rate reported).}
+Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484, 10283 and 1629 are disease-only cohorts (disease identification rate reported).}
 \label{tab:external}
 \begin{tabular}{lcccc}
 \toprule
@@ -404,6 +404,7 @@ Models are trained exclusively on the study-2538 training split. 10317 is a bala
 1939 & 1359 & 0.358 & 0.506 & \textbf{0.694} \\
 11484 & 96 & 0.510 & 0.521 & \textbf{0.750} \\
 10283 & 568 & 0.125 & 0.118 & \textbf{0.143} \\
+1629 & 683 & 0.151 & 0.183 & \textbf{0.275} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -793,7 +794,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Limitations}
 
-(1) Leave-one-source-out external validation on four independent cohorts (10317, 1939, 11484, 10283) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
+(1) Leave-one-source-out external validation on five independent cohorts (10317, 1939, 11484, 10283, 1629) confirms severe generalization failure: the SimpleEmb classifier attains external AUC 0.595 on the balanced 10317 cohort and disease identification of 12.5--51.0\% on disease-only cohorts, while tree ensembles generalize better (Random Forest AUC 0.688 on 10317); validation on further clinical cohorts is planned. (2) LOO attribution measures predictive contribution, not biological causation. (3) LLM explanations have not been clinically validated by gastroenterologists. (4) Only IBD is evaluated; extension to other microbiome-associated diseases is planned. (5) Only 6/20 literature-curated IBD genera appear in our dataset's vocabulary --- the model discovers novel features that await biological validation.
 
 % ═══════════════════════════════════════
 % 7. CONCLUSION
@@ -808,7 +809,7 @@ The core insight is the \textbf{separation of concerns}: the model discovers pat
 % REFERENCES
 % ═══════════════════════════════════════
 \section*{Data Availability}
-The clean\_2538, merged\_all and combined datasets were assembled from publicly available Qiita studies (studies 2538, 10283, 1939 and 10317) together with the American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts. External validation cohorts comprise Qiita studies 11484 and 1629 (raw BIOM tables and mapping files are available from the Qiita repository). Processed genus-abundance vectors, genus sequences and labels underlying the reported results are available from the authors upon request.
+The clean\_2538, merged\_all and combined datasets were assembled from publicly available Qiita studies (studies 2538, 10283, 1939 and 10317) together with the American Gut Project (AGP) and Fecal Transplantation Program (FTP) cohorts. External validation cohorts comprise Qiita studies 11484 (96 samples), 1629 (683 Crohn’s disease samples) and the disease-only Qiita studies 10283 and 1939; raw BIOM tables and mapping files are available from the Qiita repository. Processed genus-abundance vectors, genus sequences and labels underlying the reported results are available from the authors upon request.
 
 \section*{Code Availability}
 All model training, evaluation and analysis code is publicly available at \url{https://github.com/concker426/microbiome}. Model checkpoints and reproduction scripts are included in the repository.
