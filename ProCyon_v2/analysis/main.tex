@@ -16,7 +16,7 @@
 
 % ── Title ──
 \title{ProCyon v2: Learning Robust Microbiome Representations for\\Accurate IBD Prediction and Evidence-Grounded Biological Interpretation}
-\author{}
+\author{Jinxu Liu}
 \date{}
 
 \begin{document}
@@ -205,7 +205,7 @@ To isolate each component's contribution:
 
 \subsection{Design Borrowings from Microbiome Baselines}
 
-Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. From MDeep we plan taxonomy-aware embedding regularization, which encourages phylogenetically adjacent genera to have similar embeddings. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
+Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT~\cite{siamcat2021} we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro~\cite{deepmicro2020} we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. From MDeep~\cite{mdeep2021} we plan taxonomy-aware embedding regularization, which encourages phylogenetically adjacent genera to have similar embeddings. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
 
 \subsection{Training Details}
 
@@ -839,8 +839,8 @@ To be completed by the authors.
 \begin{thebibliography}{10}
 
 \bibitem{mgm2024}
-Ning et al.\ \textit{MGM as a large-scale pretrained foundation model for microbiome analyses in diverse contexts.}\
-Advanced Science, 2025.\
+Zhang, H., Zhang, Y., Kang, Z., Xiong, J., Yang, R., Ning, K.\ \textit{MGM as a large-scale pretrained foundation model for microbiome analyses in diverse contexts.}\
+Advanced Science, 2026.\
 \url{https://www.biorxiv.org/content/10.1101/2024.12.30.630825v1}
 
 \bibitem{biomegpt2026}
@@ -848,13 +848,13 @@ Medearis, N.~A., Zhu, S., Zomorrodi, A.~R.\ \textit{BiomeGPT: A foundation model
 bioRxiv, 2026.\ DOI: 10.64898/2026.01.05.697599.
 
 \bibitem{waypoint2026}
-Waypoint/Atlas.\ \textit{Learning the Language of the Microbiome with Transformers.}\
+Treloar, N.~J., Ur-Rehman, S., Yang, J.\ \textit{Learning the Language of the Microbiome with Transformers.}\
 bioRxiv, 2026.\
 \url{https://www.biorxiv.org/content/10.64898/2026.05.02.722381v2}
 
 \bibitem{procyon2025}
-ProCyon.\ \textit{A foundation model for multimodal protein-centric tasks.}\
-2025.
+Queen, O., Huang, Y., Calef, R., et al.\ \textit{ProCyon: A multimodal foundation model for protein phenotypes.}\
+bioRxiv, 2024.
 
 \bibitem{deepsets2017}
 Zaheer, M., et al.\ \textit{Deep Sets.}\
@@ -869,9 +869,22 @@ Paidimarri et al.\ \textit{Gut Microbiota and Inflammatory Bowel Disease.}\
 Cureus, 2024.\ PMID: 39314611.
 
 \bibitem{shah2025}
-Shah et al.\ \textit{Systematic benchmarking of foundation models and classical baselines for microbiome-based disease prediction.}\
-Research Square, 2025.\
+Mu, J., Tang, Z.-Z., Chen, G.\ \textit{Systematic benchmarking of foundation models and classical baselines for microbiome-based disease prediction.}\
+Research Square, 2026.\
 \url{https://doi.org/10.21203/rs.3.rs-8912605/v1}
+
+
+\bibitem{siamcat2021}
+Wirbel, J., Zych, K., Essex, M., Karcher, N., Kartal, E., Salazar, G., Bork, P., Sunagawa, S., Zeller, G.\ \textit{Microbiome meta-analysis and cross-disease comparison enabled by the SIAMCAT machine learning toolbox.}\
+Genome Biology, 22:93, 2021.
+
+\bibitem{deepmicro2020}
+Oh, M., Zhang, L.\ \textit{DeepMicro: deep representation learning for disease prediction based on microbiome data.}\
+Scientific Reports, 10:6026, 2020.
+
+\bibitem{mdeep2021}
+Wang, et al.\ \textit{MDeep: a deep learning approach for disease prediction based on microbiome data.}\
+2021.
 
 \end{thebibliography}
 
