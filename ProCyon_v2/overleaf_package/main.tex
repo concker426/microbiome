@@ -203,6 +203,10 @@ To isolate each component's contribution:
   \item \textbf{D: SimpleEmb$\rightarrow$MLP (ProCyon v2)} --- Full model, end-to-end trained
 \end{itemize}
 
+\subsection{Design Borrowings from Microbiome Baselines}
+
+Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. From MDeep we plan taxonomy-aware embedding regularization, which encourages phylogenetically adjacent genera to have similar embeddings. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
+
 \subsection{Training Details}
 
 All models trained with: AdamW ($\text{lr}{=}10^{-3}$, $\text{weight\_decay}{=}10^{-4}$), CosineAnnealing ($T_{\max}{=}50$), batch\_size${=}32$, class-weighted loss (Disease weight${=}1.5$). ProCyon v2 reports mean $\pm$ std across 5 random seeds (42, 123, 456, 789, 1024).
@@ -261,6 +265,7 @@ Values are mean $\pm$ std over 15 validation folds.}
 \textbf{Method} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
 \midrule
 HistGradientBoosting & \textbf{0.925} $\pm$ 0.025 & \textbf{0.925} $\pm$ 0.025 & \textbf{0.979} $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
+SIAMCAT (LASSO) & 0.922 $\pm$ 0.015 & 0.922 $\pm$ 0.015 & 0.975 $\pm$ 0.009 & 0.976 $\pm$ 0.016 \\
 Extra Trees & 0.918 $\pm$ 0.024 & 0.918 $\pm$ 0.024 & 0.963 $\pm$ 0.013 & 0.958 $\pm$ 0.027 \\
 Random Forest & 0.916 $\pm$ 0.023 & 0.915 $\pm$ 0.023 & 0.971 $\pm$ 0.013 & 0.970 $\pm$ 0.019 \\
 SimpleEmb + MLP (ours) & 0.914 $\pm$ 0.020 & 0.913 $\pm$ 0.019 & 0.957 $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
@@ -269,12 +274,13 @@ MLP & 0.872 $\pm$ 0.031 & 0.871 $\pm$ 0.031 & 0.945 $\pm$ 0.024 & 0.950 $\pm$ 0.
 Logistic Regression & 0.865 $\pm$ 0.024 & 0.864 $\pm$ 0.024 & 0.936 $\pm$ 0.017 & 0.940 $\pm$ 0.022 \\
 MGM + MLP & 0.853 $\pm$ 0.028 & 0.852 $\pm$ 0.028 & 0.929 $\pm$ 0.026 & 0.924 $\pm$ 0.048 \\
 MGM + Logistic Regression & 0.846 $\pm$ 0.026 & 0.845 $\pm$ 0.026 & 0.908 $\pm$ 0.019 & 0.911 $\pm$ 0.037 \\
+DeepMicro (AE-64 + RBF-SVM) & 0.846 $\pm$ 0.025 & 0.845 $\pm$ 0.026 & 0.917 $\pm$ 0.027 & 0.911 $\pm$ 0.040 \\
 MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 & 0.912 $\pm$ 0.030 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$).
+\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$). Beyond these classical and MGM baselines, SIAMCAT (LASSO) is competitive with HistGradientBoosting (AUROC 0.975) under the same exact-input grouped-CV protocol, while DeepMicro (AE-64 + RBF-SVM) trails the embedding classifier (AUROC 0.917). A genus-level BiomeGPT architecture transfer reaches AUROC 0.984 but is reported separately because it differs from the species-level original; MDeep is excluded pending a genus-level phylogenetic tree consistent with our vocabulary.
 
 \begin{figure}[ht]
 \centering
@@ -791,6 +797,10 @@ The LLM fails as a classifier (42--62\% accuracy across zero- to five-shot promp
 \subsection{Why LOO Attribution Is Reliable Despite Low Jaccard}
 
 IBD is a community-level dysbiosis, not driven by single genera. Different folds select functionally equivalent but taxonomically distinct genera, producing low Jaccard (0.07) but high Spearman $\rho$ (0.72). The consistent \textit{rank ordering} of importance --- combined with deletion test validation --- confirms that LOO attribution captures genuine signal.
+
+\subsection{Planned Extensions (SimpleEmb-MAP)}
+
+We outline a minimal ablation program for augmenting SimpleEmb while preserving interpretability: (A0) the current SimpleEmb + mean-pool + MLP; (A1) rank-bin embedding (MGM); (A2) abundance-bin embedding; (A3) gated pooling; (A4) masked-abundance pretraining (BiomeGPT); (A5) A3+A4; (A6) token dropout (DeepMicro); (A7) taxonomy regularization (MDeep); and (A8) a linear head to isolate the role of the MLP. A module is retained only if it improves AUROC/AUPRC with non-overlapping paired-bootstrap 95\% CIs in at least 10 of 15 folds, does not degrade AUPRC, and transfers to at least one low-data or external setting. We provisionally name the final augmented model SimpleEmb-MAP (masked abundance pretraining), contingent on the pretraining ablation outperforming the no-pretraining backbone.
 
 \subsection{Limitations}
 
