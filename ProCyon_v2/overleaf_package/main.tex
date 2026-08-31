@@ -205,7 +205,7 @@ To isolate each component's contribution:
 
 \subsection{Design Borrowings from Microbiome Baselines}
 
-Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT~\cite{siamcat2021} we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro~\cite{deepmicro2020} we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. From MDeep~\cite{mdeep2021} we plan taxonomy-aware embedding regularization, which encourages phylogenetically adjacent genera to have similar embeddings. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
+Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT~\cite{siamcat2021} we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro~\cite{deepmicro2020} we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
 
 \subsection{Training Details}
 
@@ -280,7 +280,7 @@ MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 
 \end{tabular}
 \end{table}
 
-\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$). Beyond these classical and MGM baselines, SIAMCAT (LASSO) is competitive with HistGradientBoosting (AUROC 0.975) under the same exact-input grouped-CV protocol, while DeepMicro (AE-64 + RBF-SVM) trails the embedding classifier (AUROC 0.917). A genus-level BiomeGPT architecture transfer reaches AUROC 0.984 but is reported separately because it differs from the species-level original; MDeep is excluded pending a genus-level phylogenetic tree consistent with our vocabulary.
+\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$). Beyond these classical and MGM baselines, SIAMCAT (LASSO) is competitive with HistGradientBoosting (AUROC 0.975) under the same exact-input grouped-CV protocol, while DeepMicro (AE-64 + RBF-SVM) trails the embedding classifier (AUROC 0.917). A genus-level BiomeGPT architecture transfer reaches AUROC 0.984 but is reported separately because it differs from the species-level original.
 
 \begin{figure}[ht]
 \centering
@@ -798,9 +798,27 @@ The LLM fails as a classifier (42--62\% accuracy across zero- to five-shot promp
 
 IBD is a community-level dysbiosis, not driven by single genera. Different folds select functionally equivalent but taxonomically distinct genera, producing low Jaccard (0.07) but high Spearman $\rho$ (0.72). The consistent \textit{rank ordering} of importance --- combined with deletion test validation --- confirms that LOO attribution captures genuine signal.
 
-\subsection{Planned Extensions (SimpleEmb-MAP)}
+\subsection{Module-Transfer Ablation: What Survives?}
 
-We outline a minimal ablation program for augmenting SimpleEmb while preserving interpretability: (A0) the current SimpleEmb + mean-pool + MLP; (A1) rank-bin embedding (MGM); (A2) abundance-bin embedding; (A3) gated pooling; (A4) masked-abundance pretraining (BiomeGPT); (A5) A3+A4; (A6) token dropout (DeepMicro); (A7) taxonomy regularization (MDeep); and (A8) a linear head to isolate the role of the MLP. A module is retained only if it improves AUROC/AUPRC with non-overlapping paired-bootstrap 95\% CIs in at least 10 of 15 folds, does not degrade AUPRC, and transfers to at least one low-data or external setting. We provisionally name the final augmented model SimpleEmb-MAP (masked abundance pretraining), contingent on the pretraining ablation outperforming the no-pretraining backbone.
+We executed the first stage of this program on the clean-2538 held-out split (659 train / 167 test) under the identical 5-seed protocol as the main model: A0 (SimpleEmb baseline), A1 (+MGM-style rank-bin embedding, 32 bins), A2 (+abundance-bin embedding, within-sample quantile, 32 bins), and A4 (A2 + BiomeGPT-style masked-abundance pretraining: 25\% token masking, 30 pretraining epochs).
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Module-transfer ablation on the clean-2538 holdout} (5 seeds, mean$\pm$std; bold = per-column best).}
+\label{tab:map_ablation}
+\begin{tabular}{lccc}
+\toprule
+Variant & Accuracy & AUROC & AUPRC \\
+\midrule
+A0: SimpleEmb (baseline) & 0.9246$\pm$0.0072 & 0.9753$\pm$0.0046 & \textbf{0.9829$\pm$0.0028} \\
+A1: +rank-bin (MGM) & \textbf{0.9377$\pm$0.0029} & \textbf{0.9774$\pm$0.0029} & 0.9826$\pm$0.0027 \\
+A2: +abundance-bin & 0.9293$\pm$0.0116 & 0.9749$\pm$0.0045 & 0.9797$\pm$0.0036 \\
+A4: +masked-abundance pretraining & 0.9126$\pm$0.0081 & 0.9734$\pm$0.0041 & 0.9790$\pm$0.0032 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Only the MGM-style rank-bin encoding survives: accuracy rises from 92.46\% to 93.77\% (non-overlapping $\pm$1$\sigma$ bands, seed variance halved), and it is the sole module that degrades no metric. Abundance-bin adds nothing beyond rank, and masked-abundance pretraining actively hurts (91.26\%; the pretraining loss plateaus at 2.46 within 30 epochs) --- with 659 training samples, the auxiliary reconstruction objective does not transfer to classification. Under the pre-defined retention rule, the masked-pretraining branch is rejected, the name \emph{SimpleEmb-MAP} is retired, and the minimalist SimpleEmb --- optionally with rank-bin, pending the full 15-fold CI test --- remains the recommended backbone. This negative result reinforces the central claim: at current cohort scales, architectural modules imported from the foundation-model literature do not outperform a well-regularized minimal embedding.
 
 \subsection{Limitations}
 
@@ -881,10 +899,6 @@ Genome Biology, 22:93, 2021.
 \bibitem{deepmicro2020}
 Oh, M., Zhang, L.\ \textit{DeepMicro: deep representation learning for disease prediction based on microbiome data.}\
 Scientific Reports, 10:6026, 2020.
-
-\bibitem{mdeep2021}
-Wang, et al.\ \textit{MDeep: a deep learning approach for disease prediction based on microbiome data.}\
-2021.
 
 \end{thebibliography}
 

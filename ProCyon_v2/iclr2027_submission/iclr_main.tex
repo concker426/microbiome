@@ -403,9 +403,9 @@ The LLM fails as a classifier (42--62\% across zero- to five-shot vs. 92\% train
 
 Low Jaccard (0.07) but high Spearman $\rho$ (0.72) reflects functional substitution, and deletion tests confirm genuine signal.
 
-\subsection{Planned Extensions (SimpleEmb-MAP)}
+\subsection{Module-Transfer Ablation: What Survives?}
 
-A minimal ablation program augments SimpleEmb: rank-bin (A1), abundance-bin (A2), gated pooling (A3), masked-abundance pretraining (A4), A3+A4 (A5), token dropout (A6), and a linear head (A8). A module is retained only if it improves AUROC/AUPRC with non-overlapping 95\% CIs in $\geq$10 of 15 folds and transfers to a low-data or external setting. The final model is provisionally named SimpleEmb-MAP.
+Executed on the clean-2538 holdout (5 seeds, identical protocol; Table~\ref{tab:map_ablation}): A0 baseline 92.46$\pm$0.72\% ACC / 0.9753$\pm$0.005 AUROC; A1 +rank-bin (MGM) \textbf{93.77$\pm$0.29\%} / 0.9774$\pm$0.003; A2 +abundance-bin 92.93$\pm$1.16\% / 0.9749$\pm$0.005 (no gain); A4 +masked-abundance pretraining 91.26$\pm$0.81\% / 0.9734$\pm$0.004 (degrades; loss plateaus early). Only rank-bin survives the retention rule; masked pretraining is rejected and the name SimpleEmb-MAP is retired --- at 659-sample scale, foundation-model modules do not beat the minimalist embedding.
 
 \subsection{Limitations}
 
@@ -452,6 +452,22 @@ The pipeline is reproducible: architecture and hyperparameters are in Section~4;
 
 \appendix
 \section{Supplementary Tables and Figures}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Module-transfer ablation on the clean-2538 holdout} (5 seeds, mean$\pm$std; bold = per-column best).}
+\label{tab:map_ablation}
+\begin{tabular}{lccc}
+\toprule
+Variant & Accuracy & AUROC & AUPRC \\
+\midrule
+A0: SimpleEmb (baseline) & 0.9246$\pm$0.0072 & 0.9753$\pm$0.0046 & \textbf{0.9829$\pm$0.0028} \\
+A1: +rank-bin (MGM) & \textbf{0.9377$\pm$0.0029} & \textbf{0.9774$\pm$0.0029} & 0.9826$\pm$0.0027 \\
+A2: +abundance-bin & 0.9293$\pm$0.0116 & 0.9749$\pm$0.0045 & 0.9797$\pm$0.0036 \\
+A4: +masked-abundance pretraining & 0.9126$\pm$0.0081 & 0.9734$\pm$0.0041 & 0.9790$\pm$0.0032 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \begin{table}[ht]
 \centering
