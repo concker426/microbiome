@@ -205,7 +205,7 @@ To isolate each component's contribution:
 
 \subsection{Design Borrowings from Microbiome Baselines}
 
-Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT~\cite{siamcat2021} we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro~\cite{deepmicro2020} we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. From MDeep~\cite{mdeep2021} we plan taxonomy-aware embedding regularization, which encourages phylogenetically adjacent genera to have similar embeddings. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
+Our architecture and evaluation protocol incorporate established ideas from the microbiome-modeling literature while remaining orders of magnitude smaller than the source models. From SIAMCAT~\cite{siamcat2021} we adopt its evaluation discipline: feature filtering, standardization and hyperparameter selection are performed strictly within training folds, and generalization is assessed through leave-one-source-out evaluation. From MGM we adopt leave-one-out (LOO) attribution---our primary interpretability mechanism---and rank-based abundance encoding, which mitigates extreme abundance values. From BiomeGPT we adopt abundance-bin embeddings and masked-abundance pretraining as candidate extensions. From DeepMicro~\cite{deepmicro2020} we adopt the idea of unsupervised denoising pretraining (token dropout) to improve robustness to sparse taxa. Each is evaluated as a single-module addition to the SimpleEmb backbone rather than as wholesale adoption of any source architecture.
 
 \subsection{Training Details}
 
@@ -800,7 +800,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Planned Extensions (SimpleEmb-MAP)}
 
-We outline a minimal ablation program for augmenting SimpleEmb while preserving interpretability: (A0) the current SimpleEmb + mean-pool + MLP; (A1) rank-bin embedding (MGM); (A2) abundance-bin embedding; (A3) gated pooling; (A4) masked-abundance pretraining (BiomeGPT); (A5) A3+A4; (A6) token dropout (DeepMicro); (A7) taxonomy regularization (MDeep); and (A8) a linear head to isolate the role of the MLP. A module is retained only if it improves AUROC/AUPRC with non-overlapping paired-bootstrap 95\% CIs in at least 10 of 15 folds, does not degrade AUPRC, and transfers to at least one low-data or external setting. We provisionally name the final augmented model SimpleEmb-MAP (masked abundance pretraining), contingent on the pretraining ablation outperforming the no-pretraining backbone.
+We outline a minimal ablation program for augmenting SimpleEmb while preserving interpretability: (A0) the current SimpleEmb + mean-pool + MLP; (A1) rank-bin embedding (MGM); (A2) abundance-bin embedding; (A3) gated pooling; (A4) masked-abundance pretraining (BiomeGPT); (A5) A3+A4; (A6) token dropout (DeepMicro); and (A8) a linear head to isolate the role of the MLP. A module is retained only if it improves AUROC/AUPRC with non-overlapping paired-bootstrap 95\% CIs in at least 10 of 15 folds, does not degrade AUPRC, and transfers to at least one low-data or external setting. We provisionally name the final augmented model SimpleEmb-MAP (masked abundance pretraining), contingent on the pretraining ablation outperforming the no-pretraining backbone.
 
 \subsection{Limitations}
 
@@ -881,10 +881,6 @@ Genome Biology, 22:93, 2021.
 \bibitem{deepmicro2020}
 Oh, M., Zhang, L.\ \textit{DeepMicro: deep representation learning for disease prediction based on microbiome data.}\
 Scientific Reports, 10:6026, 2020.
-
-\bibitem{mdeep2021}
-Wang, et al.\ \textit{MDeep: a deep learning approach for disease prediction based on microbiome data.}\
-2021.
 
 \end{thebibliography}
 
