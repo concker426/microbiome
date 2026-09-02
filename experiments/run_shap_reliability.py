@@ -386,8 +386,8 @@ r, p = pearsonr(prevalence, importance)
 ax.set_title(f'D. Prevalence vs Importance\n(r={r:.3f}, p={p:.4f})', fontweight='bold', loc='left')
 
 plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/shap_reliability.png', dpi=200, bbox_inches='tight')
-print(f"\nSaved: {OUT_DIR}/shap_reliability.png")
+plt.savefig(f'{OUT_DIR}/loo_reliability.png', dpi=200, bbox_inches='tight')
+print(f"\nSaved: {OUT_DIR}/loo_reliability.png")
 
 # ═══════════════════════════════════════════
 # SAVE RESULTS

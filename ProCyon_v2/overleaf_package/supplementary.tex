@@ -31,7 +31,9 @@ Values are mean $\pm$ standard deviation over 15 validation folds.}
 \toprule
 \textbf{Method} & \textbf{Accuracy} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
 \midrule
-HistGradientBoosting & \textbf{0.925} $\pm$ 0.025 & \textbf{0.925} $\pm$ 0.025 & \textbf{0.979} $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
+BiomeGPT arch.\ transfer & \textbf{0.937} $\pm$ 0.021 & \textbf{0.937} $\pm$ 0.021 & \textbf{0.981} $\pm$ 0.010 & 0.978 $\pm$ 0.025 \\
+HistGradientBoosting & 0.925 $\pm$ 0.025 & 0.925 $\pm$ 0.025 & 0.979 $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
+SIAMCAT (LASSO) & 0.922 $\pm$ 0.015 & 0.922 $\pm$ 0.015 & 0.975 $\pm$ 0.009 & 0.976 $\pm$ 0.016 \\
 Extra Trees & 0.918 $\pm$ 0.024 & 0.918 $\pm$ 0.024 & 0.963 $\pm$ 0.013 & 0.958 $\pm$ 0.027 \\
 Random Forest & 0.916 $\pm$ 0.023 & 0.915 $\pm$ 0.023 & 0.971 $\pm$ 0.013 & 0.970 $\pm$ 0.019 \\
 SimpleEmb + MLP (ours) & 0.914 $\pm$ 0.020 & 0.913 $\pm$ 0.019 & 0.957 $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
@@ -40,6 +42,7 @@ MLP & 0.872 $\pm$ 0.031 & 0.871 $\pm$ 0.031 & 0.945 $\pm$ 0.024 & 0.950 $\pm$ 0.
 Logistic Regression & 0.865 $\pm$ 0.024 & 0.864 $\pm$ 0.024 & 0.936 $\pm$ 0.017 & 0.940 $\pm$ 0.022 \\
 MGM + MLP & 0.853 $\pm$ 0.028 & 0.852 $\pm$ 0.028 & 0.929 $\pm$ 0.026 & 0.924 $\pm$ 0.048 \\
 MGM + Logistic Regression & 0.846 $\pm$ 0.026 & 0.845 $\pm$ 0.026 & 0.908 $\pm$ 0.019 & 0.911 $\pm$ 0.037 \\
+DeepMicro (AE-64 + RBF-SVM) & 0.846 $\pm$ 0.025 & 0.845 $\pm$ 0.026 & 0.917 $\pm$ 0.027 & 0.911 $\pm$ 0.040 \\
 MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 & 0.912 $\pm$ 0.030 \\
 \bottomrule
 \end{tabular}

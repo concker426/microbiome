@@ -174,8 +174,8 @@ ax.legend(fontsize=8)
 fig.suptitle('ProCyon v2: Microbiome Biomarker Discovery & Validation',fontsize=16,fontweight='bold',y=0.98)
 
 plt.tight_layout(rect=[0,0,1,0.96])
-plt.savefig(f'{OUT_DIR}/paper_figure_shap_analysis.png',dpi=200,bbox_inches='tight')
-print(f"Saved: {OUT_DIR}/paper_figure_shap_analysis.png")
+plt.savefig(f'{OUT_DIR}/loo_attribution_analysis.png',dpi=200,bbox_inches='tight')
+print(f"Saved: {OUT_DIR}/loo_attribution_analysis.png")
 
 # ═══ Save SHAP consensus ═══
 # Consensus: genera with highest mean rank across folds (from robustness report)

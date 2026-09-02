@@ -31,7 +31,7 @@ We present SimpleEmb, a microbiome analysis framework that decouples disease cla
 % ═══════════════════════════════════════
 \section{Introduction}
 
-Accurate, evidence-grounded diagnosis from gut microbiome profiles is the task we address: given a genus-level relative-abundance profile, predict whether a patient has inflammatory bowel disease (IBD), and provide the evidence behind that prediction. Building a model that generalizes across cohorts confronts three challenges identified in the original design of this project and quantified in this work. \textbf{First, data scarcity}: any single input-to-label relationship---here, microbiome$\rightarrow$IBD---is supported by only thousands of labeled samples, orders of magnitude below what large foundation models typically require. \textbf{Second, study variability (batch effects)}: independent cohorts differ in laboratory, extraction protocol, and sequencing platform, so technical compositional shifts often exceed biological signal and make single-cohort models fail on new cohorts; we quantify this directly. \textbf{Third, class imbalance and representativeness}: public cohorts are enriched for disease cases and under-represent healthy individuals, so naive training inherits cohort-specific rather than disease-specific structure. A fourth requirement---that the prediction carry inspectable evidence---distinguishes this task from pure classification and shapes our entire design.
+Accurate, evidence-grounded diagnosis from gut microbiome profiles is the task we address: given a genus-level relative-abundance profile, predict whether a patient has inflammatory bowel disease (IBD), and provide the evidence behind that prediction. Building a model that generalizes across cohorts confronts three challenges identified in the original design of this project and quantified in this work. \textbf{First, data scarcity}: any single input-to-label relationship---here, microbiome$\rightarrow$IBD---is supported by only thousands of labeled samples, orders of magnitude below what large foundation models typically require. \textbf{Second, study variability (batch effects)}: independent cohorts differ in laboratory, extraction protocol, and sequencing platform, so technical compositional shifts often exceed biological signal and make single-cohort models fail on new cohorts; we quantify this directly. \textbf{Third, class imbalance and representativeness}: public cohorts are enriched for disease cases and under-represent healthy individuals, so naive training inherits cohort-specific rather than disease-specific structure. A fourth requirement---that the prediction carry inspectable evidence---distinguishes this task from pure classification and drives our entire design.
 
 % 2) Defects of existing methods
 Existing methods, however, fall short of these requirements along two dimensions. Classical machine-learning classifiers --- random forests, gradient boosting, and logistic regression --- achieve strong discrimination on tabular abundance data but provide no learned representation space: they cannot retrieve similar patients, rank the per-genus contribution behind a specific prediction, or support a natural-language explanation. Microbiome foundation models (MGM, BiomeGPT, Waypoint) instead tokenize abundance profiles and pretrain large Transformers; yet their pretrained representations do not transfer to a single-cohort IBD task --- MGM reaches 50.9\% accuracy, below a majority-class baseline --- and their interpretability is post-hoc attention rather than evidence that can be verified against the literature. No existing method simultaneously satisfies accuracy, parameter efficiency, and verifiable per-sample explanation on the sparse, batch-dominated data we study.
@@ -116,12 +116,23 @@ The 366 observed genera exhibit a strong long-tail distribution: only 42 genera 
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/dataset_architecture_figure.png}
-\caption{\textbf{Dataset statistics and architecture comparison.}
-(A) SimpleEmb vs.\ MGM architecture side-by-side. (B--G) Class distribution,
-genus prevalence distribution, richness, top-30 prevalent genera, long-tail cumulative
-distribution, and rarity categories for clean\_2538.}
+\includegraphics[width=0.95\textwidth]{figures/dataset_architecture_figure.png}
+\caption{\textbf{Architecture comparison.}
+SimpleEmb (right) maps each present genus to a learned 512-d embedding, summarizes the
+profile by masked mean pooling, and predicts IBD; the same embedding space powers
+leave-one-out (LOO) attribution, verbalized by a frozen Qwen2-7B. MGM (left) is a
+34M-parameter pretrained Transformer that reaches only 50.9\% accuracy here.}
 \label{fig:dataset}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/dataset_statistics_figure.png}
+\caption{\textbf{Dataset statistics for clean\_2538.}
+(A) Class distribution. (B) Genus prevalence distribution. (C) Richness distribution.
+(D) Top-30 most prevalent genera. (E) Long-tail cumulative distribution.
+(F) Genus rarity categories.}
+\label{fig:dataset_stats}
 \end{figure}
 
 This sparsity pattern has important implications for model design: (1) most genera provide sparse, high-variance signals; (2) the few ubiquitous genera may dominate naive feature representations; (3) an embedding-based approach can learn distributed representations that share statistical strength across rare and common genera.
@@ -261,7 +272,8 @@ Values are mean $\pm$ std over 15 validation folds.}
 \toprule
 \textbf{Method} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
 \midrule
-HistGradientBoosting & \textbf{0.925} $\pm$ 0.025 & \textbf{0.925} $\pm$ 0.025 & \textbf{0.979} $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
+BiomeGPT arch.\ transfer & \textbf{0.937} $\pm$ 0.021 & \textbf{0.937} $\pm$ 0.021 & \textbf{0.981} $\pm$ 0.010 & 0.978 $\pm$ 0.025 \\
+HistGradientBoosting & 0.925 $\pm$ 0.025 & 0.925 $\pm$ 0.025 & 0.979 $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
 SIAMCAT (LASSO) & 0.922 $\pm$ 0.015 & 0.922 $\pm$ 0.015 & 0.975 $\pm$ 0.009 & 0.976 $\pm$ 0.016 \\
 Extra Trees & 0.918 $\pm$ 0.024 & 0.918 $\pm$ 0.024 & 0.963 $\pm$ 0.013 & 0.958 $\pm$ 0.027 \\
 Random Forest & 0.916 $\pm$ 0.023 & 0.915 $\pm$ 0.023 & 0.971 $\pm$ 0.013 & 0.970 $\pm$ 0.019 \\
@@ -277,7 +289,7 @@ MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 
 \end{tabular}
 \end{table}
 
-\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$). Beyond these classical and MGM baselines, SIAMCAT (LASSO) is competitive with HistGradientBoosting (AUROC 0.975) under the same exact-input grouped-CV protocol, while DeepMicro (AE-64 + RBF-SVM) trails the embedding classifier (AUROC 0.917). A genus-level BiomeGPT architecture transfer reaches AUROC 0.984 but is reported separately because it differs from the species-level original.
+\textbf{Grouped-CV findings}: (1) Tree ensembles are the strongest classical baselines under this protocol, with HistGradientBoosting (0.925) numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- within the noise envelope but indicating no claim of superiority over boosted trees is warranted. (2) SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp, confirming the held-out result that the pretrained Transformer representation is detrimental here. (3) SimpleEmb+MLP outperforms the un-embedded MLP (0.872) by 4.2pp and RBF-SVM by 3.5pp, and, critically, provides the embedding space that none of the tree models offer --- enabling kNN retrieval, LOO attribution, heterogeneity clustering, and LLM-grounded interpretation. In a pairwise McNemar analysis aggregated over the 15 grouped-CV folds with Benjamini--Hochberg FDR correction, SimpleEmb+MLP significantly outperforms KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly outperforms SimpleEmb+MLP ($q{=}0.006$); all remaining comparisons (HistGradientBoosting, ExtraTrees, MLP, and all MGM variants) are not significant ($q{>}0.05$). A genus-level transfer of the BiomeGPT architecture --- an 8-layer Transformer with a dual abundance-bin embedding (14.6M parameters), pretrained and fine-tuned from scratch on each fold's training data --- is numerically the strongest method in this comparison (ACC 0.937 / AUROC 0.981). It is nonetheless statistically indistinguishable from HistGradientBoosting (paired Wilcoxon on AUROC, mean difference $+0.003$, $p{=}0.229$), costs 13$\times$ the parameters of SimpleEmb plus per-fold masked pretraining, and provides no embedding-space LOO attribution, so it does not alter the interpretability conclusion that motivates SimpleEmb. SIAMCAT (LASSO, AUROC 0.975) and DeepMicro (AE-64 + RBF-SVM, AUROC 0.917) round out the external-baseline comparison under the same exact-input protocol.
 
 \begin{figure}[ht]
 \centering
@@ -572,7 +584,7 @@ The permutation control --- training a model on shuffled labels and computing it
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/shap_reliability.png}
+\includegraphics[width=0.95\textwidth]{figures/loo_reliability.png}
 \caption{\textbf{LOO attribution reliability.}
 (A) Spearman rank correlation matrix across 5 folds. (B) Deletion test: AUC drop when
 removing top-K LOO-identified genera vs.\ random genera. (C) Real vs.\ permuted-label
@@ -582,7 +594,7 @@ LOO importance distributions. (D) Prevalence vs.\ importance scatter.}
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/paper_figure_shap_analysis.png}
+\includegraphics[width=0.95\textwidth]{figures/loo_attribution_analysis.png}
 \caption{\textbf{Comprehensive LOO attribution analysis.}
 (A) Global importance ranking (top-50 genera, color-coded by literature agreement).
 (B) Prevalence vs.\ importance. (C) Cross-validation stability (Jaccard).
