@@ -800,7 +800,7 @@ IBD is a community-level dysbiosis, not driven by single genera. Different folds
 
 \subsection{Module-Transfer Ablation: What Survives?}
 
-We executed the full single-module program on the clean-2538 held-out split (659 train / 167 test) under the identical 5-seed protocol as the main model: A0 (SimpleEmb baseline), A1 (+MGM-style rank-bin embedding, 32 bins), A2 (+abundance-bin embedding, within-sample quantile, 32 bins), A3 (gated attention pooling), A4 (A2 + BiomeGPT-style masked-abundance pretraining: 25\% token masking, 30 pretraining epochs), A6 (+token dropout $p{=}0.15$, DeepMicro-style denoising), and A8 (a linear head isolating the MLP).
+To test which borrowed modules earn a place in the final model, we ran a single-module incremental ablation over the SimpleEmb backbone (holdout, 5 seeds; Table~\ref{tab:map_ablation}): A0 baseline 92.46\%/0.9753 ACC/AUROC; A1 +rank-bin 93.77\%/0.9774; A2 +abundance-bin 92.93\%/0.9749 (no gain); A3 gated pooling 91.62\%/0.9664 and A8 linear head 91.14\%/0.9681 (degrade; MLP necessary); A4 +masked-abundance pretraining 91.26\%/0.9734 (degrades); A6 +token dropout 93.89\%/0.9822 (best on all metrics). Under a pre-registered 15-fold retention rule (Table~\ref{tab:map_retention}): rank-bin wins 9/15 folds (CI-significant 2/15; rejected); token dropout wins 15/15 ($+$1.4pp AUROC, $+$2.0pp AUPRC, no fold degraded) but is CI-significant in 8/15 --- short of the 10/15 bar, and external transfer remains untested. No module is formally retained: SimpleEmb stays minimal, token dropout is the sole follow-up direction, and the SimpleEmb-MAP name is retired.
 
 \begin{table}[ht]
 \centering
@@ -834,10 +834,6 @@ A6 token dropout & \textbf{15/15} & 8/15 (rule: $\geq$10) & $+0.020$ & not retai
 \bottomrule
 \end{tabular}
 \end{table}
-
-On the holdout, token dropout (A6) improves every metric (92.46\%$\to$93.89\% ACC, 0.9753$\to$0.9822 AUROC, 0.9829$\to$0.9851 AUPRC) with the lowest seed variance of all variants, while rank-bin (A1) improves accuracy alone. Abundance-bin adds nothing, gated pooling and the linear head both degrade accuracy --- the MLP head is necessary --- and masked-abundance pretraining actively hurts (91.26\%; the pretraining loss plateaus at 2.46 within 30 epochs): with 659 training samples, the auxiliary reconstruction objective does not transfer to classification.
-
-We then subjected the two holdout winners to the pre-registered retention rule: 15 leakage-robust grouped-CV folds (3 seeds $\times$ StratifiedGroupKFold(5) over all 826 samples, grouped by exact sequence hash), each judged by paired bootstrap (Table~\ref{tab:map_retention}). Neither clears the strict bar. Rank-bin wins AUROC in only 9/15 folds with CI significance in 2/15 --- rejected. Token dropout wins AUROC in 15/15 folds, raises mean AUROC from 0.9553 to 0.9689 and AUPRC from 0.9480 to 0.9676 without degrading any metric, and reaches CI significance in 8/15 --- short of the required 10/15, with the external-transfer condition untested. We therefore retain the minimalist SimpleEmb as the paper's backbone, designate token dropout the single recommended follow-up (a directionally unanimous but magnitude-uncertain effect), and retire the SimpleEmb-MAP name. The negative result reinforces the central claim: at current cohort scales, architectural modules imported from the foundation-model literature do not outperform a well-regularized minimal embedding.
 
 \subsection{Limitations}
 
