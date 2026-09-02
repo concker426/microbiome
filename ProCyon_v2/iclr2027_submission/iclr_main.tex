@@ -14,14 +14,14 @@
 \setlength{\tabcolsep}{4pt}
 
 % ---- Title ----
-\title{ProCyon v2: Learning Robust Microbiome Representations for\\Accurate IBD Prediction and Evidence-Grounded Biological Interpretation}
+\title{Discover, Attribute, Explain: A Minimal Framework for Evidence-Grounded Microbiome Diagnosis}
 \author{Jinxu Liu}
 \date{}
 
 \begin{document}
 \maketitle
 
-\begin{abstract}We present ProCyon v2, a microbiome framework decoupling disease classification from biological interpretation. On clean\_2538 IBD (659 train, 167 test), a minimal encoder (nn.Embedding + masked mean pooling, no pretraining, no Transformer) achieves 92.57\% accuracy (AUC 0.975), comparable to tree ensembles (XGBoost 92.22\%; HistGradientBoosting 92.5\% grouped-CV) and 41.7pp above a 34M pretrained MGM Transformer. Embedding dimension saturates at $E{=}512$. LOO attribution is reliable (Spearman $\rho{=}0.72$), and LOO-grounded Qwen2-7B explanations halve hallucination (0.72 to 0.36) with 98\% consistency and 0.94 direction accuracy. Leave-one-source-out validation across five cohorts confirms batch effects remain the central challenge. ProCyon v2 shows the model discovers patterns, LOO provides evidence, and the LLM explains the evidence.\end{abstract}
+\begin{abstract}We present SimpleEmb, a microbiome framework decoupling disease classification from biological interpretation. On clean\_2538 IBD (659 train, 167 test), a minimal encoder (nn.Embedding + masked mean pooling, no pretraining, no Transformer) achieves 92.57\% accuracy (AUC 0.975), comparable to tree ensembles (XGBoost 92.22\%; HistGradientBoosting 92.5\% grouped-CV) and 41.7pp above a 34M pretrained MGM Transformer. Embedding dimension saturates at $E{=}512$. LOO attribution is reliable (Spearman $\rho{=}0.72$), and LOO-grounded Qwen2-7B explanations halve hallucination (0.72 to 0.36) with 98\% consistency and 0.94 direction accuracy. Leave-one-source-out validation across five cohorts confirms batch effects remain the central challenge. SimpleEmb shows the model discovers patterns, LOO provides evidence, and the LLM explains the evidence.\end{abstract}
 
 % ═══════════════════════════════════════
 % 1. INTRODUCTION
@@ -38,7 +38,7 @@ However, three critical questions remain under-explored:
   \item \textbf{Evidence grounding}: Can model explanations be verified against literature and made robust across data splits?
 \end{enumerate}
 
-This paper systematically investigates these questions through controlled experiments. Our findings challenge several assumptions in current microbiome foundation model design and lead to ProCyon v2: a simple embedding-based classifier with LOO-attributed feature importance, where the LLM serves solely as an interpreter --- not a predictor.
+This paper systematically investigates these questions through controlled experiments. Our findings challenge several assumptions in current microbiome foundation model design and lead to SimpleEmb: a simple embedding-based classifier with LOO-attributed feature importance, where the LLM serves solely as an interpreter --- not a predictor.
 
 \textbf{Contributions:}
 \begin{itemize}
@@ -85,7 +85,7 @@ The 366 observed genera exhibit a strong long-tail distribution: only 42 genera 
 \centering
 \includegraphics[width=0.62\textwidth]{figures/dataset_architecture_figure.png}
 \caption{\textbf{Dataset statistics and architecture comparison.}
-(A) ProCyon v2 vs.\ MGM architecture side-by-side. (B--G) Class distribution,
+(A) SimpleEmb vs.\ MGM architecture side-by-side. (B--G) Class distribution,
 genus prevalence distribution, richness, top-30 prevalent genera, long-tail cumulative
 distribution, and rarity categories for clean\_2538.}
 \label{fig:dataset}
@@ -99,9 +99,9 @@ IBD patients exhibit greater microbiome heterogeneity than healthy controls (int
 
 \section{Methods}
 
-\subsection{ProCyon v2 Architecture}
+\subsection{SimpleEmb Architecture}
 
-ProCyon v2 adopts a minimalist design based on systematic ablation findings:
+SimpleEmb adopts a minimalist design based on systematic ablation findings:
 
 \begin{center}
 \begin{tabular}{c}
@@ -141,7 +141,7 @@ We compare against nine baselines spanning three categories, all evaluated on th
   \item \textbf{Lower bound}: Majority class classifier
   \item \textbf{Classical ML} (on raw 1226-dim abundance): Logistic Regression, Linear SVM, Random Forest (200 trees), XGBoost (200 trees), MLP (sklearn, 256$\rightarrow$128)
   \item \textbf{MGM-based}: MGM pretrained encoder (34M params, 6 Transformer layers, pretrained on 263k samples) + MLP
-  \item \textbf{ProCyon v2}: SimpleEmb + MLP, 5-seed ensemble
+  \item \textbf{SimpleEmb}: SimpleEmb + MLP, 5-seed ensemble
 \end{itemize}
 
 \subsection{Ablation Design}
@@ -151,7 +151,7 @@ To isolate each component's contribution:
   \item \textbf{A: Raw$\rightarrow$MLP} --- Raw abundance directly to MLP (no embedding)
   \item \textbf{B: RandomEmb$\rightarrow$MLP} --- Frozen random embedding + mean pool $\rightarrow$ MLP
   \item \textbf{C: SimpleEmb$\rightarrow$Linear} --- Trained embedding + Linear classifier (no MLP)
-  \item \textbf{D: SimpleEmb$\rightarrow$MLP (ProCyon v2)} --- Full model, end-to-end trained
+  \item \textbf{D: SimpleEmb$\rightarrow$MLP (SimpleEmb)} --- Full model, end-to-end trained
 \end{itemize}
 
 \subsection{Design Borrowings}
@@ -160,7 +160,7 @@ We incorporate ideas from the microbiome-modeling literature while remaining far
 
 \subsection{Training Details}
 
-All models trained with: AdamW ($\text{lr}{=}10^{-3}$, $\text{weight\_decay}{=}10^{-4}$), CosineAnnealing ($T_{\max}{=}50$), batch\_size${=}32$, class-weighted loss (Disease weight${=}1.5$). ProCyon v2 reports mean $\pm$ std across 5 random seeds (42, 123, 456, 789, 1024).
+All models trained with: AdamW ($\text{lr}{=}10^{-3}$, $\text{weight\_decay}{=}10^{-4}$), CosineAnnealing ($T_{\max}{=}50$), batch\_size${=}32$, class-weighted loss (Disease weight${=}1.5$). SimpleEmb reports mean $\pm$ std across 5 random seeds (42, 123, 456, 789, 1024).
 
 % ═══════════════════════════════════════
 % 4. EXPERIMENTS
@@ -173,7 +173,7 @@ All models trained with: AdamW ($\text{lr}{=}10^{-3}$, $\text{weight\_decay}{=}1
 \begin{table}[ht]
 \centering
 \caption{\textbf{IBD classification performance on clean\_2538 (659 train / 167 test).}
-All methods evaluated on identical split. Bold indicates best. ProCyon v2 reports 5-seed ensemble mean $\pm$ std.}
+All methods evaluated on identical split. Bold indicates best. SimpleEmb reports 5-seed ensemble mean $\pm$ std.}
 \label{tab:baselines}
 \begin{tabular}{lcccccc}
 \toprule
@@ -192,14 +192,14 @@ All methods evaluated on identical split. Bold indicates best. ProCyon v2 report
 \multicolumn{7}{l}{\textit{MGM Transformer (34M params, pretrained 263k)}} \\
 \;\; MGM pretrained + MLP & 0.5090 & 0.4625 & 0.5478 & 0.6774 & 0.6058 & 34M \\
 \midrule
-\multicolumn{7}{l}{\textit{ProCyon v2 (this work)}} \\
+\multicolumn{7}{l}{\textit{SimpleEmb (this work)}} \\
 \;\; SimpleEmb + Linear & 0.4431 & 0.3362 & 0.5000 & 0.0645 & 0.1143 & 0.93M \\
-\;\; \textbf{ProCyon v2} & \textbf{0.9257}$\pm$0.0048 & \textbf{0.9750} & \textbf{0.9451} & \textbf{0.9161} & \textbf{0.9348} & \textbf{1.14M} \\
+\;\; \textbf{SimpleEmb} & \textbf{0.9257}$\pm$0.0048 & \textbf{0.9750} & \textbf{0.9451} & \textbf{0.9161} & \textbf{0.9348} & \textbf{1.14M} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Key findings}: (1) MGM pretrained encoder completely fails (50.9\% ACC, below majority baseline), demonstrating that next-genus pretraining does not transfer to IBD classification. (2) XGBoost on raw features is a strong baseline (92.22\%), establishing a high bar. (3) ProCyon v2 achieves competitive classification performance (92.57\%) with balanced precision (0.945) and recall (0.916). (4) With only 1.14M parameters --- $30\times$ fewer than MGM --- ProCyon v2 achieves 41.7pp higher accuracy, demonstrating dramatic parameter efficiency.
+\textbf{Key findings}: (1) MGM pretrained encoder completely fails (50.9\% ACC, below majority baseline), demonstrating that next-genus pretraining does not transfer to IBD classification. (2) XGBoost on raw features is a strong baseline (92.22\%), establishing a high bar. (3) SimpleEmb achieves competitive classification performance (92.57\%) with balanced precision (0.945) and recall (0.916). (4) With only 1.14M parameters --- $30\times$ fewer than MGM --- SimpleEmb achieves 41.7pp higher accuracy, demonstrating dramatic parameter efficiency.
 
 \subsubsection{Leakage-Robust Grouped Cross-Validation}
 
@@ -363,7 +363,7 @@ LLM (k=1, 1-shot) & 0.596 & 0.594 & 1 & 59/99 \\
 LLM (k=3, 3-shot) & 0.550 & 0.549 & 0 & 55/100 \\
 LLM (k=5, 5-shot) & 0.620 & 0.618 & 0 & 62/100 \\
 \midrule
-\textbf{ProCyon v2 (trained)} & \textbf{0.920} & \textbf{---} & 0 & 92/100 \\
+\textbf{SimpleEmb (trained)} & \textbf{0.920} & \textbf{---} & 0 & 92/100 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -372,7 +372,7 @@ Even with five in-context examples, the LLM reaches only 62.0\% accuracy, far be
 
 \subsection{Calibration}
 
-ProCyon v2 produces well-calibrated probabilities: Expected Calibration Error (ECE) $=$ 0.0496, Brier Score $=$ 0.0555. Most predictions concentrate near 0 or 1 (64 samples in [0.0, 0.1), 66 in [0.9, 1.0]), with only 8 samples in the ambiguous [0.3, 0.7] range. When the model assigns ${\geq}90\%$ probability to IBD, the empirical disease rate is 100\%.
+SimpleEmb produces well-calibrated probabilities: Expected Calibration Error (ECE) $=$ 0.0496, Brier Score $=$ 0.0555. Most predictions concentrate near 0 or 1 (64 samples in [0.0, 0.1), 66 in [0.9, 1.0]), with only 8 samples in the ambiguous [0.3, 0.7] range. When the model assigns ${\geq}90\%$ probability to IBD, the empirical disease rate is 100\%.
 
 Only 12 errors out of 167 test samples (7.2\%): 5 false positives (Healthy$\rightarrow$IBD, moderate confidence 0.71--0.86) and 7 false negatives (IBD$\rightarrow$Healthy, very low confidence 0.007--0.056). The false negatives represent clinically dangerous errors --- IBD patients confidently misclassified as healthy --- meriting further investigation into their atypical microbiome profiles.
 
@@ -409,7 +409,7 @@ The full program on the holdout (5 seeds; Table~\ref{tab:map_ablation}): A0 92.4
 
 \section{Conclusion}
 
-ProCyon v2 demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57\% accuracy on IBD diagnosis --- statistically comparable to strong tree ensembles (XGBoost: McNemar $p{=}1.000$; HistGradientBoosting: 92.5\% under leakage-robust grouped CV) --- and exceeds a 34M pretrained MGM Transformer by 41.7pp on the held-out split and by 6.1pp under grouped CV. The embedding dimension saturates at $E{=}512$ (760K params), and cross-dataset transfer confirms generalization (merged$\rightarrow$clean: 88.62\%). LOO attributions are reliable (Spearman $\rho{=}0.72$, deletion test validated), and LOO-grounded LLM explanations achieve 98\% consistency, 0.94 direction accuracy, and halved hallucination.
+SimpleEmb demonstrates that effective microbiome-based disease classification does not require large Transformer encoders, massive pretraining, or LLM-based prediction. A 1.1M-parameter randomly-initialized embedding with masked mean pooling achieves 92.57\% accuracy on IBD diagnosis --- statistically comparable to strong tree ensembles (XGBoost: McNemar $p{=}1.000$; HistGradientBoosting: 92.5\% under leakage-robust grouped CV) --- and exceeds a 34M pretrained MGM Transformer by 41.7pp on the held-out split and by 6.1pp under grouped CV. The embedding dimension saturates at $E{=}512$ (760K params), and cross-dataset transfer confirms generalization (merged$\rightarrow$clean: 88.62\%). LOO attributions are reliable (Spearman $\rho{=}0.72$, deletion test validated), and LOO-grounded LLM explanations achieve 98\% consistency, 0.94 direction accuracy, and halved hallucination.
 
 The core insight is the \textbf{separation of concerns}: the model discovers patterns from data, LOO attribution provides evidence for those patterns, and the LLM explains the evidence in natural language. Each component is optimized for its specific role, and the pipeline is verifiable at every stage.
 
@@ -485,7 +485,7 @@ A6 token dropout & \textbf{15/15} & 8/15 (rule: $\geq$10) & $+0.020$ & not retai
 \begin{table}[ht]
 \centering
 \caption{\textbf{Comparison of microbiome foundation models.}
-ProCyon v2 achieves competitive performance with 30$\times$ fewer parameters and no pretraining,
+SimpleEmb achieves competitive performance with 30$\times$ fewer parameters and no pretraining,
 while providing per-sample LOO attribution and LLM-based interpretation.}
 \label{tab:fm_comparison}
 \begin{tabular}{p{2.4cm}p{2.6cm}p{2.0cm}p{2.4cm}p{2.4cm}p{2.2cm}}
@@ -495,7 +495,7 @@ while providing per-sample LOO attribution and LLM-based interpretation.}
 MGM~\citep{mgm2024} & 8L Transformer (34M) & Genus & Next-genus, 263k & Attention + LOO & Public \\
 BiomeGPT~\citep{biomegpt2026} & Transformer + dual emb & Species & Masked abundance, 13.3k & CLS attention & Unavailable \\
 Waypoint~\citep{waypoint2026} & Transformer (6--170M) & Genus & 539k+ & Not emphasized & Unavailable \\
-\textbf{ProCyon v2} & \textbf{SimpleEmb + MLP (1.1M)} & Genus & \textbf{None} & \textbf{LOO + LLM} & \textbf{Public} \\
+\textbf{SimpleEmb} & \textbf{SimpleEmb + MLP (1.1M)} & Genus & \textbf{None} & \textbf{LOO + LLM} & \textbf{Public} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -627,7 +627,7 @@ FT-Transformer & Sequential & \ding{55} & 0.9102 & 0.9552 & 769K \\
 MGM & Sequential & \ding{51} & 0.5090 & 0.4625 & 34M \\
 \midrule
 DeepSets & Permutation-invariant & \ding{55} & \textbf{0.9162} & \textbf{0.9731} & 512K \\
-\textbf{ProCyon v2} & \textbf{Permutation-invariant + Embedding} & \ding{55} & \textbf{0.9162} & 0.9640 & 347K \\
+\textbf{SimpleEmb} & \textbf{Permutation-invariant + Embedding} & \ding{55} & \textbf{0.9162} & 0.9640 & 347K \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -806,7 +806,7 @@ All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
 \includegraphics[width=0.85\textwidth]{figures/learning_curve.png}
 \caption{\textbf{Data efficiency (nested group-CV).}
 (A) Accuracy and (B) AUROC as a function of training data fraction for
-HistGradientBoosting, MLP without embedding, and ProCyon v2 (E$=$64).}
+HistGradientBoosting, MLP without embedding, and SimpleEmb (E$=$64).}
 \label{fig:learning}
 \end{figure}
 

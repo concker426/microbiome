@@ -1,0 +1,32 @@
+\begin{thebibliography}{4}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Atlas/Waypoint(2026)]{waypoint2026}
+Atlas/Waypoint.
+\newblock Learning the language of the microbiome with transformers.
+\newblock \emph{bioRxiv}, 2026.
+\newblock DOI: 10.64898/2026.05.02.722381.
+
+\bibitem[Medearis et~al.(2026)Medearis, Zhu, and Zomorrodi]{biomegpt2026}
+Nicholas~A Medearis, Siyao Zhu, and Ali~R Zomorrodi.
+\newblock Biomegpt: A foundation model for the human gut microbiome.
+\newblock \emph{bioRxiv}, 2026.
+\newblock \doi{10.64898/2026.01.05.697599}.
+
+\bibitem[Ning(2025)]{mgm2024}
+et~al. Ning.
+\newblock Mgm as a large-scale pretrained foundation model for microbiome
+  analyses in diverse contexts.
+\newblock \emph{Advanced Science}, 2025.
+\newblock bioRxiv: 2024.12.30.630825.
+
+\bibitem[Team(2025)]{procyon2025}
+ProCyon Team.
+\newblock Procyon: A multimodal foundation model for protein phenotypes.
+\newblock 2025.
+
+\end{thebibliography}
