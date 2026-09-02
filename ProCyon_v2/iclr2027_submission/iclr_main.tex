@@ -397,15 +397,11 @@ With 366 genera, $E{=}512$ (1.4 dims/genus) suffices; extra dimensions encode no
 
 \subsection{When LLMs Help}
 
-The LLM fails as a classifier (42--62\% across zero- to five-shot vs. 92\% trained) but succeeds as an interpreter when LOO-grounded (halved hallucination, 98\% consistency, 0.94 direction). This asymmetry motivates the dual-branch design.
-
-\subsection{Why LOO Attribution Is Reliable Despite Low Jaccard}
-
-Low Jaccard (0.07) but high Spearman $\rho$ (0.72) reflects functional substitution, and deletion tests confirm genuine signal.
+The LLM fails as a classifier (42--62\% across zero- to five-shot vs. 92\% trained) but succeeds as an interpreter when LOO-grounded (halved hallucination, 98\% consistency, 0.94 direction). This asymmetry motivates the dual-branch design. LOO attribution remains reliable despite low Jaccard (0.07): it reflects functional substitution, and deletion tests confirm genuine signal (Spearman $\rho{=}0.72$).
 
 \subsection{Module-Transfer Ablation: What Survives?}
 
-Executed on the clean-2538 holdout (5 seeds, identical protocol; Table~\ref{tab:map_ablation}): A0 baseline 92.46$\pm$0.72\% ACC / 0.9753$\pm$0.005 AUROC; A1 +rank-bin (MGM) \textbf{93.77$\pm$0.29\%} / 0.9774$\pm$0.003; A2 +abundance-bin 92.93$\pm$1.16\% / 0.9749$\pm$0.005 (no gain); A4 +masked-abundance pretraining 91.26$\pm$0.81\% / 0.9734$\pm$0.004 (degrades; loss plateaus early). Only rank-bin survives the retention rule; masked pretraining is rejected and the name SimpleEmb-MAP is retired --- at 659-sample scale, foundation-model modules do not beat the minimalist embedding.
+The full program on the holdout (5 seeds; Table~\ref{tab:map_ablation}): A0 92.46\%/0.9753 ACC/AUROC; A1 +rank-bin 93.77\%/0.9774; A2 +abundance-bin 92.93\%/0.9749 (no gain); A3 gated pooling 91.62\%/0.9664 and A8 linear head 91.14\%/0.9681 (degrade; MLP necessary); A4 +masked pretraining 91.26\%/0.9734 (degrades); A6 +token dropout \textbf{93.89\%/0.9822} (best on all metrics). Under the 15-fold retention rule (Table~\ref{tab:map_retention}): rank-bin wins 9/15 folds (CI-significant 2/15; rejected); token dropout wins 15/15 ($+$1.4pp AUROC, $+$2.0pp AUPRC, no fold degraded), CI-significant 8/15 --- short of the 10/15 bar, external transfer untested. No module is formally retained: SimpleEmb stays minimal, token dropout is the sole follow-up, and the SimpleEmb-MAP name is retired.
 
 \subsection{Limitations}
 
@@ -461,10 +457,27 @@ The pipeline is reproducible: architecture and hyperparameters are in Section~4;
 \toprule
 Variant & Accuracy & AUROC & AUPRC \\
 \midrule
-A0: SimpleEmb (baseline) & 0.9246$\pm$0.0072 & 0.9753$\pm$0.0046 & \textbf{0.9829$\pm$0.0028} \\
-A1: +rank-bin (MGM) & \textbf{0.9377$\pm$0.0029} & \textbf{0.9774$\pm$0.0029} & 0.9826$\pm$0.0027 \\
+A0: SimpleEmb (baseline) & 0.9246$\pm$0.0072 & 0.9753$\pm$0.0046 & 0.9829$\pm$0.0028 \\
+A1: +rank-bin (MGM) & 0.9377$\pm$0.0029 & 0.9774$\pm$0.0029 & 0.9826$\pm$0.0027 \\
 A2: +abundance-bin & 0.9293$\pm$0.0116 & 0.9749$\pm$0.0045 & 0.9797$\pm$0.0036 \\
+A3: gated pooling & 0.9162$\pm$0.0066 & 0.9664$\pm$0.0045 & 0.9749$\pm$0.0060 \\
 A4: +masked-abundance pretraining & 0.9126$\pm$0.0081 & 0.9734$\pm$0.0041 & 0.9790$\pm$0.0032 \\
+A6: +token dropout (DeepMicro) & \textbf{0.9389$\pm$0.0045} & \textbf{0.9822$\pm$0.0022} & \textbf{0.9851$\pm$0.0022} \\
+A8: linear head & 0.9114$\pm$0.0045 & 0.9681$\pm$0.0025 & 0.9783$\pm$0.0015 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Retention test under the 15-fold leakage-robust grouped-CV protocol} (3 seeds $\times$ StratifiedGroupKFold(5) over all 826 samples, grouped by exact sequence hash; paired bootstrap, 1000 resamples per fold).}
+\label{tab:map_retention}
+\begin{tabular}{lcccc}
+\toprule
+Candidate & AUROC wins & CI-sig.\ folds & $\Delta$AUPRC & Verdict \\
+\midrule
+A1 rank-bin & 9/15 & 2/15 & $+0.002$ & rejected \\
+A6 token dropout & \textbf{15/15} & 8/15 (rule: $\geq$10) & $+0.020$ & not retained; follow-up \\
 \bottomrule
 \end{tabular}
 \end{table}
