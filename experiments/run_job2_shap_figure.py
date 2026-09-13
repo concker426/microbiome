@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 from matplotlib.patches import Patch
 
 OUT_DIR='/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
@@ -173,8 +174,8 @@ ax.legend(fontsize=8)
 # Overall title
 fig.suptitle('ProCyon v2: Microbiome Biomarker Discovery & Validation',fontsize=16,fontweight='bold',y=0.98)
 
-plt.tight_layout(rect=[0,0,1,0.96])
-plt.savefig(f'{OUT_DIR}/loo_attribution_analysis.png',dpi=200,bbox_inches='tight')
+plt.tight_layout(rect=[0,0,1,0.96], pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/loo_attribution_analysis.png',dpi=300,bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/loo_attribution_analysis.png")
 
 # ═══ Save SHAP consensus ═══

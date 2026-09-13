@@ -578,6 +578,7 @@ print(f"\nSaved: {OUT_DIR}/week1_tables.tex")
 # ═══════════════════════════════════════════════════════════
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
@@ -679,8 +680,8 @@ ax.set_xscale('log'); ax.set_title('F. Parameter Efficiency', fontweight='bold',
 ax.grid(True, alpha=0.3)
 
 fig.suptitle('ProCyon v2 — Week 1: Baseline Comparison & Ablation Analysis', fontsize=14, fontweight='bold', y=0.99)
-plt.tight_layout(rect=[0,0,1,0.96])
-plt.savefig(f'{OUT_DIR}/week1_figure.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(rect=[0,0,1,0.96], pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/week1_figure.png', dpi=300, bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/week1_figure.png")
 
 print(f"\n{'='*70}")

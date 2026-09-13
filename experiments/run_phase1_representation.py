@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.metrics import (silhouette_score, pairwise_distances,
@@ -344,8 +345,8 @@ ax.axhline(y=0.9281,color='gray',linestyle='--',label=f'MLP ensemble (0.928)')
 ax.set_xlabel('k'); ax.set_ylabel('ACC'); ax.set_title('kNN Accuracy vs k'); ax.legend(fontsize=8)
 ax.set_xlim(0,max(ks)+1)
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/phase1_representation_analysis.png',dpi=150,bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/phase1_representation_analysis.png',dpi=300,bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/phase1_representation_analysis.png")
 
 # ── Save report ──

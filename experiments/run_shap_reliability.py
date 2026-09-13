@@ -15,6 +15,7 @@ from scipy.stats import spearmanr, pearsonr
 from sklearn.metrics import accuracy_score, roc_auc_score
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 OUT_DIR = '/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
 DATA_DIR = '/hd/liujx/microbiome_llm_project/data/qiita_ibd/clean_2538'
@@ -385,8 +386,8 @@ ax.set_xlabel('Prevalence (n samples)'); ax.set_ylabel('|SHAP Importance|')
 r, p = pearsonr(prevalence, importance)
 ax.set_title(f'D. Prevalence vs Importance\n(r={r:.3f}, p={p:.4f})', fontweight='bold', loc='left')
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/loo_reliability.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/loo_reliability.png', dpi=300, bbox_inches='tight')
 print(f"\nSaved: {OUT_DIR}/loo_reliability.png")
 
 # ═══════════════════════════════════════════

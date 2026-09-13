@@ -2,6 +2,7 @@
 """Generate inductive bias illustration figure for Section 4.5"""
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 import numpy as np
@@ -111,5 +112,5 @@ ax.annotate('Correct\ninductive bias', xy=(2, 91.6), xytext=(3, 85),
            arrowprops=dict(arrowstyle='->', color='#4CAF50', lw=1.5))
 
 plt.tight_layout()
-plt.savefig(f'{OUT}/inductive_bias_figure.png', dpi=120)
+plt.savefig(f'{OUT}/inductive_bias_figure.png', dpi=150)
 print(f"Saved: {OUT}/inductive_bias_figure.png")

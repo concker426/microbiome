@@ -21,7 +21,7 @@
 \begin{document}
 \maketitle
 
-\begin{abstract}We present SimpleEmb, a microbiome framework decoupling disease classification from biological interpretation. On clean\_2538 IBD (659 train, 167 test), a minimal encoder (nn.Embedding + masked mean pooling, no pretraining, no Transformer) achieves 92.57\% accuracy (AUC 0.975), comparable to tree ensembles (XGBoost 92.22\%) and 41.7pp above a 34M pretrained MGM Transformer. Embedding dimension saturates at $E{=}512$. LOO attribution is reliable (Spearman $\rho{=}0.72$), and LOO-grounded Qwen2-7B explanations halve hallucination (0.72 to 0.36) with 98\% consistency and 0.94 direction accuracy. Leave-one-source-out validation across five cohorts confirms batch effects remain the central challenge. SimpleEmb shows the model discovers patterns, LOO provides evidence, and the LLM explains the evidence.\end{abstract}
+\begin{abstract}We present SimpleEmb, a microbiome framework decoupling disease classification from biological interpretation. On clean\_2538 IBD (659 train, 167 test), a minimal encoder (nn.Embedding + masked mean pooling, no pretraining, no Transformer) achieves 92.57\% accuracy (AUC 0.975), comparable to tree ensembles (XGBoost 92.22\%; HistGradientBoosting 92.5\% grouped-CV) and 41.7pp above a 34M pretrained MGM Transformer. Embedding dimension saturates at $E{=}512$. LOO attribution is reliable (Spearman $\rho{=}0.72$), and LOO-grounded Qwen2-7B explanations halve hallucination (0.72 to 0.36) with 98\% consistency and 0.94 direction accuracy. Leave-one-source-out validation across five cohorts confirms batch effects remain the central challenge. SimpleEmb shows the model discovers patterns, LOO provides evidence, and the LLM explains the evidence.\end{abstract}
 
 % ═══════════════════════════════════════
 % 1. INTRODUCTION
@@ -210,7 +210,12 @@ Values are mean $\pm$ std over 15 validation folds.}
 \toprule
 \textbf{Method} & \textbf{ACC} & \textbf{Macro-F1} & \textbf{AUROC} & \textbf{AUPRC} \\
 \midrule
-SimpleEmb + MLP (ours) & \textbf{0.914} $\pm$ 0.020 & \textbf{0.913} $\pm$ 0.019 & \textbf{0.957} $\pm$ 0.014 & \textbf{0.952} $\pm$ 0.032 \\
+BiomeGPT arch.\ transfer & \textbf{0.937} $\pm$ 0.021 & \textbf{0.937} $\pm$ 0.021 & \textbf{0.981} $\pm$ 0.010 & 0.978 $\pm$ 0.025 \\
+HistGradientBoosting & 0.925 $\pm$ 0.025 & 0.925 $\pm$ 0.025 & 0.979 $\pm$ 0.010 & \textbf{0.981} $\pm$ 0.010 \\
+SIAMCAT (LASSO) & 0.922 $\pm$ 0.015 & 0.922 $\pm$ 0.015 & 0.975 $\pm$ 0.009 & 0.976 $\pm$ 0.016 \\
+Extra Trees & 0.918 $\pm$ 0.024 & 0.918 $\pm$ 0.024 & 0.963 $\pm$ 0.013 & 0.958 $\pm$ 0.027 \\
+Random Forest & 0.916 $\pm$ 0.023 & 0.915 $\pm$ 0.023 & 0.971 $\pm$ 0.013 & 0.970 $\pm$ 0.019 \\
+SimpleEmb + MLP (ours) & 0.914 $\pm$ 0.020 & 0.913 $\pm$ 0.019 & 0.957 $\pm$ 0.014 & 0.952 $\pm$ 0.032 \\
 RBF-SVM & 0.879 $\pm$ 0.032 & 0.877 $\pm$ 0.032 & 0.941 $\pm$ 0.023 & 0.942 $\pm$ 0.031 \\
 MLP & 0.872 $\pm$ 0.031 & 0.871 $\pm$ 0.031 & 0.945 $\pm$ 0.024 & 0.950 $\pm$ 0.030 \\
 Logistic Regression & 0.865 $\pm$ 0.024 & 0.864 $\pm$ 0.024 & 0.936 $\pm$ 0.017 & 0.940 $\pm$ 0.022 \\
@@ -222,7 +227,7 @@ MGM + Random Forest & 0.815 $\pm$ 0.031 & 0.813 $\pm$ 0.031 & 0.902 $\pm$ 0.025 
 \end{tabular}
 \end{table}
 
-\textbf{Grouped-CV findings}: SimpleEmb+MLP achieves the highest accuracy among all compared methods under the leakage-robust grouped-CV protocol, significantly exceeding every MGM variant by 6.1--9.9pp and outperforming the un-embedded MLP (0.872) by 4.2pp, while providing the embedding space classical baselines lack (kNN, LOO attribution, clustering, LLM grounding). FDR-corrected McNemar tests (Table~\ref{tab:mcnemar}, Appendix) confirm SimpleEmb+MLP significantly beats KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$). DeepMicro (AUROC 0.917) completes the external-baseline comparison.
+\textbf{Grouped-CV findings}: HistGradientBoosting (0.925) is numerically ahead of SimpleEmb+MLP (0.914) by 1.1pp --- no superiority over boosted trees is claimed. SimpleEmb+MLP significantly exceeds every MGM variant by 6.1--9.9pp and outperforms the un-embedded MLP (0.872) by 4.2pp, while providing the embedding space tree models lack (kNN, LOO attribution, clustering, LLM grounding). FDR-corrected McNemar tests (Table~\ref{tab:mcnemar}, Appendix) show SimpleEmb+MLP significantly beats KNN ($q{=}0.000$) and BernoulliNB ($q{=}0.015$), while Random Forest significantly beats SimpleEmb+MLP ($q{=}0.006$). A genus-level BiomeGPT architecture transfer (8-layer Transformer, 14.6M params, pretrained and fine-tuned from scratch per fold) is numerically the strongest here (ACC 0.937 / AUROC 0.981) but statistically indistinguishable from HistGradientBoosting (paired Wilcoxon, $p{=}0.229$), costs 13$\times$ the parameters of SimpleEmb plus per-fold pretraining, and yields no LOO attribution --- so it does not alter our interpretability conclusion. SIAMCAT (AUROC 0.975) and DeepMicro (AUROC 0.917) complete the external-baseline comparison.
 
 
 
@@ -284,23 +289,23 @@ To probe generalization beyond the AGP/FTP cohorts, we evaluate the clean\_2538-
 \caption{\textbf{Leave-one-source-out external validation on four independent cohorts.}
 Models are trained exclusively on the study-2538 training split. 10317 is a balanced external IBD cohort with healthy controls (AUC reported); 1939, 11484, 10283 and 1629 are disease-only cohorts (disease identification rate reported).}
 \label{tab:external}
-\begin{tabular}{lcc}
+\begin{tabular}{lcccc}
 \toprule
-\textbf{Cohort} & \textbf{$n$} & \textbf{SimpleEmb} \\
+\textbf{Cohort} & \textbf{$n$} & \textbf{SimpleEmb} & \textbf{HGB} & \textbf{RF} \\
 \midrule
-\multicolumn{3}{l}{\textit{Balanced external cohort (with controls, AUC)}} \\
-10317 (194 IBD / 388 H) & 582 & 0.595 \\
+\multicolumn{5}{l}{\textit{Balanced external cohort (with controls, AUC)}} \\
+10317 (194 IBD / 388 H) & 582 & 0.595 & 0.630 & \textbf{0.688} \\
 \midrule
-\multicolumn{3}{l}{\textit{Disease-only cohorts (disease identification rate)}} \\
-1939 & 1359 & 0.358 \\
-11484 & 96 & 0.510 \\
-10283 & 568 & 0.125 \\
-1629 & 683 & 0.151 \\
+\multicolumn{5}{l}{\textit{Disease-only cohorts (disease identification rate)}} \\
+1939 & 1359 & 0.358 & 0.506 & \textbf{0.694} \\
+11484 & 96 & 0.510 & 0.521 & \textbf{0.750} \\
+10283 & 568 & 0.125 & 0.118 & \textbf{0.143} \\
+1629 & 683 & 0.151 & 0.183 & \textbf{0.275} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-SimpleEmb exhibits substantial degradation on independent cohorts relative to the in-family holdout (92.8\% ACC), confirming that batch effects across studies remain the dominant obstacle to microbiome-based diagnosis. The classifier retains partial discriminative signal on the balanced 10317 cohort (AUC 0.595), and its Study-11484 disease identification rate (51.0\%) is consistent with the 51.6\% previously reported for a 50k-pretrained MGM encoder. These results confirm limitation~(1): external validation on independent clinical cohorts is the central open challenge for embedding-based microbiome classifiers.
+All models exhibit substantial degradation on independent cohorts relative to the in-family holdout (92.8\% ACC), confirming that batch effects across studies remain the dominant obstacle to microbiome-based diagnosis. The SimpleEmb classifier retains partial discriminative signal on the balanced 10317 cohort (AUC 0.595) and its Study-11484 disease identification (51.0\%) is consistent with the 51.6\% previously reported for a 50k-pretrained MGM encoder. However, Random Forest trained on raw abundance generalizes better (AUC 0.688 on 10317; 69.4\% on 1939), echoing the grouped-CV finding that tree ensembles transfer most strongly. These results confirm limitation~(1): external validation on independent clinical cohorts is the central open challenge for embedding-based microbiome classifiers.
 
 \subsection{Data Efficiency}
 
@@ -363,7 +368,7 @@ MGM failure (50.9\% ACC) stems from mismatched next-genus pretraining, Transform
 
 \subsection{Generalization Across Independent Cohorts}
 
-SimpleEmb degrades on independent cohorts (external AUC 0.595 on 10317 vs. 0.973 in-family), consistent with batch effects, and its Study-11484 disease identification rate (51.0\%) matches a 50k-pretrained MGM encoder (51.6\%).
+All classifiers degrade on independent cohorts (external AUC 0.595--0.688 on 10317 vs. 0.973 in-family), consistent with batch effects. Random Forest transfers best; SimpleEmb Study-11484 rate (51.0\%) matches a 50k-pretrained MGM encoder (51.6\%).
 
 \subsection{Why 512 Dimensions Are Sufficient}
 
@@ -379,7 +384,7 @@ On the holdout (5 seeds; Table~\ref{tab:map_ablation}), only token dropout beats
 
 \subsection{Limitations}
 
-(1) Leave-one-source-out validation on five cohorts shows batch effects remain the central challenge (external AUC 0.595 on 10317). (2) LOO attribution measures predictive contribution, not causation. (3) LLM explanations await clinical validation. (4) Only IBD is evaluated. (5) Only 6/20 literature-curated Crohn's disease genera appear in the vocabulary.
+(1) Leave-one-source-out validation on five cohorts shows batch effects remain the central challenge (external AUC 0.595 on 10317; trees generalize better). (2) LOO attribution measures predictive contribution, not causation. (3) LLM explanations await clinical validation. (4) Only IBD is evaluated. (5) Only 6/20 literature-curated IBD genera appear in the vocabulary.
 
 \section{Conclusion}
 
@@ -601,15 +606,15 @@ Held-out test set results are shown for reference in parentheses.}
 \caption{\textbf{Nested grouped-CV learning curves (AUROC).}
 The training fraction is sampled from only the outer training groups.}
 \label{tab:learning}
-\begin{tabular}{lc}
+\begin{tabular}{lccc}
 \toprule
-\textbf{Train fraction} & \textbf{Embedding64+MLP (ours)} \\
+\textbf{Train fraction} & \textbf{HGB} & \textbf{Presence+MLP} & \textbf{Embedding64+MLP (ours)} \\
 \midrule
-20\% & 0.900 $\pm$ 0.027 \\
-40\% & 0.929 $\pm$ 0.022 \\
-60\% & 0.947 $\pm$ 0.015 \\
-80\% & 0.951 $\pm$ 0.017 \\
-100\% & 0.956 $\pm$ 0.016 \\
+20\% & 0.922 $\pm$ 0.027 & 0.940 $\pm$ 0.019 & 0.900 $\pm$ 0.027 \\
+40\% & 0.962 $\pm$ 0.012 & 0.959 $\pm$ 0.011 & 0.929 $\pm$ 0.022 \\
+60\% & 0.972 $\pm$ 0.010 & 0.965 $\pm$ 0.011 & 0.947 $\pm$ 0.015 \\
+80\% & 0.976 $\pm$ 0.009 & 0.966 $\pm$ 0.010 & 0.951 $\pm$ 0.017 \\
+100\% & \textbf{0.979} $\pm$ 0.010 & 0.969 $\pm$ 0.012 & 0.956 $\pm$ 0.016 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -714,7 +719,7 @@ Prevalence-importance correlation & $r{=}0.05$ ($p{>}0.05$) \\
 \includegraphics[width=0.9\textwidth]{figures/phase3_biological_validation.png}
 \caption{\textbf{Biological validation against literature.}
 Direction agreement between model LOO attribution and 20 literature-curated
-Crohn's disease-associated genera from Paidimarri et al.\ (2024).}
+IBD-associated genera from Paidimarri et al.\ (2024).}
 \label{fig:literature}
 \end{figure}
 
@@ -809,8 +814,8 @@ All models correct & Disease & 23 & D (1.000) & D (1.000) & D (1.000) \\
 \centering
 \includegraphics[width=0.85\textwidth]{figures/learning_curve.png}
 \caption{\textbf{Data efficiency (nested group-CV).}
-(A) Accuracy and (B) AUROC of SimpleEmb (E$=$64) as a function of training data fraction.
-}
+(A) Accuracy and (B) AUROC as a function of training data fraction for
+HistGradientBoosting, MLP without embedding, and SimpleEmb (E$=$64).}
 \label{fig:learning}
 \end{figure}
 
@@ -843,6 +848,7 @@ Specificity ratio (biol. mechanisms) & 0.38 & \textbf{0.44} & 0.33 \\
 \textbf{Baseline} & $n_\text{disc}$ & $B$ & $C$ & $q_\text{BH}$ \\
 \midrule
 KNN & 329 & 213 & 116 & \textbf{$1.2{\times}10^{-6}$} \\
+Random Forest & 151 & 55 & 96 & \textbf{$6.4{\times}10^{-3}$} \\
 BernoulliNB & 375 & 216 & 159 & \textbf{$1.5{\times}10^{-2}$} \\
 MGM + Logistic Regression & 286 & 161 & 125 & $1.1{\times}10^{-1}$ \\
 MGM + Random Forest & 406 & 186 & 220 & $2.4{\times}10^{-1}$ \\

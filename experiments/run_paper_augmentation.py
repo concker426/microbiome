@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 OUT_DIR = '/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
 RESULTS = '/hd/liujx/microbiome_llm_project/experiments/results'
@@ -77,8 +78,8 @@ ax.set_xlabel('Training Data (%)'); ax.set_ylabel('Group-CV AUROC')
 ax.set_title('B. AUROC vs Training Data', fontweight='bold', loc='left')
 ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/learning_curve.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/learning_curve.png', dpi=300, bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/learning_curve.png")
 
 # ═══════════════════════════════════════════
@@ -249,8 +250,8 @@ ax.set_xlabel('Training Data (%)'); ax.set_ylabel('Group-CV Accuracy')
 ax.set_title('C. Data Efficiency\n(SimpleEmb works with limited data)', fontweight='bold', loc='left', fontsize=9)
 ax.legend(fontsize=7); ax.grid(True, alpha=0.3)
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/attribution_biology_figure.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/attribution_biology_figure.png', dpi=300, bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/attribution_biology_figure.png")
 
 # Save learning curve results

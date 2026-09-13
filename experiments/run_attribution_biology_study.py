@@ -16,6 +16,7 @@ from scipy.stats import spearmanr
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 OUT_DIR = '/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
 DATA_DIR = '/hd/liujx/microbiome_llm_project/data/qiita_ibd/clean_2538'
@@ -241,8 +242,8 @@ ax.set_xticklabels([n[:12] for n in top30_names], rotation=90, fontsize=7)
 ax.set_yticklabels([n[:12] for n in top30_names], fontsize=7)
 ax.set_title('Genus Embedding Cosine Similarity (Top-30 LOO-important genera)', fontweight='bold')
 plt.colorbar(im, ax=ax, shrink=0.8)
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/embedding_heatmap.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/embedding_heatmap.png', dpi=300, bbox_inches='tight')
 print(f"  Saved: {OUT_DIR}/embedding_heatmap.png")
 
 # Save results

@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 import umap
 
 OUT_DIR='/hd/liujx/microbiome_llm_project/experiments/results/final_backbone/embeddings'
@@ -43,8 +44,8 @@ for lbl,color,name in [(0,'#4CAF50','Train'),(1,'#FF9800','Test')]:
     ax.scatter(embedding_2d[mask,0],embedding_2d[mask,1],c=color,label=name,alpha=0.6,s=20,edgecolors='none')
 ax.set_title('UMAP by Split'); ax.legend(); ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/umap_visualization.png',dpi=150,bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/umap_visualization.png',dpi=300,bbox_inches='tight')
 print(f"Saved to {OUT_DIR}/umap_visualization.png")
 
 # Save UMAP coordinates

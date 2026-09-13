@@ -1,0 +1,169 @@
+# ProCyon Experiment Automation Config
+# One entry per experiment in PLAN.md, mapped to executable scripts.
+# Runner reads this file, checks state.json, and runs experiments in order.
+
+phase_order: [1, 2, 3, 4]
+
+defaults:
+  data_dir: /hd/liujx/microbiome_llm_project/data/qiita_ibd
+  model_dir: /hd/liujx/microbiome_llm_project/saved_models
+  result_dir: /hd/liujx/microbiome_llm_project/experiments/results
+  gpu: 1  # default GPU (0=busy with other work, 2=free for overflow)
+
+experiments:
+  # ===== Phase 1: Core Validation =====
+  H1.1:
+    phase: 1
+    desc: "MGM encoder -> MLP vs RF/XGBoost/LR baseline"
+    hypothesis: "MGM learned features >= traditional ML on raw genus counts"
+    script: experiments/h1_1_mlp_baseline.py
+    data: clean_2538
+    depends: []
+    timeout_min: 10
+    gpu: 0
+
+  H1.2:
+    phase: 1
+    desc: "Pretrained MGM vs Random MGM vs No encoder"
+    hypothesis: "Pretrained > Random > None for classification"
+    script: experiments/h1_2_encoder_ablation.py
+    data: clean_2538
+    depends: [H1.1]
+    timeout_min: 40
+    gpu: 1
+
+  H2.1:
+    phase: 1
+    desc: "Encoder+MLP vs Encoder+LLM vs LLM NL-only comparison table"
+    hypothesis: "MLP ~= LLM for classification; LLM value is in NL explanation"
+    script: experiments/h2_1_llm_necessity.py
+    data: clean_2538
+    depends: [H1.1]
+    timeout_min: 30
+    gpu: 1
+
+  # ===== Phase 2: Dropout Ablation + Cross-dataset =====
+  H4.1:
+    phase: 2
+    desc: "Fixed dropout rate ablation: 0/30%/50%/70%/90%"
+    hypothesis: "50% is sweet spot"
+    script: experiments/h4_1_dropout_rates.py
+    data: clean_2538
+    depends: [H4.4]
+    timeout_min: 60
+    gpu: 1
+
+  H4.2:
+    phase: 2
+    desc: "Curriculum vs fixed dropout comparison"
+    hypothesis: "Curriculum > fixed"
+    script: experiments/h4_2_curriculum_vs_fixed.py
+    data: clean_2538
+    depends: [H4.1]
+    timeout_min: 30
+    gpu: 1
+
+  H4.3:
+    phase: 2
+    desc: "Gap (Enc+NL - NL-only) vs dropout rate curve"
+    hypothesis: "Curve visualization for paper"
+    script: experiments/h4_3_gap_curve.py
+    data: clean_2538
+    depends: [H4.1]
+    timeout_min: 20
+    gpu: 1
+
+  H4.4:
+    phase: 2
+    desc: "merged_all 大数据集上复现最优 dropout 配置"
+    hypothesis: "More data -> better NL-only"
+    script: run_v6_merged.py
+    data: merged_all
+    depends: []
+    timeout_min: 120
+    gpu: 1
+
+  H5.1:
+    phase: 2
+    desc: "clean_2538 train -> merged_all test (cross-dataset)"
+    hypothesis: "ACC drop < 5%"
+    script: experiments/h5_1_cross_dataset.py
+    data: [clean_2538, merged_all]
+    depends: [H4.4]
+    timeout_min: 30
+    gpu: 1
+
+  H5.2:
+    phase: 2
+    desc: "merged_all train -> clean_2538 test"
+    hypothesis: "ACC >= current best on clean_2538"
+    script: experiments/h5_2_cross_dataset.py
+    data: [merged_all, clean_2538]
+    depends: [H4.4, H5.1]
+    timeout_min: 30
+    gpu: 1
+
+  # ===== Phase 3: Metadata Fusion + Scaling =====
+  H3.1:
+    phase: 3
+    desc: "Baseline (no metadata)"
+    script: experiments/h3_x_metadata.py
+    data: clean_2538
+    depends: []
+    timeout_min: 15
+    gpu: 1
+
+  H3.2:
+    phase: 3
+    desc: "Prompt injection of 34 metadata fields"
+    script: experiments/h3_x_metadata.py
+    data: clean_2538
+    depends: [H3.1]
+    timeout_min: 15
+    gpu: 1
+
+  H3.3:
+    phase: 3
+    desc: "Structured MLP fusion (34->128->768)"
+    script: experiments/h3_x_metadata.py
+    data: clean_2538
+    depends: [H3.1]
+    timeout_min: 15
+    gpu: 1
+
+  H6.1:
+    phase: 3
+    desc: "Pretraining scale: 10k vs 50k vs 250k"
+    script: experiments/h6_1_pretrain_scale.py
+    data: qiita_50k
+    depends: []
+    timeout_min: 180
+    gpu: 1
+
+  # ===== Phase 4: Multi-task + Paper =====
+  H7.1:
+    phase: 4
+    desc: "Multi-class disease classification (IBD+T2D+Obesity+Healthy)"
+    script: experiments/h7_1_multiclass.py
+    data: multi_disease
+    depends: []
+    timeout_min: 60
+    gpu: 1
+
+  S1:
+    phase: 4
+    desc: "Data leakage check: subject-level split validation"
+    script: experiments/s1_leakage_check.py
+    data: merged_all
+    depends: []
+    timeout_min: 10
+    gpu: 0
+
+  S3:
+    phase: 4
+    desc: "Statistical tests: bootstrap CI for all comparisons"
+    script: experiments/s3_statistical_tests.py
+    data: all
+    depends: [H1.1, H1.2, H2.1, H4.1]
+    timeout_min: 10
+    gpu: 0

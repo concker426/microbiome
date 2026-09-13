@@ -15,6 +15,7 @@ from sklearn.metrics import (brier_score_loss, accuracy_score, roc_auc_score,
 from sklearn.calibration import calibration_curve
 import matplotlib; matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 OUT_DIR = '/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
 os.makedirs(OUT_DIR, exist_ok=True)
@@ -256,7 +257,7 @@ ax.text(0.05, 0.95, case_text, transform=ax.transAxes, fontsize=8, fontfamily='m
 
 fig.suptitle('ProCyon v2: Calibration, Error Analysis & Case Studies', fontsize=14, fontweight='bold', y=0.99)
 plt.tight_layout(rect=[0, 0, 1, 0.96])
-plt.savefig(f'{OUT_DIR}/calibration_error_cases.png', dpi=200, bbox_inches='tight')
+plt.savefig(f'{OUT_DIR}/calibration_error_cases.png', dpi=300, bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/calibration_error_cases.png")
 
 # ═══════════════════════════════════════════

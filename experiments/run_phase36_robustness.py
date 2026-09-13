@@ -9,6 +9,7 @@ from sklearn.metrics import accuracy_score
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+exec(open("/hd/liujx/microbiome_llm_project/experiments/fig_style.py").read())  # publication style
 
 OUT_DIR='/hd/liujx/microbiome_llm_project/ProCyon_v2/analysis'
 DATA_DIR='/hd/liujx/microbiome_llm_project/data/qiita_ibd/clean_2538'
@@ -502,8 +503,8 @@ Cluster Validation:
 ax.text(0.05,0.95,msg,transform=ax.transAxes,fontsize=9.5,verticalalignment='top',fontfamily='monospace',
     bbox=dict(boxstyle='round',facecolor='#F5F5F5',alpha=0.8))
 
-plt.tight_layout()
-plt.savefig(f'{OUT_DIR}/phase36_robustness.png',dpi=150,bbox_inches='tight')
+plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.savefig(f'{OUT_DIR}/phase36_robustness.png',dpi=300,bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/phase36_robustness.png")
 
 # Save report
