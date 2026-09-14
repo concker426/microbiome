@@ -20,13 +20,13 @@ ax.set_title('A. Inductive Bias Comparison', fontsize=13, fontweight='bold', loc
 # Sequential (Transformer) side
 ax.text(5, 15.8, 'Sequential (Transformer)', fontsize=12, fontweight='bold', ha='center', color='#B71C1C')
 for i in range(6):
-    x = 2 + i * 2.2; y = 14.5
+    x = 2 + i * 1.8; y = 14.5
     rect = FancyBboxPatch((x - 0.8, y - 0.5), 1.6, 1, boxstyle="round,pad=0.2",
                           facecolor='#FFCDD2', edgecolor='#B71C1C', linewidth=1.5)
     ax.add_patch(rect)
     ax.text(x, y, f'g{i+1}', ha='center', va='center', fontsize=9, fontweight='bold')
 for i in range(5):
-    ax.annotate('', xy=(3.4 + i * 2.2, 14.5), xytext=(2.4 + i * 2.2, 14.5),
+    ax.annotate('', xy=(3.0 + i * 1.8, 14.5), xytext=(2.8 + i * 1.8, 14.5),
                arrowprops=dict(arrowstyle='->', color='#B71C1C', lw=2))
 ax.text(8, 13.6, 'Position matters: g1→g2→g3...', ha='center', fontsize=9, color='#B71C1C', style='italic')
 ax.text(8, 13.1, 'Self-attention over ordered sequence', ha='center', fontsize=9, color='#B71C1C', style='italic')
@@ -39,7 +39,7 @@ ax.text(8, 11.2, 'MGM (pretrained): 50.9% ACC', ha='center', fontsize=10, color=
 
 # Permutation-invariant (Set) side
 ax.text(15, 15.8, 'Permutation-Invariant (Set)', fontsize=12, fontweight='bold', ha='center', color='#1B5E20')
-centers = [(13, 13.7), (16, 13.0), (15, 12.3), (13.5, 11.7), (16.5, 14.3), (17.5, 12.5)]
+centers = [(14.5, 13.7), (17, 13.0), (15.5, 12.3), (14, 11.7), (17.5, 14.3), (18.5, 12.5)]
 for i, (cx, cy) in enumerate(centers):
     circle = plt.Circle((cx, cy), 0.6, facecolor='#C8E6C9', edgecolor='#1B5E20', linewidth=1.5)
     ax.add_patch(circle)
@@ -110,7 +110,7 @@ ax.annotate('Pretraining\nmismatch', xy=(0, 52), xytext=(0, 100),
            fontsize=7.5, ha='center', color='#B71C1C',
            arrowprops=dict(arrowstyle='->', color='#B71C1C', lw=1.2),
            bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.85))
-ax.annotate('Sequential\nbias (−0.6pp)', xy=(1, 92), xytext=(1.15, 106),
+ax.annotate('Sequential\nbias (−0.6pp)', xy=(1, 92), xytext=(1.15, 111),
            fontsize=7.5, ha='center', color='#FF9800',
            arrowprops=dict(arrowstyle='->', color='#FF9800', lw=1.2),
            bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.85))
