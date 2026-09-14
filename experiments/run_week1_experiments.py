@@ -648,15 +648,22 @@ ax.set_ylim(0.2, 1.0); ax.grid(True, alpha=0.3, axis='y')
 
 # Panel E: Sensitivity vs Specificity scatter
 ax = axes[1, 1]
-offsets_e = [(8,8),(-10,10),(10,-10),(-10,-8),(8,12),(-8,10),(10,8),(-10,8),(8,-10)]
+highlight = {6, 8}  # MGM+MLP, ProCyon v2
+highlight_offsets = {6: (10, -12), 8: (10, 10)}
 for i, key in enumerate(bar_keys):
     r = baseline_results.get(key, {})
     if not r: continue
     ax.scatter(r.get('specificity',0), r.get('sensitivity',0),
               s=100, c=[colors[i]], edgecolors='black', linewidths=0.5, zorder=5)
-    ox, oy = offsets_e[i % len(offsets_e)]
-    ax.annotate(bar_names[i], (r.get('specificity',0), r.get('sensitivity',0)),
-               fontsize=6, xytext=(ox, oy), textcoords='offset points', arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
+    if i in highlight:
+        ox, oy = highlight_offsets.get(i, (10, 10))
+        ax.annotate(bar_names[i], (r.get('specificity',0), r.get('sensitivity',0)),
+                   fontsize=7, xytext=(ox, oy), textcoords='offset points',
+                   fontweight='bold',
+                   arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
+from matplotlib.patches import Patch
+legend_e = [Patch(facecolor=colors[i], label=bar_names[i].replace('\n',' ')) for i in range(len(bar_names))]
+ax.legend(handles=legend_e, fontsize=5, loc='lower left', ncol=3, framealpha=0.9)
 ax.set_xlabel('Specificity'); ax.set_ylabel('Sensitivity')
 ax.set_title('E. Sensitivity-Specificity Trade-off', fontweight='bold', loc='left')
 ax.plot([0,1],[0,1],'k--',alpha=0.3)
@@ -672,7 +679,7 @@ model_data = [
     ('MGM+MLP', 34e6, baseline_results.get('MGM pretrained + MLP',{}).get('accuracy',0), '#F44336'),
     ('ProCyon v2', our_result['n_params'], our_result['accuracy'], '#1B5E20'),
 ]
-offsets_f = [(8,8),(10,-10),(-10,10),(-10,-8),(8,12),(-8,-10)]
+offsets_f = [(8,8),(12,-14),(-10,-14),(-16,-6),(-14,10),(-8,-10)]
 for j, (name, params, acc, color) in enumerate(model_data):
     if acc == 0: continue
     size = np.log10(max(params,1)) * 45 + 25
@@ -684,7 +691,7 @@ ax.set_xscale('log'); ax.set_title('F. Parameter Efficiency', fontweight='bold',
 ax.grid(True, alpha=0.3)
 
 fig.suptitle('ProCyon v2 — Week 1: Baseline Comparison & Ablation Analysis', fontsize=14, fontweight='bold', y=0.99)
-plt.tight_layout(rect=[0,0,1,0.96], pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.tight_layout(rect=[0,0,1,0.95], pad=0.8, h_pad=2.4, w_pad=1.8)
 plt.savefig(f'{OUT_DIR}/week1_figure.png', dpi=300, bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/week1_figure.png")
 

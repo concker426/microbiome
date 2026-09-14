@@ -81,7 +81,7 @@ colors = ['#F44336', '#FF9800', '#4CAF50', '#1B5E20']
 
 x = np.arange(len(methods)); w = 0.3
 bars1 = ax.bar(x - w/2, accs, w, label='ACC (%)', color=colors, edgecolor='black', linewidth=1)
-bars2 = ax.bar(x + w/2, [a * 100 for a in aucs], w, label='AUC (×100)',
+bars2 = ax.bar(x + w/2, aucs, w, label='AUC (%)',
               color=colors, edgecolor='black', linewidth=1, alpha=0.5, hatch='//')
 
 # Value labels — above bars with enough clearance
@@ -90,7 +90,7 @@ for bar, val in zip(bars1, accs):
            f'{val:.1f}%', ha='center', fontsize=10, fontweight='bold')
 for bar, val in zip(bars2, aucs):
     ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1.2,
-           f'{val*100:.1f}', ha='center', fontsize=9)
+           f'{val:.1f}', ha='center', fontsize=9)
 
 # Inductive bias labels — BELOW x-axis method names, as colored text
 bias_labels = ['Sequential\n+ pretrained', 'Sequential\n(no pretrain)', 'Permutation-\ninvariant', 'Permutation-\ninvariant']
