@@ -349,7 +349,7 @@ for s in spearman_results:
 im = ax.imshow(rho_matrix, cmap='RdYlBu_r', vmin=0, vmax=1)
 ax.set_xticks(range(5)); ax.set_yticks(range(5))
 ax.set_xticklabels([f'F{i}' for i in range(5)]); ax.set_yticklabels([f'F{i}' for i in range(5)])
-ax.set_title(f'A. SHAP Rank Correlation\n(Mean ρ={mean_rho:.3f})', fontweight='bold', loc='left')
+ax.set_title(f'A. SHAP Rank Correlation\n(Mean ρ={mean_rho:.3f})', fontweight='bold', loc='left', linespacing=1.4)
 for i in range(5):
     for j in range(5):
         ax.text(j, i, f'{rho_matrix[i,j]:.3f}', ha='center', va='center', fontsize=8)
@@ -384,7 +384,7 @@ importance = [abs(float(r['mean_importance'])) for r in global_data]
 ax.scatter(prevalence, importance, s=30, alpha=0.4, c='#1565C0', edgecolors='none')
 ax.set_xlabel('Prevalence (n samples)'); ax.set_ylabel('|SHAP Importance|')
 r, p = pearsonr(prevalence, importance)
-ax.set_title(f'D. Prevalence vs Importance\n(r={r:.3f}, p={p:.4f})', fontweight='bold', loc='left')
+ax.set_title(f'D. Prevalence vs Importance\n(r={r:.3f}, p={p:.4f})', fontweight='bold', loc='left', linespacing=1.4)
 
 plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
 plt.savefig(f'{OUT_DIR}/loo_reliability.png', dpi=300, bbox_inches='tight')

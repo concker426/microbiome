@@ -443,7 +443,7 @@ novel_y=[g['abs_importance'] for g in novel_candidates[:5]]
 novel_names=[g['genus_name'] for g in novel_candidates[:5]]
 ax.scatter(novel_x,novel_y,c='red',marker='*',s=200,edgecolors='black',linewidths=0.5)
 for i in range(len(novel_x)):
-    ax.annotate(novel_names[i],(novel_x[i],novel_y[i]),fontsize=7,xytext=(5,5),textcoords="offset points")
+    ax.annotate(novel_names[i],(novel_x[i],novel_y[i]),fontsize=7,xytext=(8, 8), textcoords="offset points", arrowprops=dict(arrowstyle="-", color="gray", lw=0.5))
 ax.set_xlabel('Prevalence'); ax.set_ylabel('|SHAP Importance|')
 ax.set_title(f'Prevalence vs Importance (r={np.corrcoef(all_prev,all_imp)[0,1]:.3f})')
 plt.colorbar(sc,ax=ax,shrink=0.7,label='|SHAP|')

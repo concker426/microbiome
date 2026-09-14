@@ -123,7 +123,7 @@ ax.text(18.5, 0.15, '1.1M params  |  no pretraining  |  92.57% ACC  |  LOO + LLM
         fontsize=10.5, ha='center', color='#1B5E20', style='italic')
 
 fig.tight_layout(pad=0.4)
-fig.savefig(f'{OUT_DIR}/dataset_architecture_figure.png', dpi=220, bbox_inches='tight')
+fig.savefig(f'{OUT_DIR}/dataset_architecture_figure.png', dpi=300, bbox_inches='tight')
 plt.close(fig)
 print(f"Saved architecture figure -> {OUT_DIR}/dataset_architecture_figure.png")
 
@@ -212,7 +212,7 @@ ax.pie(sizes, labels=labels, colors=['#FFCDD2', '#FFAB91', '#81D4FA', '#1565C0']
 ax.set_title('F. Genus rarity categories', fontweight='bold', loc='left')
 
 fig.tight_layout(pad=0.8)
-fig.savefig(f'{OUT_DIR}/dataset_statistics_figure.png', dpi=220, bbox_inches='tight')
+fig.savefig(f'{OUT_DIR}/dataset_statistics_figure.png', dpi=300, bbox_inches='tight')
 plt.close(fig)
 print(f"Saved statistics figure -> {OUT_DIR}/dataset_statistics_figure.png")
 

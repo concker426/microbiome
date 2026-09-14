@@ -626,7 +626,7 @@ ax.plot(dims, lin_accs, 'o-', label='Emb+Linear', color='#2196F3', markersize=8,
 ax.plot(dims, e2e_accs, 's-', label='Emb+MLP (e2e)', color='#1B5E20', markersize=8, linewidth=2)
 ax.set_xlabel('Embedding Dimension'); ax.set_ylabel('Test Accuracy')
 ax.set_title('C. Embedding Dimension', fontweight='bold', loc='left')
-ax.legend(); ax.grid(True, alpha=0.3)
+ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
 ax.set_xscale('log', base=2); ax.set_xticks(dims); ax.set_xticklabels(dims)
 
 # Panel D: Cross-cohort
@@ -654,7 +654,7 @@ for i, key in enumerate(bar_keys):
     ax.scatter(r.get('specificity',0), r.get('sensitivity',0),
               s=100, c=[colors[i]], edgecolors='black', linewidths=0.5, zorder=5)
     ax.annotate(bar_names[i], (r.get('specificity',0), r.get('sensitivity',0)),
-               fontsize=6, xytext=(5,5), textcoords='offset points')
+               fontsize=6, xytext=(8, 8), textcoords='offset points', arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
 ax.set_xlabel('Specificity'); ax.set_ylabel('Sensitivity')
 ax.set_title('E. Sensitivity-Specificity Trade-off', fontweight='bold', loc='left')
 ax.plot([0,1],[0,1],'k--',alpha=0.3)
@@ -674,7 +674,7 @@ for name, params, acc, color in model_data:
     if acc == 0: continue
     size = np.log10(max(params,1)) * 60 + 30
     ax.scatter(params, acc, s=size, c=color, alpha=0.8, edgecolors='black', linewidths=1)
-    ax.annotate(name, (params, acc), fontsize=8, xytext=(5,5), textcoords='offset points')
+    ax.annotate(name, (params, acc), fontsize=8, xytext=(8, 8), textcoords='offset points', arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
 ax.set_xlabel('Parameters'); ax.set_ylabel('Test Accuracy')
 ax.set_xscale('log'); ax.set_title('F. Parameter Efficiency', fontweight='bold', loc='left')
 ax.grid(True, alpha=0.3)

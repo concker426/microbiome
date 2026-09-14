@@ -225,7 +225,8 @@ rho, p = spearmanr(x_vals, y_vals)
 ax.scatter(x_vals, y_vals, s=20, alpha=0.5, c='#1565C0', edgecolors='none')
 ax.set_xlabel('|log2 fold change| (Disease vs Healthy)')
 ax.set_ylabel('Mean |LOO Importance|')
-ax.set_title(f'A. Attribution vs Differential Abundance\n(ρ={rho:.3f}, p={p:.3f}, n={len(x_vals)}, prev≥50)', fontweight='bold', loc='left', fontsize=9)
+ax.set_title(f'A. Attribution vs Differential Abundance\n(ρ={rho:.3f}, p={p:.3f}, n={len(x_vals)}, prev≥50)',
+           fontweight='bold', loc='left', fontsize=10, linespacing=1.5)
 
 # Panel B: Disease structure in embedding
 ax = axes[1]
@@ -236,7 +237,8 @@ ax.bar(names, bars, color=['#F44336', '#4CAF50'], edgecolor='none')
 for i, v in enumerate(bars):
     ax.text(i, v+0.01, f'{v:.3f}', ha='center', fontsize=10, fontweight='bold')
 ax.set_ylabel('Intra-class Cosine Similarity')
-ax.set_title('B. Embedding Structure: Disease vs Healthy\n(IBD more heterogeneous)', fontweight='bold', loc='left', fontsize=9)
+ax.set_title('B. Embedding Structure: Disease vs Healthy\n(IBD more heterogeneous)',
+           fontweight='bold', loc='left', fontsize=10, linespacing=1.5)
 ax.set_ylim(0, 0.8); ax.grid(True, alpha=0.3, axis='y')
 
 # Panel C: Learning curve summary
@@ -247,7 +249,8 @@ for model in models:
     ax.plot([f*100 for f in fracs], accs, marker='o', markersize=5,
            label=labels[model], color=colors[model], linewidth=2)
 ax.set_xlabel('Training Data (%)'); ax.set_ylabel('Group-CV Accuracy')
-ax.set_title('C. Data Efficiency\n(SimpleEmb works with limited data)', fontweight='bold', loc='left', fontsize=9)
+ax.set_title('C. Data Efficiency\n(SimpleEmb works with limited data)',
+           fontweight='bold', loc='left', fontsize=10, linespacing=1.5)
 ax.legend(fontsize=7); ax.grid(True, alpha=0.3)
 
 plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)

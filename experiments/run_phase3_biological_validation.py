@@ -195,7 +195,7 @@ ax.legend(handles=[
     Patch(facecolor='#F44336',label=f'Mismatch ({len(dir_mismatches)})'),
     Patch(facecolor='#FFC107',label='Complex'),
     Patch(facecolor='#90CAF9',label='Novel (no literature)')
-],fontsize=7,loc='lower right')
+], fontsize=7, loc='lower left', framealpha=0.9)
 
 # Panel 2: Dataset presence table
 ax=axes[0,1]

@@ -209,6 +209,7 @@ for i in range(2):
         color = 'white' if cm_display[i, j] > cm_display.max()/2 else 'black'
         ax.text(j, i, f'{cm_display[i,j]}', ha='center', va='center', fontsize=16, fontweight='bold', color=color)
 ax.set_title(f'C. Confusion Matrix\nACC={accuracy_score(test_true,test_pred_binary):.4f} AUC={roc_auc_score(test_true,test_probs):.4f}',
+           linespacing=1.4,
             fontweight='bold', loc='left')
 
 # Panel D: Error Profile (FP vs FN samples)
@@ -241,7 +242,7 @@ for i in range(3):
     ax.text(i+w, spec_vals[i]+0.02, f'{spec_vals[i]:.2f}', ha='center', fontsize=7)
 ax.set_xticks(x); ax.set_xticklabels(variants); ax.set_ylabel('Score')
 ax.set_title('E. LLM Explanation Validation (n=50)', fontweight='bold', loc='left')
-ax.legend(fontsize=7, loc='upper right')
+ax.legend(fontsize=7, loc='upper left', framealpha=0.9)
 
 # Panel F: Case Study Summary
 ax = fig.add_subplot(2, 3, 6)

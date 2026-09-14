@@ -36,13 +36,13 @@ ax=axes[0]
 for lbl,color,name in [(0,'#2196F3','Healthy'),(1,'#F44336','Disease')]:
     mask=all_labels==lbl
     ax.scatter(embedding_2d[mask,0],embedding_2d[mask,1],c=color,label=name,alpha=0.6,s=20,edgecolors='none')
-ax.set_title('UMAP by Disease Status'); ax.legend(); ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
+ax.set_title('UMAP by Disease Status'); ax.legend(fontsize=8); ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
 
 ax=axes[1]
 for lbl,color,name in [(0,'#4CAF50','Train'),(1,'#FF9800','Test')]:
     mask=np.array(all_split)==name
     ax.scatter(embedding_2d[mask,0],embedding_2d[mask,1],c=color,label=name,alpha=0.6,s=20,edgecolors='none')
-ax.set_title('UMAP by Split'); ax.legend(); ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
+ax.set_title('UMAP by Split'); ax.legend(fontsize=8); ax.set_xlabel('UMAP 1'); ax.set_ylabel('UMAP 2')
 
 plt.tight_layout(pad=0.8, h_pad=1.6, w_pad=1.3)
 plt.savefig(f'{OUT_DIR}/umap_visualization.png',dpi=300,bbox_inches='tight')

@@ -54,7 +54,7 @@ ax.set_ylabel('Mean SHAP Importance'); ax.set_xlabel('Genus Rank')
 ax.set_title('A. Global SHAP Importance Ranking (Top 50)',fontweight='bold',loc='left')
 legend_a=[Patch(facecolor='#1B5E20',label='Lit match'),Patch(facecolor='#B71C1C',label='Lit mismatch'),
     Patch(facecolor='#FFC107',label='Complex/Variable'),Patch(facecolor='#1565C0',label='Novel discovery')]
-ax.legend(handles=legend_a,fontsize=7,loc='upper right')
+ax.legend(handles=legend_a,fontsize=7,loc='upper left',framealpha=0.9)
 
 # Panel B: Prevalence vs Importance
 ax=fig.add_subplot(2,3,2)
@@ -73,16 +73,26 @@ for name in all_names:
 sc=ax.scatter(all_prev,all_imp,c=colors_b,s=40,alpha=0.6,edgecolors='none')
 ax.scatter(all_prev[:20],all_imp[:20],marker='o',s=80,edgecolors='black',linewidths=0.8,facecolors='none')
 
-# Annotate top-5
+# Annotate top-5 with staggered offsets to avoid overlap
+offsets = [(8, 8), (-8, 10), (10, -8), (-10, 8), (8, -10)]
 for i in range(5):
-    ax.annotate(all_names[i],(all_prev[i],all_imp[i]),fontsize=6,xytext=(5,5),textcoords="offset points")
+    ox, oy = offsets[i % len(offsets)]
+    ax.annotate(all_names[i], (all_prev[i], all_imp[i]), fontsize=6,
+               xytext=(ox, oy), textcoords="offset points",
+               arrowprops=dict(arrowstyle='-', color='gray', lw=0.5))
 
-# Literature genera in data
+# Literature genera in data — use small offset, skip if too close
+plotted_lit = []
 for name in all_names:
     if name.strip().lower() in lit_set:
-        idx=all_names.index(name)
-        ax.annotate(name,(all_prev[idx],all_imp[idx]),fontsize=7,color='#B71C1C',fontweight='bold',
-            xytext=(5,-10),textcoords="offset points")
+        idx = all_names.index(name)
+        xp, yp = all_prev[idx], all_imp[idx]
+        # Check distance from already-plotted labels to avoid overlap
+        too_close = any(abs(xp - px) < 0.03 and abs(yp - py) < 0.002 for px, py in plotted_lit)
+        if not too_close:
+            ax.annotate(name, (xp, yp), fontsize=6.5, color='#B71C1C', fontweight='bold',
+                       xytext=(6, -8), textcoords="offset points")
+            plotted_lit.append((xp, yp))
 
 ax.set_xlabel('Prevalence (fraction of samples)'); ax.set_ylabel('|SHAP Importance|')
 ax.set_title(f'B. Prevalence vs Importance (r={robust["abundance_importance_correlation"]:.3f})',fontweight='bold',loc='left')
@@ -100,15 +110,15 @@ stds_j=[jc[f'{k}']['std'] if f'{k}' in jc else jc[k]['std'] for k in ks_list]
 ax.errorbar(ks_list,means_j,yerr=stds_j,marker='o',markersize=10,linewidth=2,capsize=5,color='#1565C0')
 ax.set_xlabel('Top-K'); ax.set_ylabel('Mean Jaccard Similarity (5 folds)')
 ax.set_title('C. Cross-Validation SHAP Stability',fontweight='bold',loc='left')
-ax.set_ylim(0,0.5); ax.grid(True,alpha=0.3,axis='y')
-for k,m,s in zip(ks_list,means_j,stds_j):
-    ax.annotate(f'{m:.3f}±{s:.3f}',(k,m+s+0.02),fontsize=9,ha='center')
+ax.set_ylim(0, 0.55); ax.grid(True, alpha=0.3, axis='y')
+for k, m, s in zip(ks_list, means_j, stds_j):
+    ax.annotate(f'{m:.3f}±{s:.3f}', (k, m + s + 0.03), fontsize=8.5, ha='center')
 
 # Add consistent genera annotation
 consistent20=robust['consistent_genera_across_folds']['top20']
-ax.text(0.98,0.95,f'Consistent in all 5 folds (Top-20):\n{", ".join(consistent20[:3])}...',
-    transform=ax.transAxes,fontsize=7,ha='right',va='top',
-    bbox=dict(boxstyle='round',facecolor='#FFF9C4',alpha=0.8))
+ax.text(0.97, 0.93, f'Consistent in all 5 folds (Top-20):\n{", ".join(consistent20[:3])}...',
+    transform=ax.transAxes, fontsize=6.5, ha='right', va='top',
+    bbox=dict(boxstyle='round', facecolor='#FFF9C4', alpha=0.8))
 
 # Panel D: Cluster-specific biomarkers
 ax=fig.add_subplot(2,3,4)
@@ -119,9 +129,11 @@ c0_names=[g[0] for g in c0_top]; c0_imps=[g[1] for g in c0_top]
 c1_names=[g[0] for g in c1_top]; c1_imps=[g[1] for g in c1_top]
 
 y_pos=range(len(c0_names))
-ax.barh([y+0.2 for y in y_pos],c0_imps,0.4,label=f'Cluster 0 (n=319, 94%)',color='#4CAF50',edgecolor='none')
-ax.barh([y-0.2 for y in y_pos],c1_imps,0.4,label=f'Cluster 1 (n=21, 6%)',color='#F44336',edgecolor='none')
-ax.set_yticks(y_pos); ax.set_yticklabels([f'{c0_names[i]}' for i in y_pos],fontsize=7)
+ax.barh([y + 0.2 for y in y_pos], c0_imps, 0.4, label='Cluster 0 (n=319, 94%)',
+       color='#2196F3', edgecolor='none')  # blue — more distinct from red
+ax.barh([y - 0.2 for y in y_pos], c1_imps, 0.4, label='Cluster 1 (n=21, 6%)',
+       color='#FF5722', edgecolor='none')  # deep orange
+ax.set_yticks(y_pos); ax.set_yticklabels([f'{c0_names[i]}' for i in y_pos], fontsize=8)
 ax.set_xlabel('Mean SHAP Importance'); ax.axvline(x=0,color='black',linewidth=0.5)
 ax.set_title('D. Cluster-Specific Biomarker Profiles',fontweight='bold',loc='left')
 ax.legend(fontsize=7); ax.invert_yaxis()
@@ -143,10 +155,11 @@ categories=['Direction\nMatch','Direction\nMismatch','Complex/\nVariable','Absen
 values=[len(dir_match),len(dir_mismatch),len(dir_complex),len(absent)]
 colors_e=['#1B5E20','#B71C1C','#FFC107','#9E9E9E']
 bars=ax.bar(range(4),values,color=colors_e,edgecolor='none')
-for b,v in zip(bars,values):
-    ax.text(b.get_x()+b.get_width()/2,b.get_height()+0.3,str(v),ha='center',fontsize=12,fontweight='bold')
+for b, v in zip(bars, values):
+    ax.text(b.get_x() + b.get_width()/2, b.get_height() + 0.8,
+           str(v), ha='center', fontsize=12, fontweight='bold')
 ax.set_xticks(range(4)); ax.set_xticklabels(categories,fontsize=8)
-ax.set_ylabel('Number of Literature Genera'); ax.set_ylim(0,max(values)+5)
+ax.set_ylabel('Number of Literature Genera'); ax.set_ylim(0, max(values) + 7)
 ax.set_title(f'E. Literature Validation ({n_in}/20 genera in dataset)',fontweight='bold',loc='left')
 
 # Panel F: SHAP signal quality (Real vs Permuted)
@@ -169,7 +182,7 @@ ax.hist(all_shap_vals,bins=bins,alpha=0.7,label=f'Real signal (μ={real_mean:.5f
 ax.hist(perm_shap_vals,bins=bins,alpha=0.7,label=f'Permuted labels (μ={perm_mean:.5f})',color='#F44336')
 ax.set_xlabel('|SHAP Importance|'); ax.set_ylabel('Frequency')
 ax.set_title(f'F. Signal Quality Control (Real/Perm={1/ratio:.1f}x)',fontweight='bold',loc='left')
-ax.legend(fontsize=8)
+ax.legend(fontsize=8, loc='upper right', framealpha=0.9)
 
 # Overall title
 fig.suptitle('ProCyon v2: Microbiome Biomarker Discovery & Validation',fontsize=16,fontweight='bold',y=0.98)
