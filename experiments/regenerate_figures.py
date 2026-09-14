@@ -130,7 +130,7 @@ print(f"Saved architecture figure -> {OUT_DIR}/dataset_architecture_figure.png")
 # ═══════════════════════════════════════════════════════════
 # FIGURE 2: dataset statistics (2 x 3 grid)
 # ═══════════════════════════════════════════════════════════
-fig = plt.figure(figsize=(10.5, 7.2))
+fig = plt.figure(figsize=(12.5, 8))
 
 # B: class distribution
 ax = fig.add_subplot(2, 3, 1)
@@ -166,17 +166,17 @@ ax.hist(genus_counts[all_labels == 0], bins=20, alpha=0.7, label='Healthy', colo
 ax.hist(genus_counts[all_labels == 1], bins=20, alpha=0.7, label='Disease (IBD)', color='#F44336')
 ax.set_xlabel('Genera per sample')
 ax.set_ylabel('Frequency')
-ax.legend(fontsize=9)
+ax.legend(fontsize=9, loc='upper right')
 ax.set_title('C. Richness distribution', fontweight='bold', loc='left')
 
 # E: top-30 prevalent genera
 ax = fig.add_subplot(2, 3, 4)
 top30 = prevalence_sorted[:30]
-names = [g[:16] for g, _ in top30]
+names = [g[:14] for g, _ in top30]
 vals = [v / n_total for _, v in top30]
 colors = ['#1565C0' if v > n_total * 0.5 else '#90CAF9' for _, v in top30]
 ax.barh(range(len(names)), vals, color=colors)
-ax.set_yticks(range(len(names))); ax.set_yticklabels(names, fontsize=8.5)
+ax.set_yticks(range(len(names))); ax.set_yticklabels(names, fontsize=7)
 ax.set_xlabel('Prevalence'); ax.invert_yaxis()
 ax.set_title('D. Top-30 prevalent genera', fontweight='bold', loc='left')
 
@@ -211,7 +211,7 @@ ax.pie(sizes, labels=labels, colors=['#FFCDD2', '#FFAB91', '#81D4FA', '#1565C0']
        startangle=90, textprops={'fontsize': 10})
 ax.set_title('F. Genus rarity categories', fontweight='bold', loc='left')
 
-fig.tight_layout(pad=0.8)
+fig.tight_layout(pad=0.8, h_pad=1.8, w_pad=1.5)
 fig.savefig(f'{OUT_DIR}/dataset_statistics_figure.png', dpi=300, bbox_inches='tight')
 plt.close(fig)
 print(f"Saved statistics figure -> {OUT_DIR}/dataset_statistics_figure.png")

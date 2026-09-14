@@ -13,8 +13,8 @@ All methods evaluated on identical train/test split.}
   Random Forest & 0.8922 & 0.9587 & 0.8817 & 0.9054 \\
   XGBoost & 0.9222 & 0.9679 & 0.9247 & 0.9189 \\
   MLP & 0.8982 & 0.9605 & 0.8817 & 0.9189 \\
-  MGM pretrained (34M) + MLP & 0.4910 & 0.4356 & 0.1828 & 0.8784 \\
-  SimpleEmb + Linear (ours) & 0.4371 & 0.6382 & 0.0000 & 0.9865 \\
+  MGM pretrained (34M) + MLP & 0.4671 & 0.7002 & 0.1075 & 0.9189 \\
+  SimpleEmb + Linear (ours) & 0.4671 & 0.4435 & 0.0430 & 1.0000 \\
   \textbf{ProCyon v2 (SimpleEmb+MLP, ours)} & 0.9257 & 0.9750 & 0.9161 & 0.9378 \\
 \bottomrule
 \end{tabular}
@@ -30,7 +30,7 @@ All variants use the same MLP architecture.}
 \midrule
   A: Raw→MLP & 0.8982 & 0.9605 & 0.8817 & 0.9189 & Raw abundance → MLP (no embedding) \\
   B: RandomEmb→MLP & 0.9162 & 0.9762 & 0.9140 & 0.9189 & Random frozen embedding → MLP \\
-  C: SimpleEmb→Linear & 0.4371 & 0.6382 & 0.0000 & 0.9865 & Trained embedding → Linear \\
+  C: SimpleEmb→Linear & 0.4671 & 0.4435 & 0.0430 & 1.0000 & Trained embedding → Linear \\
   D: SimpleEmb→MLP (ours) & 0.9257 & 0.9750 & 0.9161 & 0.9378 & Trained embedding → MLP \\
 \bottomrule
 \end{tabular}

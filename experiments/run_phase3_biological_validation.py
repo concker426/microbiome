@@ -186,7 +186,7 @@ for r in top40:
 
 y=range(len(names))
 ax.barh(y,vals,color=colors,edgecolor='none')
-ax.set_yticks(y); ax.set_yticklabels(names,fontsize=6)
+ax.set_yticks(y); ax.set_yticklabels(names,fontsize=5.5)
 ax.set_xlabel('SHAP Importance'); ax.set_title('Top 40 SHAP Genera')
 ax.axvline(x=0,color='black',linewidth=0.5); ax.invert_yaxis()
 from matplotlib.patches import Patch
@@ -195,7 +195,7 @@ ax.legend(handles=[
     Patch(facecolor='#F44336',label=f'Mismatch ({len(dir_mismatches)})'),
     Patch(facecolor='#FFC107',label='Complex'),
     Patch(facecolor='#90CAF9',label='Novel (no literature)')
-], fontsize=7, loc='lower left', framealpha=0.9)
+], fontsize=7, loc='center right', bbox_to_anchor=(1.32, 0.5), framealpha=0.9)
 
 # Panel 2: Dataset presence table
 ax=axes[0,1]
@@ -208,11 +208,11 @@ for lit_r in lit_data:
         sr=shap_by_name[g]; imp=float(sr['mean_importance'])
         table_data.append([
             lit_r['Genus'],'YES',sr['rank'],f'{abs(imp):.4f}',
-            '↑' if imp>0 else '↓',lit_r['Evidence_Level'][:8]
+            '↑' if imp>0 else '↓',lit_r['Evidence_Level']
         ])
     else:
         table_data.append([lit_r['Genus'],'NO','—','—','—','—'])
-table=ax.table(cellText=table_data,cellLoc='center',loc='center',colWidths=[0.18,0.08,0.08,0.10,0.10,0.18])
+table=ax.table(cellText=table_data,cellLoc='center',loc='center',colWidths=[0.16,0.08,0.08,0.10,0.10,0.22])
 table.auto_set_font_size(False); table.set_fontsize(8)
 ax.set_title('Literature Genera: Dataset Presence',fontsize=12,fontweight='bold')
 

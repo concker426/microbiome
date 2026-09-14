@@ -88,7 +88,7 @@ for name in all_names:
         idx = all_names.index(name)
         xp, yp = all_prev[idx], all_imp[idx]
         # Check distance from already-plotted labels to avoid overlap
-        too_close = any(abs(xp - px) < 0.03 and abs(yp - py) < 0.002 for px, py in plotted_lit)
+        too_close = any(abs(xp - px) < 0.05 and abs(yp - py) < 0.005 for px, py in plotted_lit)
         if not too_close:
             ax.annotate(name, (xp, yp), fontsize=6.5, color='#B71C1C', fontweight='bold',
                        xytext=(6, -8), textcoords="offset points")
@@ -116,8 +116,8 @@ for k, m, s in zip(ks_list, means_j, stds_j):
 
 # Add consistent genera annotation
 consistent20=robust['consistent_genera_across_folds']['top20']
-ax.text(0.97, 0.93, f'Consistent in all 5 folds (Top-20):\n{", ".join(consistent20[:3])}...',
-    transform=ax.transAxes, fontsize=6.5, ha='right', va='top',
+ax.text(0.02, 0.95, f'Consistent (Top-20):\n{", ".join(consistent20[:2])}...',
+    transform=ax.transAxes, fontsize=6, ha='left', va='top',
     bbox=dict(boxstyle='round', facecolor='#FFF9C4', alpha=0.8))
 
 # Panel D: Cluster-specific biomarkers
@@ -187,7 +187,7 @@ ax.legend(fontsize=8, loc='upper right', framealpha=0.9)
 # Overall title
 fig.suptitle('ProCyon v2: Microbiome Biomarker Discovery & Validation',fontsize=16,fontweight='bold',y=0.98)
 
-plt.tight_layout(rect=[0,0,1,0.96], pad=0.8, h_pad=1.6, w_pad=1.3)
+plt.tight_layout(rect=[0,0,1,0.96], pad=0.8, h_pad=2.2, w_pad=1.8)
 plt.savefig(f'{OUT_DIR}/loo_attribution_analysis.png',dpi=300,bbox_inches='tight')
 print(f"Saved: {OUT_DIR}/loo_attribution_analysis.png")
 

@@ -100,21 +100,24 @@ for i, (bias, c) in enumerate(zip(bias_labels, colors)):
 ax.set_xticks(x)
 ax.set_xticklabels(methods, fontsize=9)
 ax.set_ylabel('Score')
-ax.set_ylim(-12, 110)
+ax.set_ylim(-12, 118)
 ax.set_title('B. Structural Baseline Comparison', fontsize=13, fontweight='bold', loc='left')
-ax.legend(fontsize=9, loc='upper left', framealpha=0.9)  # moved to upper left to avoid bars
+ax.legend(fontsize=9, loc='center right', framealpha=0.9)
 ax.grid(True, alpha=0.2, axis='y')
 
 # Annotation arrows — repositioned to avoid overlap
-ax.annotate('Pretraining\nmismatch', xy=(0, 52), xytext=(0.55, 35),
-           fontsize=8, ha='center', color='#B71C1C',
-           arrowprops=dict(arrowstyle='->', color='#B71C1C', lw=1.5))
-ax.annotate('Sequential\nbias (−0.6pp)', xy=(1, 92), xytext=(0.55, 78),
-           fontsize=8, ha='center', color='#FF9800',
-           arrowprops=dict(arrowstyle='->', color='#FF9800', lw=1.5))
-ax.annotate('Correct\ninductive bias', xy=(2.3, 91.6), xytext=(3.15, 82),
-           fontsize=8, ha='center', color='#4CAF50',
-           arrowprops=dict(arrowstyle='->', color='#4CAF50', lw=1.5))
+ax.annotate('Pretraining\nmismatch', xy=(0, 52), xytext=(0, 100),
+           fontsize=7.5, ha='center', color='#B71C1C',
+           arrowprops=dict(arrowstyle='->', color='#B71C1C', lw=1.2),
+           bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.85))
+ax.annotate('Sequential\nbias (−0.6pp)', xy=(1, 92), xytext=(1.15, 106),
+           fontsize=7.5, ha='center', color='#FF9800',
+           arrowprops=dict(arrowstyle='->', color='#FF9800', lw=1.2),
+           bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.85))
+ax.annotate('Correct\ninductive bias', xy=(2.3, 92), xytext=(2.85, 100),
+           fontsize=7.5, ha='center', color='#4CAF50',
+           arrowprops=dict(arrowstyle='->', color='#4CAF50', lw=1.2),
+           bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.85))
 
 plt.tight_layout()
 plt.savefig(f'{OUT}/inductive_bias_figure.png', dpi=300)

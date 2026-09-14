@@ -237,9 +237,10 @@ ax.bar(x-w, hall_vals, w, label='Hallucination', color='#F44336', edgecolor='non
 ax.bar(x, cons_vals, w, label='Consistency', color='#4CAF50', edgecolor='none')
 ax.bar(x+w, spec_vals, w, label='Specificity', color='#1565C0', edgecolor='none')
 for i in range(3):
-    ax.text(i-w, hall_vals[i]+0.02, f'{hall_vals[i]:.2f}', ha='center', fontsize=7)
-    ax.text(i, cons_vals[i]+0.02, f'{cons_vals[i]:.2f}', ha='center', fontsize=7)
-    ax.text(i+w, spec_vals[i]+0.02, f'{spec_vals[i]:.2f}', ha='center', fontsize=7)
+    ax.text(i-w, hall_vals[i]+0.03, f'{hall_vals[i]:.2f}', ha='center', fontsize=6.5)
+    ax.text(i, cons_vals[i]+0.03, f'{cons_vals[i]:.2f}', ha='center', fontsize=6.5)
+    ax.text(i+w, spec_vals[i]+0.03, f'{spec_vals[i]:.2f}', ha='center', fontsize=6.5)
+ax.margins(y=0.25)
 ax.set_xticks(x); ax.set_xticklabels(variants); ax.set_ylabel('Score')
 ax.set_title('E. LLM Explanation Validation (n=50)', fontweight='bold', loc='left')
 ax.legend(fontsize=7, loc='upper left', framealpha=0.9)

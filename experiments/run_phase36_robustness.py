@@ -459,6 +459,7 @@ ax.bar(x+w/2,c1_vals,w,label=f'Cluster 1 (n={len(c1_richness)})',color='#F44336'
 ax.set_xticks(x); ax.set_xticklabels(metrics)
 ax.set_title('IBD Cluster Comparison'); ax.legend(fontsize=8)
 ax.grid(True,alpha=0.3,axis='y')
+ax.margins(y=0.15)
 
 # Panel 5: Abundance rank histogram for top SHAP genera
 ax=axes[1,1]
@@ -469,7 +470,7 @@ ax.hist(low_rank,bins=20,alpha=0.6,label=f'High |SHAP| (P75+)',color='#F44336')
 ax.hist(high_rank,bins=20,alpha=0.6,label=f'Low |SHAP| (P25-)',color='#4CAF50')
 ax.set_xlabel('Mean Abundance Rank (0=most abundant)'); ax.set_ylabel('Frequency')
 ax.set_title('Abundance Rank by SHAP Importance')
-ax.legend(fontsize=8)
+ax.legend(fontsize=8, loc='upper right', framealpha=0.9)
 
 # Panel 6: Summary
 ax=axes[1,2]

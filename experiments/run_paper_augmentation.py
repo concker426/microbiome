@@ -63,6 +63,7 @@ for model in models:
     ax.errorbar([f*100 for f in fracs], accs, yerr=stds, marker='o', markersize=6,
                label=labels[model], color=colors[model], linewidth=2, capsize=3)
 ax.set_xlabel('Training Data (%)'); ax.set_ylabel('Group-CV Accuracy')
+ax.margins(y=0.18)
 ax.set_title('A. Data Efficiency (Nested Group-CV)', fontweight='bold', loc='left')
 ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
 
@@ -75,6 +76,7 @@ for model in models:
     ax.errorbar([f*100 for f in fracs], aucs, yerr=stds, marker='s', markersize=6,
                label=labels[model], color=colors[model], linewidth=2, capsize=3)
 ax.set_xlabel('Training Data (%)'); ax.set_ylabel('Group-CV AUROC')
+ax.margins(y=0.18)
 ax.set_title('B. AUROC vs Training Data', fontweight='bold', loc='left')
 ax.legend(fontsize=8); ax.grid(True, alpha=0.3)
 
