@@ -54,21 +54,17 @@ ax.annotate('', xy=(15, 9.2), xytext=(15, 9.85),
 ax.text(15, 8.85, 'DeepSets: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20')
 ax.text(15, 8.35, 'ProCyon v2: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20', fontweight='bold')
 
-# Plus annotation
-ax.text(15, 8.1, '+ explicit embedding → SHAP, kNN, clustering, LLM', ha='center',
-       fontsize=9, color='#1565C0', style='italic')
-
 # Key insight box — with line spacing
-rect = FancyBboxPatch((2, 3.5), 16, 3.8, boxstyle="round,pad=0.5",
+rect = FancyBboxPatch((2, 2.6), 16, 3.2, boxstyle="round,pad=0.5",
                       facecolor='#E3F2FD', edgecolor='#1565C0', linewidth=1.5, alpha=0.5)
 ax.add_patch(rect)
 insight_lines = [
     'Key Insight: Microbiome abundance profiles are SETS, not sequences.',
-    'Permutation-invariant models (DeepSets, SimpleEmb) match this structure.',
-    'Transformers can work (FT: 91.0%) but carry unnecessary sequential bias.',
+    'Permutation-invariant models match this structure.',
+    'Explicit embeddings enable LOO-attribution, kNN, clustering and LLM interpretation.',
 ]
 for k, line in enumerate(insight_lines):
-    ax.text(10, 6.5 - k * 0.65, line, ha='center', fontsize=10, fontweight='bold', color='#1565C0')
+    ax.text(10, 5.1 - k * 0.6, line, ha='center', fontsize=10, fontweight='bold', color='#1565C0')
 
 # ══════════════════════════════════════════════════════════
 # Panel B: Structural Baseline Results — FIXED
@@ -100,7 +96,7 @@ for i, (bias, c) in enumerate(zip(bias_labels, colors)):
 ax.set_xticks(x)
 ax.set_xticklabels(methods, fontsize=9)
 ax.set_ylabel('Score')
-ax.set_ylim(-12, 118)
+ax.set_ylim(-12, 130)
 ax.set_title('B. Structural Baseline Comparison', fontsize=13, fontweight='bold', loc='left')
 ax.legend(fontsize=9, loc='center right', framealpha=0.9)
 ax.grid(True, alpha=0.2, axis='y')
