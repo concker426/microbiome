@@ -28,31 +28,31 @@ for i in range(6):
 for i in range(5):
     ax.annotate('', xy=(3.0 + i * 1.8, 14.5), xytext=(2.8 + i * 1.8, 14.5),
                arrowprops=dict(arrowstyle='->', color='#B71C1C', lw=2))
-ax.text(8, 13.6, 'Position matters: g1→g2→g3...', ha='center', fontsize=9, color='#B71C1C', style='italic')
-ax.text(8, 13.1, 'Self-attention over ordered sequence', ha='center', fontsize=9, color='#B71C1C', style='italic')
+ax.text(8, 13.3, 'Position matters: g1→g2→g3...', ha='center', fontsize=9, color='#B71C1C', style='italic')
+ax.text(8, 12.75, 'Self-attention over ordered sequence', ha='center', fontsize=9, color='#B71C1C', style='italic')
 
 # Arrow down + results
-ax.annotate('', xy=(8, 12.0), xytext=(8, 12.7),
+ax.annotate('', xy=(8, 11.85), xytext=(8, 12.4),
            arrowprops=dict(arrowstyle='->', color='black', lw=2))
-ax.text(8, 11.7, 'FT-Transformer: 91.0% ACC', ha='center', fontsize=10, color='#B71C1C')
-ax.text(8, 11.2, 'MGM (pretrained): 50.9% ACC', ha='center', fontsize=10, color='#B71C1C')
+ax.text(8, 11.5, 'FT-Transformer: 91.0% ACC', ha='center', fontsize=10, color='#B71C1C')
+ax.text(8, 11.0, 'MGM (pretrained): 50.9% ACC', ha='center', fontsize=10, color='#B71C1C')
 
 # Permutation-invariant (Set) side
 ax.text(15, 15.8, 'Permutation-Invariant (Set)', fontsize=12, fontweight='bold', ha='center', color='#1B5E20')
-centers = [(14.5, 13.7), (17, 13.0), (15.5, 12.3), (14, 11.7), (17.5, 14.3), (18.5, 12.5)]
+centers = [(14.5, 13.7), (17, 13.0), (15.5, 12.3), (14.5, 12.1), (17.5, 14.3), (18.5, 12.5)]
 for i, (cx, cy) in enumerate(centers):
     circle = plt.Circle((cx, cy), 0.6, facecolor='#C8E6C9', edgecolor='#1B5E20', linewidth=1.5)
     ax.add_patch(circle)
     ax.text(cx, cy, f'g{i+1}', ha='center', va='center', fontsize=8, fontweight='bold')
 
-ax.text(15, 11.0, 'Position irrelevant: {g1, g2, ..., gk}', ha='center', fontsize=9, color='#1B5E20', style='italic')
-ax.text(15, 10.5, 'Aggregate over SET, not sequence', ha='center', fontsize=9, color='#1B5E20', style='italic')
+ax.text(15, 10.7, 'Position irrelevant: {g1, g2, ..., gk}', ha='center', fontsize=9, color='#1B5E20', style='italic')
+ax.text(15, 10.15, 'Aggregate over SET, not sequence', ha='center', fontsize=9, color='#1B5E20', style='italic')
 
 # Arrow down + results
-ax.annotate('', xy=(15, 9.6), xytext=(15, 10.3),
+ax.annotate('', xy=(15, 9.2), xytext=(15, 9.85),
            arrowprops=dict(arrowstyle='->', color='black', lw=2))
-ax.text(15, 9.3, 'DeepSets: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20')
-ax.text(15, 8.8, 'ProCyon v2: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20', fontweight='bold')
+ax.text(15, 8.85, 'DeepSets: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20')
+ax.text(15, 8.35, 'ProCyon v2: 91.6% ACC', ha='center', fontsize=10, color='#1B5E20', fontweight='bold')
 
 # Plus annotation
 ax.text(15, 8.1, '+ explicit embedding → SHAP, kNN, clustering, LLM', ha='center',
