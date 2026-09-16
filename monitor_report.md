@@ -1,4 +1,4 @@
-# Monitor Report — 2026-09-16 22:00:01
+# Monitor Report — 2026-09-16 22:10:01
 
 ## Processes
 - **A (merged_all)**: **NOT RUNNING** :red_circle:
@@ -6,8 +6,8 @@
 
 ## GPU
 ```
-0, NVIDIA L40, 34444 MiB, 46068 MiB, 96 %
-1, NVIDIA L40, 35088 MiB, 46068 MiB, 98 %
+0, NVIDIA L40, 34444 MiB, 46068 MiB, 100 %
+1, NVIDIA L40, 35088 MiB, 46068 MiB, 0 %
 ```
 
 ## Output Health
@@ -49,4 +49,4 @@ torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 130.00 MiB. GPU 2 
 ```
 ```
 
-*Auto: 22:00:03*
+*Auto: 22:10:04*
