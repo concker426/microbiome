@@ -1,4 +1,4 @@
-# Monitor Report — 2026-10-23 23:30:01
+# Monitor Report — 2026-10-23 23:40:01
 
 ## Processes
 - **A (merged_all)**: **NOT RUNNING** :red_circle:
@@ -6,9 +6,9 @@
 
 ## GPU
 ```
-0, NVIDIA L40, 42994 MiB, 46068 MiB, 97 %
+0, NVIDIA L40, 42994 MiB, 46068 MiB, 95 %
 1, NVIDIA L40, 43100 MiB, 46068 MiB, 97 %
-2, NVIDIA L40, 43056 MiB, 46068 MiB, 99 %
+2, NVIDIA L40, 43056 MiB, 46068 MiB, 94 %
 ```
 
 ## Output Health
@@ -21,4 +21,4 @@
 ```
 ```
 
-*Auto: 23:30:01*
+*Auto: 23:40:01*
